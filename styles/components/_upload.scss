@@ -1,0 +1,15 @@
+.ant-upload {
+  &-list {
+    &-item{
+      
+      & &-info  {
+        @apply pl-2 rounded-md hover:bg-sky-200;
+      }
+    }
+  }
+  &-span {
+  }
+  &-text-icon {
+    @apply flex items-center;
+  }
+}
