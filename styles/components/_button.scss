@@ -3,5 +3,11 @@
 
   &-primary {
     @apply rounded-md text-white border-sky-500 bg-sky-500 hover:bg-sky-300 hover:border-sky-300;
+
+    &.button {
+      &-green {
+        @apply border-emerald-500 bg-emerald-500 hover:bg-emerald-400 hover:border-emerald-400
+      }
+    }
   }
 }

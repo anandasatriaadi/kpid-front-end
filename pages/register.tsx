@@ -14,7 +14,7 @@ const Home: NextPage = () => {
 
       <div className="container mx-auto">
         <Navbar />
-        <div className="mt-8">
+        <div>
           <Empty />
         </div>
       </div>

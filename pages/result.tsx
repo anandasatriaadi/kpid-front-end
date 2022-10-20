@@ -1,7 +1,8 @@
-import { Button, Empty } from "antd";
+import { Button, Collapse, Divider, Empty, Timeline } from "antd";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Navbar from "../components/Navbar";
+import ResultCard from "../components/ResultCard";
 
 const Home: NextPage = () => {
   return (
@@ -14,8 +15,11 @@ const Home: NextPage = () => {
 
       <div className="container mx-auto">
         <Navbar />
-        <div className="mt-8">
-          <Empty />
+        <div>
+          <h1 className="text-lg font-semibold mx-4">Hasil Moderasi</h1>
+          <ResultCard />
+          <ResultCard />
+          <ResultCard />
         </div>
       </div>
     </div>

@@ -40,7 +40,7 @@ function Navbar() {
     )
 
   return (
-    <div className="p-4 rounded-b-md shadow-lg">
+    <div className="p-4 rounded-b-md shadow-lg sticky top-0 z-50 bg-white mb-8">
       <div className="flex justify-between font-semibold">
         <div className="flex gap-x-4 items-center">
           <div className="flex flex-col font-bold text-lg leading-4 pr-4 border-r-2 border-gray-900">
@@ -54,16 +54,13 @@ function Navbar() {
         <div className="flex gap-x-4 items-center">
           <Navlink route="/login" title="Login" />
           <Link href="/register">
-            <a className="ant-btn ant-btn-primary">
-              Daftar
-            </a>
+            <a className="ant-btn ant-btn-primary">Daftar</a>
           </Link>
           <div className="flex items-center">
-            <span className="p-4 rounded-full bg-gray-400 mr-2">
-            </span>
+            <span className="p-4 rounded-full bg-gray-400 mr-2"></span>
             <Dropdown overlay={accountMenu}>
-              <a onClick={e => e.preventDefault()} className="">
-                  <p>Akun</p>
+              <a onClick={(e) => e.preventDefault()} className="">
+                <p>Akun</p>
               </a>
             </Dropdown>
           </div>

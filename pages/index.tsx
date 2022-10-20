@@ -52,7 +52,7 @@ const Home: NextPage = () => {
 
       <div className="container mx-auto">
         <Navbar />
-        <div className="mt-8 p-4">
+        <div className="p-4">
           <div className="flex justify-center">
             <div className="md:text-center md:w-1/2">
               <h1 className="text-lg font-semibold">
@@ -90,7 +90,9 @@ const Home: NextPage = () => {
                 </div>
               </Dragger>
               <div className="flex justify-end mt-4">
-                <Button type="primary" onClick={handleUpload}>Upload</Button>
+                <Button type="primary" onClick={handleUpload}>
+                  Upload
+                </Button>
               </div>
             </div>
           </div>

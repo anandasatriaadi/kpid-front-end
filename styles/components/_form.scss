@@ -1,0 +1,25 @@
+.ant {
+  &-form {
+    &-item {
+      &:last-child {
+        @apply mb-0;
+      }
+    }
+  }
+
+  &-input {
+    @apply rounded-md;
+
+    &-affix-wrapper {
+      @apply rounded-md;
+    }
+
+    &-status-error {
+      
+    }
+  }
+
+  &-picker {
+    @apply rounded-md;
+  }
+}

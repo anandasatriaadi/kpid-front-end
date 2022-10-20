@@ -7,12 +7,15 @@
 @import './vendors/_antd';
 
 
-//BASE
+// BASE
 @import './base/_reset';
 
 
 // COMPONENTS
 @import './components/_button';
-@import './components/_navlink';
+@import './components/_collapse';
 @import './components/_dropdown';
+@import "./components/_form";
+@import './components/_navlink';
+@import './components/_timeline';
 @import "./components/_upload";

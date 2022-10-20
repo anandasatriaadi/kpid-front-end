@@ -1,0 +1,8 @@
+.ant-timeline {
+  &-item {
+    $p: &;
+    &#{$p}-last {
+      @apply pb-0;
+    }
+  }
+}
