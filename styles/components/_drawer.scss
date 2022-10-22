@@ -1,0 +1,15 @@
+.ant {
+  &-drawer {
+    &-content {
+      &-wrapper {
+        @apply max-w-[100%]
+      }
+    }
+    &-body {
+      @apply flex flex-col max-w-[100%];
+    }
+    &-close {
+      @apply flex items-center;
+    }
+  }
+}
