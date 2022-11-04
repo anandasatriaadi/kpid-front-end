@@ -1,11 +1,17 @@
-import { Button, Empty, Form, Input } from "antd";
+import { Button, Form, Input } from "antd";
 import type { NextPage } from "next";
 import Head from "next/head";
+import { useRouter } from "next/router";
+import { useContext } from "react";
 import Navbar from "../components/Navbar";
+import { AuthContext, AuthContextInterface } from "../context/AuthContext";
 
 const Home: NextPage = () => {
+  let router = useRouter();
+  const { login } = useContext(AuthContext) as AuthContextInterface;
+
   const onFinish = (values: any) => {
-    console.log("Success:", values);
+    login(values);
   };
 
   const onFinishFailed = (errorInfo: any) => {
@@ -24,10 +30,10 @@ const Home: NextPage = () => {
         <div className="flex flex-col min-h-screen">
           <Navbar />
           <div className="my-auto mx-4 sm:m-auto">
-            <div className="sm:bg-sky-50 p-8 rounded-md sm:shadow-lg">
+            <div className="sm:bg-gray-50 p-8 rounded-md sm:shadow-lg">
               <h1 className="text-lg">Login</h1>
               <Form
-                name="basic"
+                name="login_form"
                 onFinish={onFinish}
                 onFinishFailed={onFinishFailed}
                 autoComplete="off"

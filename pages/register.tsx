@@ -1,9 +1,44 @@
-import { Button, Empty } from "antd";
+import { Button, Form, Input, message } from "antd";
 import type { NextPage } from "next";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import Navbar from "../components/Navbar";
 
 const Home: NextPage = () => {
+  let router = useRouter();
+
+  const onFinish = (values: any) => {
+    let form = new FormData();
+    for (const key in values) {
+      form.append(key, values[key]);
+    }
+
+    let requestOptions: RequestInit = {
+      method: "POST",
+      body: form,
+      redirect: "follow",
+    };
+
+    fetch("http://localhost:5000/api/signup", requestOptions)
+      .then((response) => response.text())
+      .then((result) => {
+        let res = JSON.parse(result);
+        if (res.status == 201) {
+          message.success(res.data);
+          setTimeout(() => {
+            router.push("/login");
+          }, 200);
+        } else {
+          message.error(res.data);
+        }
+      })
+      .catch((error) => console.log("error", error));
+  };
+
+  const onFinishFailed = (errorInfo: any) => {
+    console.log("Failed:", errorInfo);
+  };
+
   return (
     <div>
       <Head>
@@ -13,9 +48,55 @@ const Home: NextPage = () => {
       </Head>
 
       <div className="container mx-auto">
-        <Navbar />
-        <div>
-          <Empty />
+        <div className="flex flex-col min-h-screen">
+          <Navbar />
+          <div className="my-auto mx-4 sm:m-auto">
+            <div className="sm:bg-gray-50 p-8 rounded-md sm:shadow-lg">
+              <h1 className="text-lg">Register</h1>
+              <Form
+                name="register_form"
+                onFinish={onFinish}
+                onFinishFailed={onFinishFailed}
+                autoComplete="off"
+                layout="vertical"
+              >
+                <Form.Item
+                  label="Nama"
+                  name="name"
+                  rules={[
+                    { required: true, message: "Please input your name!" },
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+                <Form.Item
+                  label="Email"
+                  name="email"
+                  rules={[
+                    { required: true, message: "Please input your email!" },
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+
+                <Form.Item
+                  label="Password"
+                  name="password"
+                  rules={[
+                    { required: true, message: "Please input your password!" },
+                  ]}
+                >
+                  <Input.Password />
+                </Form.Item>
+
+                <Form.Item>
+                  <Button type="primary" htmlType="submit">
+                    Login
+                  </Button>
+                </Form.Item>
+              </Form>
+            </div>
+          </div>
         </div>
       </div>
     </div>

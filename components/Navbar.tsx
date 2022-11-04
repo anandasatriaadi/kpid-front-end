@@ -1,11 +1,15 @@
-import { Button, Divider, Drawer, Dropdown, Menu, Space } from "antd";
+import { Button, Drawer, Dropdown, Menu } from "antd";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Navlink from "./Navlink";
 import debounce from "../utils/Debounce";
+import { AuthContext, AuthContextInterface } from "../context/AuthContext";
 
 function Navbar() {
   const [open, setOpen] = useState(false);
+  const { isLoggedIn, userData, logout } = useContext(
+    AuthContext
+  ) as AuthContextInterface;
 
   const showDrawer = () => {
     setOpen(true);
@@ -32,11 +36,17 @@ function Navbar() {
         },
         {
           key: "3",
-          label: <Link href="/logout">Logout</Link>,
+          label: (
+            <Link href="/">
+              <a onClick={logout}>Logout</a>
+            </Link>
+          ),
         },
       ]}
     />
   );
+
+  // Adding event listener to make navbar hide and show on scroll
   useEffect(() => {
     document.addEventListener(
       "scroll",
@@ -99,21 +109,26 @@ function Navbar() {
         <div>
           {/* Desktop View */}
           <div className="hidden md:flex gap-x-4 items-center">
-            <Navlink route="/login" title="Login" />
-            <Navlink
-              className="ant-btn ant-btn-primary"
-              route="/login"
-              title="Register"
-              useLinkStyle={false}
-            />
-            <div className="flex items-center">
-              <span className="p-4 rounded-full bg-gray-400 mr-2"></span>
-              <Dropdown overlay={accountMenu} placement="bottomRight">
-                <a onClick={(e) => e.preventDefault()}>
-                  <p>Hai! Ananda</p>
-                </a>
-              </Dropdown>
-            </div>
+            {!isLoggedIn ? (
+              <>
+                <Navlink route="/login" title="Login" />
+                <Navlink
+                  className="ant-btn ant-btn-primary"
+                  route="/register"
+                  title="Register"
+                  useLinkStyle={false}
+                />
+              </>
+            ) : (
+              <div className="flex items-center">
+                <span className="p-4 rounded-full bg-gray-400 mr-2"></span>
+                <Dropdown overlay={accountMenu} placement="bottomRight">
+                  <a onClick={(e) => e.preventDefault()}>
+                    <p>Hai! {userData.name}</p>
+                  </a>
+                </Dropdown>
+              </div>
+            )}
           </div>
 
           {/* Mobile View */}
@@ -136,28 +151,31 @@ function Navbar() {
               />
               <Navlink className="text-lg" route="/result" title="Hasil" />
             </div>
-            <div className="flex gap-4 mt-4 bg-white">
-              <Navlink
-                className="flex items-center flex-1 justify-center"
-                bottomBorder={false}
-                route="/login"
-                title="Login"
-              />
+            {!isLoggedIn ? (
+              <div className="flex gap-4 mt-4 bg-white">
+                <Navlink
+                  className="flex items-center flex-1 justify-center"
+                  bottomBorder={false}
+                  route="/login"
+                  title="Login"
+                />
 
-              <Navlink
-                className="ant-btn ant-btn-primary flex-1"
-                route="/login"
-                title="Register"
-                useLinkStyle={false}
-              />
-            </div>
-            <Button
-              className="h-min flex mt-4 p-2 items-center justify-center"
-              type="primary"
-            >
-              <span className="p-4 rounded-full bg-sky-200 mr-2"></span>
-              Hai! Ananda
-            </Button>
+                <Navlink
+                  className="ant-btn ant-btn-primary flex-1"
+                  route="/register"
+                  title="Register"
+                  useLinkStyle={false}
+                />
+              </div>
+            ) : (
+              <Button
+                className="h-min flex mt-4 p-2 items-center justify-center"
+                type="primary"
+              >
+                <span className="p-4 rounded-full bg-sky-200 mr-2"></span>
+                Hai! {userData.name}
+              </Button>
+            )}
           </Drawer>
         </div>
       </div>
