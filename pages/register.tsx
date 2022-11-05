@@ -3,6 +3,7 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import Navbar from "../components/Navbar";
+import { BASE_URL } from "../config/Production";
 
 const Home: NextPage = () => {
   let router = useRouter();
@@ -19,7 +20,7 @@ const Home: NextPage = () => {
       redirect: "follow",
     };
 
-    fetch("http://localhost:5000/api/signup", requestOptions)
+    fetch(BASE_URL + "/api/signup", requestOptions)
       .then((response) => response.text())
       .then((result) => {
         let res = JSON.parse(result);

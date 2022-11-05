@@ -8,6 +8,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
+import { BASE_URL } from "../config/Production";
 
 export interface AuthContextInterface {
   isLoggedIn: boolean;
@@ -32,7 +33,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const checkToken = async () => {
     let userToken = localStorage.getItem("token");
     if (userToken != null) {
-      const response = await fetch("http://localhost:5000/api/user", {
+      const response = await fetch(BASE_URL + "/api/user", {
         method: "GET",
         headers: { Authorization: userToken },
       }).catch((err) => console.log(err));
@@ -70,7 +71,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       redirect: "follow",
     };
 
-    fetch("http://localhost:5000/api/login", requestOptions)
+    fetch(BASE_URL + "/api/login", requestOptions)
       .then((response) => response.text())
       .then((result) => {
         let res = JSON.parse(result);
