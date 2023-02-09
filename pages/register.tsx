@@ -21,16 +21,15 @@ const Home: NextPage = () => {
     };
 
     fetch(BASE_URL + "/api/signup", requestOptions)
-      .then((response) => response.text())
+      .then((response) => response.json())
       .then((result) => {
-        let res = JSON.parse(result);
-        if (res.status == 201) {
-          message.success(res.data);
+        if (result.status == 201) {
+          message.success(result.data);
           setTimeout(() => {
             router.push("/login");
           }, 200);
         } else {
-          message.error(res.data);
+          message.error(result.data);
         }
       })
       .catch((error) => console.log("error", error));

@@ -1,13 +1,6 @@
 import { message } from "antd";
 import { useRouter } from "next/router";
-import React, {
-  createContext,
-  FC,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, FC, ReactNode, useEffect, useState } from "react";
 import { BASE_URL } from "../config/Production";
 
 export interface AuthContextInterface {
@@ -47,7 +40,6 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
           localStorage.removeItem("token");
           setIsLoggedIn(false);
           setUserData({});
-          message.warning("Logging Out");
         }
       }
     }
@@ -72,19 +64,18 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     };
 
     fetch(BASE_URL + "/api/login", requestOptions)
-      .then((response) => response.text())
+      .then((response) => response.json())
       .then((result) => {
-        let res = JSON.parse(result);
-        if (res.status == 200) {
-          localStorage.setItem("token", res.data.token);
+        if (result.status == 200) {
+          localStorage.setItem("token", result.data.token);
           setIsLoggedIn(true);
-          setUserData(res.data.user_data);
+          setUserData(result.data.user_data);
           message.success("Login Success");
           setTimeout(() => {
             router.push("/");
           }, 200);
         } else {
-          message.error(res.data.message);
+          message.error(result.data.message);
         }
       })
       .catch((error) => console.log("error", error));
@@ -96,6 +87,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem("token");
     setIsLoggedIn(false);
     setUserData({});
+    router.reload();
   };
 
   return (

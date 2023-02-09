@@ -1,4 +1,3 @@
-import { Button, Collapse, Divider, Empty, Timeline } from "antd";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Navbar from "../components/Navbar";
@@ -17,8 +16,6 @@ const Home: NextPage = () => {
         <Navbar />
         <div>
           <h1 className="text-lg font-semibold mx-4">Hasil Moderasi</h1>
-          <ResultCard />
-          <ResultCard />
           <ResultCard />
         </div>
       </div>

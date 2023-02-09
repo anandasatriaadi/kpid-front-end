@@ -6,7 +6,14 @@
 
     &.button {
       &-green {
-        @apply border-emerald-500 bg-emerald-500 hover:bg-emerald-400 hover:border-emerald-400
+        @apply border-emerald-500 bg-emerald-500 hover:bg-emerald-400 hover:border-emerald-400;
+      }
+    }
+  }
+  &-dashed {
+    &.button {
+      &-green {
+        @apply text-emerald-500 border-emerald-500 hover:text-emerald-400 hover:border-emerald-400;
       }
     }
   }

@@ -1,19 +1,7 @@
-import { Button } from "antd";
 import type { NextPage } from "next";
 import Head from "next/head";
-import Navbar from "../components/Navbar";
-import {
-  BarChart,
-  Bar,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
 import ChartCard from "../components/ChartCard";
+import Navbar from "../components/Navbar";
 
 const chart1 = {
   title: "Moderasi Bulanan",

@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function debounce(callback: Function, wait: number) {
   let timeoutId: any = null;
   return (...args: any[]) => {

@@ -1,45 +1,89 @@
-import { Button, message, UploadFile } from "antd";
 import type { UploadProps } from "antd";
+import { Button, Form, Input, message, TimePicker, UploadFile } from "antd";
+import { RcFile } from "antd/lib/upload";
 import Dragger from "antd/lib/upload/Dragger";
 import type { NextPage } from "next";
 import Head from "next/head";
+import { useRouter } from "next/router";
+import { useContext, useState } from "react";
 import Navbar from "../components/Navbar";
-import { useState } from "react";
-import { RcFile } from "antd/lib/upload";
+import { BASE_URL } from "../config/Production";
+import { AuthContext, AuthContextInterface } from "../context/AuthContext";
 
 const Home: NextPage = () => {
-  const [uploadFile, setUploadFile] = useState<UploadFile>()
-  const [uploading, setUploading] = useState<Boolean>(false)
+  const router = useRouter();
+  const { isLoggedIn, logout } = useContext(
+    AuthContext
+  ) as AuthContextInterface;
 
-  const handleUpload = () => {
-    const formData = new FormData();
-    formData.append("file", uploadFile as RcFile);
-    setUploading(true);
-    // You can use any AJAX library you like
-    fetch("https://www.mocky.io/v2/5cc8019d300000980a055e76", {
+  const [uploadFile, setUploadFile] = useState<UploadFile>();
+  const [uploading, setUploading] = useState<Boolean>(false);
+  const [form] = Form.useForm();
+
+  const onFinish = (values: any) => {
+    console.log(values);
+    let form = new FormData();
+    for (const key in values) {
+      form.append(key, values[key]);
+    }
+
+    form.append("video_file", uploadFile as RcFile);
+
+    let requestOptions: RequestInit = {
       method: "POST",
-      body: formData,
-    })
-      .then((res) => res.json())
-      .then(() => {
-        setUploadFile(undefined);
-        message.success("upload successfully.");
+      body: form,
+      redirect: "follow",
+      headers: {
+        Authorization: `${localStorage.getItem("token")}`,
+      },
+    };
+
+    console.log(form.forEach((value, key) => console.log(key, value)));
+
+    fetch(BASE_URL + "/api/moderation-form", requestOptions)
+      .then((response) => {
+        if (response.status == 401) {
+          logout();
+        }
+        return response.json();
       })
-      .catch(() => {
-        message.error("upload failed.");
+      .then((result) => {
+        if (result.status == 201) {
+          message.success(result.data);
+          setTimeout(() => {
+            router.push("/login");
+          }, 200);
+        } else {
+          message.error(result.data);
+        }
       })
-      .finally(() => {
-        setUploading(false);
-      });
+      .catch((error) => console.log("error", error));
+  };
+
+  const onFinishFailed = (errorInfo: any) => {
+    if (!isLoggedIn) {
+      router.push("/login");
+    }
+    console.log("Failed:", errorInfo);
   };
 
   const fileDropProps: UploadProps = {
     name: "file",
     maxCount: 1,
-    beforeUpload: file => {
-      setUploadFile(file)
-      return false;
-    }
+    beforeUpload: (file) => {
+      if (isLoggedIn) {
+        setUploadFile(file);
+        return false;
+      } else {
+        message.error("Anda harus login terlebih dahulu");
+        return false;
+      }
+    },
+    onRemove: () => {
+      form.resetFields();
+      setUploadFile(undefined);
+    },
+    fileList: uploadFile ? [uploadFile] : [],
   };
 
   return (
@@ -67,33 +111,95 @@ const Home: NextPage = () => {
           </div>
           <div className="flex justify-center">
             <div className="w-full md:w-3/4 mt-8 p-4 rounded-md shadow-lg bg-sky-50">
-              <Dragger
-                {...fileDropProps}
-                className="flex justify-center items-center h-[15rem] rounded-md border-2 border-dashed border-gray-400 bg-transparent"
+              <Form
+                form={form}
+                name="moderation_form"
+                onFinish={onFinish}
+                onFinishFailed={onFinishFailed}
+                autoComplete="off"
+                layout="vertical"
               >
-                <div className="flex flex-col">
-                  <div className="flex justify-center">
-                    <span className="p-4 rounded-full bg-sky-500"></span>
+                <Dragger
+                  {...fileDropProps}
+                  className="flex justify-center items-center h-[15rem] rounded-md border-2 border-dashed border-gray-400 bg-transparent"
+                >
+                  <div className="flex flex-col">
+                    <div className="flex justify-center">
+                      <span className="p-4 rounded-full bg-sky-500"></span>
+                    </div>
+                    <div className="flex justify-center">
+                      <Button
+                        type="primary"
+                        className="flex items-center mt-2"
+                        icon={
+                          <span className="rounded-full bg-sky-100 p-2 mr-2 h-auto" />
+                        }
+                      >
+                        Pilih Video
+                      </Button>
+                    </div>
+                    <span className="mt-2">
+                      atau letakkan video anda disini
+                    </span>
                   </div>
-                  <div className="flex justify-center">
-                    <Button
-                      type="primary"
-                      className="flex items-center mt-2"
-                      icon={
-                        <span className="rounded-full bg-sky-100 p-2 mr-2 h-auto" />
-                      }
-                    >
-                      Pilih Video
-                    </Button>
-                  </div>
-                  <span className="mt-2">atau letakkan video anda disini</span>
+                </Dragger>
+
+                <div
+                  className={"font-semibold " + (uploadFile ? "" : "hidden")}
+                >
+                  <Form.Item
+                    className="my-4"
+                    initialValue={""}
+                    label="Nama Program"
+                    name="program"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please input your program name!",
+                      },
+                    ]}
+                  >
+                    <Input className="font-normal" />
+                  </Form.Item>
+                  <Form.Item
+                    className="my-4"
+                    initialValue={""}
+                    label="Stasiun Televisi"
+                    name="television"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please input your television station!",
+                      },
+                    ]}
+                  >
+                    <Input className="font-normal" />
+                  </Form.Item>
+                  <Form.Item
+                    className="my-4"
+                    initialValue={""}
+                    label="Jam Mulai"
+                    name="start_time"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please input your start time!",
+                      },
+                    ]}
+                  >
+                    <TimePicker
+                      className="w-full font-normal"
+                      format={"HH:mm"}
+                    ></TimePicker>
+                  </Form.Item>
                 </div>
-              </Dragger>
-              <div className="flex justify-end mt-4">
-                <Button type="primary" onClick={handleUpload}>
-                  Upload
-                </Button>
-              </div>
+
+                <div className="flex justify-end mt-4">
+                  <Button type="primary" htmlType="submit">
+                    Upload
+                  </Button>
+                </div>
+              </Form>
             </div>
           </div>
         </div>

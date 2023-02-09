@@ -1,6 +1,7 @@
 import { Button, DatePicker, Tooltip } from "antd";
-import React, { useState } from "react";
 import type { Moment } from "moment";
+import moment from "moment";
+import { useState } from "react";
 import {
   Bar,
   BarChart,
@@ -10,8 +11,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import styles from "../styles/components/ChartCard.module.scss";
-import moment from "moment";
 import debounce from "../utils/Debounce";
 
 type RangeValue = [Moment | null, Moment | null] | null;
