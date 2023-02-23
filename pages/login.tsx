@@ -1,13 +1,16 @@
-import { Button, Form, Input } from "antd";
+import { Button, Form, Input, Tabs } from "antd";
 import type { NextPage } from "next";
 import Head from "next/head";
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/router";
-import { useContext } from "react";
+import { ReactNode, useContext } from "react";
 import Navbar from "../components/Navbar";
 import { AuthContext, AuthContextInterface } from "../context/AuthContext";
 
 const Home: NextPage = () => {
   let router = useRouter();
+  let { tab } = router.query;
   const { login } = useContext(AuthContext) as AuthContextInterface;
 
   const onFinish = (values: any) => {
@@ -18,6 +21,89 @@ const Home: NextPage = () => {
     console.log("Failed:", errorInfo);
   };
 
+  const loginForm: ReactNode = (
+    <Form
+      name="login_form"
+      onFinish={onFinish}
+      onFinishFailed={onFinishFailed}
+      autoComplete="off"
+      layout="vertical"
+    >
+      <Form.Item
+        label="Email"
+        name="email"
+        rules={[{ required: true, message: "Please input your email!" }]}
+      >
+        <Input />
+      </Form.Item>
+
+      <Form.Item
+        label="Password"
+        name="password"
+        rules={[
+          {
+            required: true,
+            message: "Please input your password!",
+          },
+        ]}
+      >
+        <Input.Password />
+      </Form.Item>
+
+      <Form.Item>
+        <Button
+          className="mt-4 py-2 text-xl w-full"
+          type="primary"
+          htmlType="submit"
+        >
+          Login
+        </Button>
+      </Form.Item>
+    </Form>
+  );
+  const registerForm: ReactNode = (
+    <Form
+      name="register_form"
+      onFinish={onFinish}
+      onFinishFailed={onFinishFailed}
+      autoComplete="off"
+      layout="vertical"
+    >
+      <Form.Item
+        label="Nama"
+        name="name"
+        rules={[{ required: true, message: "Please input your name!" }]}
+      >
+        <Input />
+      </Form.Item>
+      <Form.Item
+        label="Email"
+        name="email"
+        rules={[{ required: true, message: "Please input your email!" }]}
+      >
+        <Input />
+      </Form.Item>
+
+      <Form.Item
+        label="Password"
+        name="password"
+        rules={[{ required: true, message: "Please input your password!" }]}
+      >
+        <Input.Password />
+      </Form.Item>
+
+      <Form.Item>
+        <Button
+          className="mt-4 py-2 text-xl w-full"
+          type="primary"
+          htmlType="submit"
+        >
+          Register
+        </Button>
+      </Form.Item>
+    </Form>
+  );
+
   return (
     <div>
       <Head>
@@ -26,48 +112,56 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className="container mx-auto">
-        <div className="flex flex-col min-h-screen">
-          <Navbar />
-          <div className="my-auto mx-4 sm:m-auto">
-            <div className="sm:bg-gray-50 p-8 rounded-md sm:shadow-lg">
-              <h1 className="text-lg">Login</h1>
-              <Form
-                name="login_form"
-                onFinish={onFinish}
-                onFinishFailed={onFinishFailed}
-                autoComplete="off"
-                layout="vertical"
-              >
-                <Form.Item
-                  label="Email"
-                  name="email"
-                  rules={[
-                    { required: true, message: "Please input your email!" },
-                  ]}
-                >
-                  <Input />
-                </Form.Item>
-
-                <Form.Item
-                  label="Password"
-                  name="password"
-                  rules={[
-                    { required: true, message: "Please input your password!" },
-                  ]}
-                >
-                  <Input.Password />
-                </Form.Item>
-
-                <Form.Item>
-                  <Button type="primary" htmlType="submit">
-                    Login
-                  </Button>
-                </Form.Item>
-              </Form>
+      <div className="flex">
+        <section className="flex-1 flex flex-col justify-center items-center min-h-screen bg-gradient-to-t from-sky-700 to-sky-400">
+          <Link href="/">
+            <a>
+              <Image
+                src={"/logo_kpid.png"}
+                width={626}
+                height={160}
+                alt="Logo KPID Jawa Timur"
+              />
+            </a>
+          </Link>
+          {/* <Image
+            src={"/login_defend.png"}
+            width={423}
+            height={423}
+            alt="KPID Melindungi"
+          /> */}
+          <p className="text-justify text-lg uppercase font-light opacity-80 tracking-tight mt-16 md:w-3/4 text-white">
+            Website Moderasi Video KPID Jawa Timur 2023
+          </p>
+          <p className="text-justify text-2xl mt-4 md:w-3/4 text-white">
+            Melindungi masyarakat Indonesia dari konten mengandung 5S: SARU,
+            SARA, SADIS, SIHIR, dan Siaran Partisan & Ilegal melalui pengawasan
+            siaran televisi
+          </p>
+        </section>
+        <section className="flex-1 flex flex-col min-h-screen">
+          <div className="my-auto mx-16">
+            <div>
+              <Tabs
+                className="custom-tabs"
+                type="card"
+                defaultActiveKey={tab == "register" ? "2" : "1"}
+                items={[
+                  {
+                    label: `Login`,
+                    key: `1`,
+                    children: loginForm,
+                  },
+                  {
+                    label: `Register`,
+                    key: `2`,
+                    children: registerForm,
+                  },
+                ]}
+              />
             </div>
           </div>
-        </div>
+        </section>
       </div>
     </div>
   );

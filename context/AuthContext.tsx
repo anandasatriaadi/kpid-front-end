@@ -1,6 +1,8 @@
 import { message } from "antd";
 import { useRouter } from "next/router";
 import { createContext, FC, ReactNode, useEffect, useState } from "react";
+import { authService } from "../common/AuthService";
+import httpRequest from "../common/HttpRequest";
 import { BASE_URL } from "../config/Production";
 
 export interface AuthContextInterface {
@@ -19,6 +21,15 @@ export const AuthContext = createContext<AuthContextInterface | null>(null);
 export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const router = useRouter();
 
+  useEffect(() => {
+    authService.subscribe(logout);
+
+    return () => {
+      authService.unsubscribe(logout);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Initial States
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState({});
@@ -28,18 +39,22 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     if (userToken != null) {
       const response = await fetch(BASE_URL + "/api/user", {
         method: "GET",
-        headers: { Authorization: userToken },
+        headers: { Authorization: "Bearer " + userToken },
       }).catch((err) => console.log(err));
 
       if (response != null) {
-        let res = JSON.parse(await response.text());
-        if (response.status == 200) {
-          setIsLoggedIn(true);
-          setUserData(res.data);
-        } else {
-          localStorage.removeItem("token");
-          setIsLoggedIn(false);
-          setUserData({});
+        try {
+          let res = JSON.parse(await response.text());
+          if (response.status == 200) {
+            setIsLoggedIn(true);
+            setUserData(res.data);
+          } else {
+            localStorage.removeItem("token");
+            setIsLoggedIn(false);
+            setUserData({});
+          }
+        } catch (error) {
+          message.error("Something went wrong");
         }
       }
     }

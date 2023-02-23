@@ -1,5 +1,15 @@
-import { Button, Collapse, Skeleton, Timeline } from "antd";
+import { Button, Collapse, Skeleton, Timeline, Tooltip } from "antd";
 import { useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faMarsAndVenusBurst,
+  faGhost,
+  faHandHoldingHeart,
+  faHandsPraying,
+  faPeopleGroup,
+} from "@fortawesome/free-solid-svg-icons";
+import Link from "next/link";
+import { randomInt, randomUUID } from "crypto";
 
 const timelineItem = [
   {
@@ -96,7 +106,11 @@ interface detectedViolations {
   }[];
 }
 
-function ResultCard() {
+type Props = {
+  index: number;
+};
+
+function ResultCard(props: Props) {
   const [loaded, setLoaded] = useState<boolean>(false);
   const [timelines, setTimelines] = useState<any>(timelineItem);
   const [isModerated, setIsModerated] = useState<boolean>(false);
@@ -134,137 +148,100 @@ function ResultCard() {
     checkIfAllModerated();
   };
 
+  const testStatus = props.index % 2 ? "uploaded" : "rejected";
+  const getStatusStyling = (() => {
+    const status = testStatus;
+    switch (status) {
+      case "uploaded":
+        return {
+          className: "bg-amber-400",
+          text: "Belum Diproses",
+        };
+      case "on_process":
+        return {
+          className: "bg-cyan-300",
+          text: "Sedang Diproses",
+        };
+      case "approved":
+        return {
+          className: "bg-green-300",
+          text: "Tidak Ditemukan Pelanggaran",
+        };
+      case "rejected":
+        return {
+          className: "bg-red-300",
+          text: "Ditemukan Pelanggaran",
+        };
+      default:
+        return {
+          className: "bg-amber-300",
+          text: "Belum Diproses",
+        };
+    }
+  })();
+
   return (
-    <div className="mt-4 p-4 rounded-md shadow-lg border-2 border-gray-100">
-      <h4 className="font-semibold">BBS TV_1825_Acara TV.mp4</h4>
-      <div className="flex mt-2 text-center">
-        <div className="flex flex-col items-center pl-0 pr-2 border-r-2 border-gray-100 last:border-0">
-          <p className="text-sm text-gray-500">Jam Mulai</p>
-          <p className="font-semibold">18:25:00</p>
-        </div>
-        <div className="flex flex-col items-center pl-2 pr-2 border-r-2 border-gray-100 last:border-0">
-          <p className="text-sm text-gray-500">Jam Selesai</p>
-          <p className="font-semibold">18:25:15</p>
-        </div>
-        <div className="flex flex-col items-center pl-2 pr-2 border-r-2 border-gray-100 last:border-0">
-          <p className="text-sm text-gray-500">Durasi</p>
-          <p className="font-semibold">15 detik</p>
-        </div>
-        <div className="flex flex-col items-center pl-2 pr-2 border-r-2 border-gray-100 last:border-0">
-          <p className="text-sm text-gray-500">FPS</p>
-          <p className="font-semibold">30</p>
-        </div>
-        <div className="flex flex-col items-center pl-2 pr-0 border-r-2 border-gray-100 last:border-0">
-          <p className="text-sm text-gray-500">Konten Terdeteksi</p>
-          <p className="font-semibold">1</p>
+    <div className="rounded-md shadow-lg border-2 border-gray-100 bg">
+      <div className="relative pt-[56.25%]">
+        <div className="bg-gray-400 rounded-t-md absolute top-0 bottom-0 left-0 right-0 opacity-70"></div>
+        <div
+          className={
+            "absolute top-4 right-4 px-4 py-2 rounded-lg " +
+            getStatusStyling.className
+          }
+        >
+          {getStatusStyling.text}
         </div>
       </div>
-      <div className="mt-4">
-        <Collapse onChange={onChange}>
-          <Collapse.Panel header="Lihat Detail" key="1">
-            {loaded ? (
-              <Timeline>
-                {timelines.map((item: detectedViolations, index: number) => (
-                  <Timeline.Item key={index}>
-                    <p className="">
-                      Detik {item.second} | {item.time}
-                    </p>
-                    <div className="flex flex-col sm:flex-row mt-2 mb-2">
-                      <div className="sm:flex-1">
-                        <div
-                          className="pt-[52%] relative bg-center bg-cover"
-                          style={{
-                            backgroundImage: `url(${item.image})`,
-                          }}
-                        >
-                          <div className="absolute inset-0 bg-black bg-opacity-50"></div>
-                        </div>
-                      </div>
-                      <div className="sm:flex-1 lg:flex-[2] sm:ml-4 mt-2 sm:mt-0 mb-4 sm:mb-0">
-                        <h3 className="font-semibold">Dugaan Pelanggaran</h3>
-                        <ol className="list-decimal list-inside">
-                          {item.violations.map((violation, vIndex) => {
-                            console.log(violation.decision);
-                            return (
-                              <li className="font-semibold mt-2" key={vIndex}>
-                                {violation.pasal}
-                                {violation.decision != null &&
-                                  (violation.decision ? (
-                                    <Button
-                                      type="dashed"
-                                      className="button-green ml-2"
-                                    >
-                                      Valid
-                                    </Button>
-                                  ) : (
-                                    <Button
-                                      className="ml-2"
-                                      type="dashed"
-                                      danger
-                                    >
-                                      Invalid
-                                    </Button>
-                                  ))}
-                                <div>
-                                  <p
-                                    className="font-normal"
-                                    dangerouslySetInnerHTML={{
-                                      __html: violation.deskripsi,
-                                    }}
-                                  ></p>
-                                </div>
-                                {violation.decision === null ? (
-                                  <div className="flex justify-end mt-2">
-                                    <Button
-                                      type="primary"
-                                      className="button-green mr-4"
-                                      onClick={(e) => {
-                                        onValidatePasal(index, vIndex);
-                                      }}
-                                    >
-                                      Valid
-                                    </Button>
-                                    <Button
-                                      type="primary"
-                                      danger
-                                      onClick={(e) => {
-                                        onInvalidatePasal(index, vIndex);
-                                      }}
-                                    >
-                                      Invalid
-                                    </Button>
-                                  </div>
-                                ) : (
-                                  ""
-                                )}
-                              </li>
-                            );
-                          })}
-                        </ol>
-                      </div>
-                    </div>
-                  </Timeline.Item>
-                ))}
-                {isModerated ? (
-                  <div className="flex justify-end mt-2">
-                    <Button
-                      type="primary"
-                      className="button-green mr-4"
-                      href="/tv9_result.pdf"
-                      target="_blank"
-                    >
-                      Generate Laporan
-                    </Button>
-                  </div>
-                ) : (
-                  ""
-                )}
-              </Timeline>
-            ) : (
-              <Skeleton active />
-            )}
-          </Collapse.Panel>
-        </Collapse>
+      <div className="p-4 flex flex-col gap-4">
+        <h4 className="font-semibold">BBS TV_1825_Acara TV.mp4</h4>
+        <div className="flex gap-4">
+          <Tooltip title="SARA">
+            <FontAwesomeIcon
+              icon={faHandsPraying}
+              height="24px"
+              className="text-gray-900 text-2xl"
+            />
+            <p className="text-center font-bold">0</p>
+          </Tooltip>
+          <Tooltip title="SARU">
+            <FontAwesomeIcon
+              icon={faMarsAndVenusBurst}
+              height="24px"
+              className="text-gray-900 text-2xl"
+            />
+            <p className="text-center font-bold">0</p>
+          </Tooltip>
+          <Tooltip title="SADIS">
+            <FontAwesomeIcon
+              icon={faHandHoldingHeart}
+              height="24px"
+              className="text-gray-900 text-2xl"
+            />
+            <p className="text-center font-bold">0</p>
+          </Tooltip>
+          <Tooltip title="SIHIR">
+            <FontAwesomeIcon
+              icon={faGhost}
+              height="24px"
+              className="text-gray-900 text-2xl"
+            />
+            <p className="text-center font-bold">0</p>
+          </Tooltip>
+          <Tooltip title="Siaran Partisan & Ilegal">
+            <FontAwesomeIcon
+              icon={faPeopleGroup}
+              height="24px"
+              className="text-gray-900 text-2xl"
+            />
+            <p className="text-center font-bold">0</p>
+          </Tooltip>
+        </div>
+        <Link href={"/result/" + "random_id_" + testStatus}>
+          <Button type="primary" className="w-full">
+            Lihat Detail
+          </Button>
+        </Link>
       </div>
     </div>
   );

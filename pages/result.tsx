@@ -1,9 +1,12 @@
-import type { NextPage } from "next";
+import { Select } from "antd";
 import Head from "next/head";
-import Navbar from "../components/Navbar";
+import { ReactElement, useState } from "react";
+import Layout from "../components/Layout";
 import ResultCard from "../components/ResultCard";
+import { NextPageWithLayout } from "./_app";
 
-const Home: NextPage = () => {
+const Result: NextPageWithLayout = () => {
+  const [resultCount, setResultCount] = useState<Number>(5);
   return (
     <div>
       <Head>
@@ -12,15 +15,48 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className="container mx-auto">
-        <Navbar />
-        <div>
-          <h1 className="text-lg font-semibold mx-4">Hasil Moderasi</h1>
-          <ResultCard />
-        </div>
+      <div>
+        <h1 className="text-2xl font-semibold">Daftar Video Unggahan</h1>
+        <section className="my-4">
+          <div className="flex gap-8">
+            <div className="flex gap-2">
+              <p className="text-lg mb-2">Urutkan</p>
+              <Select
+                defaultValue="newest"
+                className="w-60"
+                options={[
+                  { value: "newest", label: "Unggahan Terbaru" },
+                  { value: "status", label: "Status Video" },
+                ]}
+              />
+            </div>
+            <div className="flex gap-2">
+              <p className="text-lg mb-2">Hasil per halaman</p>
+              <Select
+                defaultValue="5"
+                className="w-40"
+                options={[
+                  { value: "5", label: "5" },
+                  { value: "10", label: "10" },
+                  { value: "15", label: "15" },
+                ]}
+                onChange={(value) => setResultCount(Number(value))}
+              />
+            </div>
+          </div>
+        </section>
+        <section className="grid lg:grid-cols-3 gap-4">
+          {new Array(resultCount).fill(1).map((_, i) => {
+            return <ResultCard key={i} index={i} />;
+          })}
+        </section>
       </div>
     </div>
   );
 };
 
-export default Home;
+export default Result;
+
+Result.getLayout = function getLayout(page: ReactElement) {
+  return <Layout>{page}</Layout>;
+};

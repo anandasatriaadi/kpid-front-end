@@ -7,6 +7,7 @@ interface Props {
   className?: string | undefined;
   bottomBorder?: boolean | undefined;
   useLinkStyle?: boolean | undefined;
+  useAnchorTag?: boolean | undefined;
 }
 
 function Navlink(props: Props) {
@@ -24,15 +25,27 @@ function Navlink(props: Props) {
     : "";
   return (
     <Link href={props.route} {...props}>
-      <a
-        className={
-          (props.className ? props.className : "") +
-          (props.route == route.asPath ? activeLinkStyle : defaultLinkStyle) +
-          (bottomBorder ? " border-b-2 " : "")
-        }
-      >
-        {props.title}
-      </a>
+      {props.useAnchorTag == undefined || props.useAnchorTag ? (
+        <a
+          className={
+            (props.className ? props.className : "") +
+            (props.route == route.asPath ? activeLinkStyle : defaultLinkStyle) +
+            (bottomBorder ? " border-b-2 " : "")
+          }
+        >
+          {props.title}
+        </a>
+      ) : (
+        <div
+          className={
+            (props.className ? props.className : "") +
+            (props.route == route.asPath ? activeLinkStyle : defaultLinkStyle) +
+            (bottomBorder ? " border-b-2 " : "")
+          }
+        >
+          {props.title}
+        </div>
+      )}
     </Link>
   );
 }

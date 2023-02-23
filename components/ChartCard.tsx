@@ -62,23 +62,10 @@ function ChartCard(props: Props) {
   }, 200);
 
   return (
-    <div className="w-full lg:w-1/2 px-4 mb-8">
-      <div className="p-4 last:mb-0 rounded-md shadow-lg border-2 border-gray-100">
-        <h2 className="text-lg mb-2">{title}</h2>
-        <div className="flex flex-wrap justify-between gap-4 mb-6">
-          <DatePicker.RangePicker
-            value={hackValue || value}
-            disabledDate={disabledDate}
-            onCalendarChange={(val) => setDates(val)}
-            onChange={(val) => setValue(val)}
-            onOpenChange={onOpenChange}
-            format={"DD-MM-YYYY"}
-          />
-          <Button type="primary" onClick={onButtonClick}>
-            Cari
-          </Button>
-        </div>
-        <div className="h-[20rem]">
+    <div className="w-full mb-8">
+      <div className="p-4 last:mb-0 rounded-md shadow-xl border-2 border-gray-100">
+        <h2 className="text-lg mb-4">{title}</h2>
+        <div className="h-[10rem]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={chartData.data}

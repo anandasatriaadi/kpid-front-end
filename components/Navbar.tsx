@@ -1,4 +1,5 @@
 import { Button, Drawer, Dropdown, Menu } from "antd";
+import Image from "next/image";
 import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext, AuthContextInterface } from "../context/AuthContext";
@@ -25,11 +26,19 @@ function Navbar() {
       items={[
         {
           key: "1",
-          label: <Link href="/result">Hasil</Link>,
+          label: (
+            <Link className="text-lg" href="/result">
+              Hasil
+            </Link>
+          ),
         },
         {
           key: "2",
-          label: <Link href="/login">Pengaturan Akun</Link>,
+          label: (
+            <Link className="text-lg" href="/login">
+              Pengaturan Akun
+            </Link>
+          ),
         },
         {
           type: "divider",
@@ -37,7 +46,7 @@ function Navbar() {
         {
           key: "3",
           label: (
-            <Link href="/">
+            <Link className="text-lg" href="/">
               <a onClick={logout}>Logout</a>
             </Link>
           ),
@@ -89,13 +98,23 @@ function Navbar() {
       id="navbar"
       className="p-4 rounded-b-md shadow-lg z-50 bg-white mb-8 transition-all duration-300"
     >
-      <div className="flex justify-between font-semibold">
+      <div className="flex justify-between">
         {/* LEFT SECTION */}
-        <div className="flex gap-x-4 items-center">
-          <div className="flex flex-col font-bold text-lg leading-4 pr-4 md:backdrop:border-r-2 border-gray-900">
+        <div className="text-lg flex gap-x-4 items-center">
+          {/* <div className="flex flex-col font-bold text-lg leading-4 pr-4 md:backdrop:border-r-2 border-gray-900">
             <div>Moderasi</div>
             <div className="self-end text-sky-500">Video</div>
-          </div>
+          </div> */}
+          <Link href="/">
+            <a>
+              <Image
+                src={"/logo_kpid.png"}
+                width={227}
+                height={58}
+                alt="Logo KPID Jawa Timur"
+              />
+            </a>
+          </Link>
           <Navlink className="hidden md:inline" route="/" title="Moderasi" />
           <Navlink
             className="hidden md:inline"
@@ -106,17 +125,18 @@ function Navbar() {
         </div>
 
         {/* RIGHT SECTION */}
-        <div>
+        <div className="flex items-center">
           {/* Desktop View */}
-          <div className="hidden md:flex gap-x-4 items-center">
+          <div className="hidden text-lg md:flex gap-x-4 items-center">
             {!isLoggedIn ? (
               <>
                 <Navlink route="/login" title="Login" />
                 <Navlink
-                  className="ant-btn ant-btn-primary"
-                  route="/register"
+                  className="text-lg ant-btn ant-btn-primary"
+                  route="/login?tab=register"
                   title="Register"
                   useLinkStyle={false}
+                  useAnchorTag={false}
                 />
               </>
             ) : (
@@ -162,7 +182,7 @@ function Navbar() {
 
                 <Navlink
                   className="ant-btn ant-btn-primary flex-1"
-                  route="/register"
+                  route="/login?tab=register"
                   title="Register"
                   useLinkStyle={false}
                 />

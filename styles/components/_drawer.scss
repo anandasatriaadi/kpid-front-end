@@ -2,7 +2,7 @@
   &-drawer {
     &-content {
       &-wrapper {
-        @apply max-w-[100%]
+        @apply max-w-[100%];
       }
     }
     &-body {
@@ -10,6 +10,64 @@
     }
     &-close {
       @apply flex items-center;
+    }
+  }
+}
+
+.anticon {
+  &.trigger {
+    @apply flex items-center text-lg leading-[64px] cursor-pointer transition duration-300;
+
+    &:hover {
+      @apply text-sky-500;
+    }
+  }
+}
+
+.ant-tabs {
+  &.custom-tabs {
+    .ant-tabs {
+      &-nav {
+        @apply m-0;
+
+        &-list {
+          @apply w-full;
+        }
+
+        .ant-tabs {
+          &-tab {
+            @apply px-8 rounded-t-lg justify-center;
+
+            &-active {
+              @apply bg-sky-50 shadow-lg border-b-transparent;
+            }
+
+            &-btn {
+              @apply text-lg;
+            }
+          }
+        }
+      }
+
+      &-content-holder {
+        @apply bg-sky-50 p-8 shadow-lg rounded-b-lg rounded-tr-lg;
+      }
+    }
+
+    .ant-form-item {
+      &-label > label {
+        @apply text-lg;
+      }
+    }
+
+    :not(.ant-input-affix-wrapper) > {
+      .ant-input {
+        @apply px-4 py-2 text-lg;
+      }
+    }
+
+    .ant-input-affix-wrapper.ant-input-password {
+      @apply px-4 py-2 text-lg;
     }
   }
 }
