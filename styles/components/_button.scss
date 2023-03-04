@@ -1,19 +1,19 @@
 .ant-btn {
-  @apply px-3 py-1 h-min;
+  @apply h-min px-3 py-1;
 
   &-primary {
-    @apply rounded-md text-white border-sky-500 bg-sky-500 hover:bg-sky-300 hover:border-sky-300;
+    @apply rounded-md border-sky-500 bg-sky-500 text-white hover:border-sky-300 hover:bg-sky-300;
 
     &.button {
       &-green {
-        @apply border-emerald-500 bg-emerald-500 hover:bg-emerald-400 hover:border-emerald-400;
+        @apply border-emerald-500 bg-emerald-500 hover:border-emerald-400 hover:bg-emerald-400;
       }
     }
   }
   &-dashed {
     &.button {
       &-green {
-        @apply text-emerald-500 border-emerald-500 hover:text-emerald-400 hover:border-emerald-400;
+        @apply border-emerald-500 text-emerald-500 hover:border-emerald-400 hover:text-emerald-400;
       }
     }
   }
@@ -21,17 +21,4 @@
 
 a.ant-btn {
   @apply pt-3;
-}
-
-.ant-layout-sider.custom-layout-sider {
-  .ant-menu {
-    &-item {
-      &-icon {
-        @apply text-lg;
-      }
-    }
-    &-title-content {
-        @apply text-lg;
-    }
-  }
 }

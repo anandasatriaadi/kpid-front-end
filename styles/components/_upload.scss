@@ -1,9 +1,8 @@
 .ant-upload {
   &-list {
-    &-item{
-      
-      & &-info  {
-        @apply pl-2 rounded-md hover:bg-sky-200;
+    &-item {
+      & &-info {
+        @apply rounded-md pl-2 hover:bg-sky-200;
       }
     }
   }

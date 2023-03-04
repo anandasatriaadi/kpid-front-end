@@ -1,21 +1,19 @@
 // SASS-UTILS
-@import './sass-utils/_fonts';
-
+@import "./sass-utils/_fonts";
 
 // VENDORS
-@import './vendors/_tailwind';
-@import './vendors/_antd';
-
+@import "./vendors/_tailwind";
+@import "./vendors/_antd";
 
 // BASE
-@import './base/_reset';
-
+@import "./base/_reset";
 
 // COMPONENTS
-@import './components/_button';
-@import './components/_collapse';
-@import './components/_drawer';
-@import './components/_dropdown';
-@import "./components/_form";
-@import './components/_timeline';
+@import "./components/_layout";
+@import "./components/_button";
+@import "./components/_collapse";
+@import "./components/_drawer";
+@import "./components/_dropdown";
+@import "./components/_timeline";
 @import "./components/_upload";
+@import "./components/_form";

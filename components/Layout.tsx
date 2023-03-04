@@ -12,6 +12,7 @@ import { useRouter } from "next/router";
 import React, { useContext, useEffect, useState } from "react";
 import { authService } from "../common/AuthService";
 import { AuthContext, AuthContextInterface } from "../context/AuthContext";
+import { isEmpty, isNilOrEmpty } from "../utils/CommonUtil";
 import Navlink from "./Navlink";
 
 const accountMenu = (
@@ -54,6 +55,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const router = useRouter();
 
+  const unprotectedRoutes = ["/login", "/register"];
+  useEffect(() => {
+    if (!isLoggedIn && !unprotectedRoutes.includes(router.pathname)) {
+      router.push("/login");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoggedIn]);
+
   const getSelectedMenuKey = (): string => {
     const paths = ["/", "/result", "/help"];
     let index = 0;
@@ -79,7 +88,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     },
   ];
 
-  if (!isLoggedIn) {
+  if (isLoggedIn) {
     sidebarMenus.splice(1, 0, {
       key: "2",
       icon: <VideoCameraOutlined />,
@@ -88,15 +97,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AntLayout>
+    <AntLayout className={"custom-layout"}>
       <AntLayout.Sider
         trigger={null}
         collapsible
         collapsed={collapsed}
         theme={"light"}
-        className={"custom-layout-sider"}
+        width={280}
       >
-        <div className="flex justify-center items-center pt-4 pb-2 px-3">
+        <div className="flex items-center justify-center px-3 pt-4 pb-2">
           <Link href="/">
             <a>
               <Image
@@ -114,8 +123,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           items={sidebarMenus}
         />
       </AntLayout.Sider>
-      <AntLayout className="site-layout min-h-screen max-h-screen">
-        <AntLayout.Header className="flex p-4 bg-white">
+      <AntLayout className="site-layout max-h-screen min-h-screen">
+        <AntLayout.Header className="flex bg-white p-4">
           {collapsed ? (
             <MenuUnfoldOutlined
               className="trigger"
@@ -127,12 +136,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               onClick={() => setCollapsed(!collapsed)}
             />
           )}
-          <div className="flex-1 text-lg flex gap-x-4 items-center justify-end">
+          <div className="flex flex-1 items-center justify-end gap-x-4 text-lg">
             {!isLoggedIn ? (
               <>
                 <Navlink route="/login" title="Login" />
                 <Navlink
-                  className="text-lg ant-btn ant-btn-primary"
+                  className="ant-btn ant-btn-primary text-lg"
                   route="/login?tab=register"
                   title="Register"
                   useLinkStyle={false}
@@ -141,24 +150,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </>
             ) : (
               <div className="flex items-center">
-                <span className="p-4 rounded-full bg-gray-400 mr-2"></span>
+                <span className="mr-2 rounded-full bg-gray-400 p-4"></span>
                 <Dropdown overlay={accountMenu} placement="bottomRight">
                   <a onClick={(e) => e.preventDefault()}>
-                    <p>Hai! {userData.name}</p>
+                    <p className="capitalize">{userData.name}</p>
                   </a>
                 </Dropdown>
               </div>
             )}
           </div>
         </AntLayout.Header>
-        <AntLayout.Content
-          className="grow overflow-y-scroll"
-          style={{
-            margin: "24px 16px",
-            padding: 24,
-            background: "white",
-          }}
-        >
+        <AntLayout.Content className="mx-4 my-6 flex grow flex-col overflow-y-scroll">
           {children}
         </AntLayout.Content>
       </AntLayout>

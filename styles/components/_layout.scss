@@ -1,0 +1,23 @@
+.ant-layout.custom-layout {
+  @apply bg-slate-100;
+  .ant-layout {
+    &-header {
+      height: 72px;
+    }
+    &-sider {
+      .ant-menu {
+        &-item {
+          &-icon {
+            @apply text-lg;
+          }
+        }
+        &-title-content {
+          @apply text-lg;
+        }
+      }
+    }
+    &-content {
+      @apply rounded-md;
+    }
+  }
+}

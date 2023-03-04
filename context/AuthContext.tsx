@@ -8,6 +8,7 @@ import { BASE_URL } from "../config/Production";
 export interface AuthContextInterface {
   isLoggedIn: boolean;
   userData: { [key: string]: any };
+  register: (values: any) => void;
   login: (values: any) => void;
   logout: () => void;
 }
@@ -19,9 +20,13 @@ type AuthProviderProps = {
 export const AuthContext = createContext<AuthContextInterface | null>(null);
 
 export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
+  // Initial States
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userData, setUserData] = useState({});
   const router = useRouter();
 
   useEffect(() => {
+    checkToken();
     authService.subscribe(logout);
 
     return () => {
@@ -29,10 +34,6 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Initial States
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userData, setUserData] = useState({});
 
   const checkToken = async () => {
     let userToken = localStorage.getItem("token");
@@ -59,11 +60,6 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       }
     }
   };
-
-  // Login if token is valid
-  useEffect(() => {
-    checkToken();
-  }, []);
 
   // Login method, values are from login form (AntDesign)
   const login = (values: { [key: string]: any }) => {
@@ -96,17 +92,47 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       .catch((error) => console.log("error", error));
   };
 
+  // Register method, values are from login form (AntDesign)
+  const register = (values: { [key: string]: any }) => {
+    let form = new FormData();
+    for (const key in values) {
+      form.append(key, values[key]);
+    }
+
+    let requestOptions: RequestInit = {
+      method: "POST",
+      body: form,
+      redirect: "follow",
+    };
+
+    fetch(BASE_URL + "/api/signup", requestOptions)
+      .then((response) => response.json())
+      .then((result) => {
+        if (result.status == 201) {
+          message.success(result.data);
+          setTimeout(() => {
+            router.push("/login");
+          }, 200);
+        } else {
+          message.error(result.data);
+        }
+      })
+      .catch((error) => console.log("error", error));
+  };
+
   // Logout method
   const logout = () => {
     message.loading("Logging Out", 0.5);
     localStorage.removeItem("token");
     setIsLoggedIn(false);
     setUserData({});
-    router.reload();
+    router.push("/login");
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, userData, login, logout }}>
+    <AuthContext.Provider
+      value={{ isLoggedIn, userData, register, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );

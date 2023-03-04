@@ -1,40 +1,50 @@
 import {
+  faArrowTrendUp,
+  faEquals,
+  faNotEqual,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
   Button,
-  Card,
   Form,
   Input,
   message,
   Modal,
+  Progress,
   TimePicker,
   UploadFile,
   UploadProps,
 } from "antd";
 import Upload, { RcFile } from "antd/lib/upload";
-import Dragger from "antd/lib/upload/Dragger";
+import { AxiosProgressEvent, AxiosRequestConfig } from "axios";
 import Head from "next/head";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { ReactElement, useContext, useState } from "react";
+import httpRequest from "../common/HttpRequest";
 import ChartCard from "../components/ChartCard";
 import Layout from "../components/Layout";
-import { BASE_URL } from "../config/Production";
 import { AuthContext, AuthContextInterface } from "../context/AuthContext";
 import { isNilOrEmpty } from "../utils/CommonUtil";
 import { chart1 } from "./statistic";
 import { NextPageWithLayout } from "./_app";
-import { UploadOutlined } from "@ant-design/icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileVideo } from "@fortawesome/free-solid-svg-icons";
 
 const Home: NextPageWithLayout = () => {
   const router = useRouter();
-  const { isLoggedIn, logout } = useContext(
+  const { isLoggedIn, logout, userData } = useContext(
     AuthContext
   ) as AuthContextInterface;
-
   const [uploadFile, setUploadFile] = useState<UploadFile>();
   const [uploading, setUploading] = useState<Boolean>(false);
+  const [uploadProgressPercent, setUploadProgressPercent] = useState<number>(0);
   const [form] = Form.useForm();
+
+  const uploadProgressHandler = (progress: AxiosProgressEvent) => {
+    const { loaded, total } = progress;
+
+    if (total !== undefined) {
+      setUploadProgressPercent(Math.floor((loaded * 100) / total));
+    }
+  };
 
   const onFinish = (values: any) => {
     console.log(values);
@@ -45,35 +55,22 @@ const Home: NextPageWithLayout = () => {
 
     form.append("video_file", uploadFile as RcFile);
 
-    let requestOptions: RequestInit = {
-      method: "POST",
-      body: form,
-      redirect: "follow",
-      headers: {
-        Authorization: `${localStorage.getItem("token")}`,
-      },
+    let formPostConfig: AxiosRequestConfig = {
+      onUploadProgress: uploadProgressHandler,
     };
 
     console.log(form.forEach((value, key) => console.log(key, value)));
 
-    fetch(BASE_URL + "/api/moderation-form", requestOptions)
-      .then((response) => {
-        if (response.status == 401) {
-          logout();
-        }
-        return response.json();
-      })
-      .then((result) => {
-        if (result.status == 201) {
-          message.success(result.data);
-          setTimeout(() => {
-            router.push("/login");
-          }, 200);
-        } else {
-          message.error(result.data);
-        }
-      })
-      .catch((error) => console.log("error", error));
+    httpRequest.post("/moderation-form", form, formPostConfig).then((res) => {
+      if (res.status == 201) {
+        message.success(res.data);
+        setTimeout(() => {
+          router.push("/login");
+        }, 200);
+      } else {
+        message.error(res.data);
+      }
+    });
   };
 
   const onFinishFailed = (errorInfo: any) => {
@@ -110,34 +107,75 @@ const Home: NextPageWithLayout = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <section>
-        <h1 className="text-center text-3xl font-bold">
-          Moderasi Konten Video KPID Jawa Timur
-        </h1>
-        <div className="flex gap-4">
-          <Card
-            className="flex-1 mt-6 mb-2 rounded-md shadow-lg"
-            bodyStyle={{ padding: "12px" }}
-          >
-            <h3 className="text-lg">Video Terunggah</h3>
-            <p className="text-2xl font-bold">2048</p>
-          </Card>
-          <Card
-            className="flex-1 mt-6 mb-2 rounded-md shadow-lg"
-            bodyStyle={{ padding: "12px" }}
-          >
-            <h3 className="text-lg">Video Terdeteksi Melanggar</h3>
-            <p className="text-2xl font-bold">1024</p>
-          </Card>
-        </div>
-        <ChartCard chartData={chart1} title={chart1.title}></ChartCard>
-      </section>
-      <section className="flex-1 flex justify-center">
-        <div className="flex-1">
+      <div className="flex flex-1 flex-col gap-4">
+        <section className="grid grid-cols-2 gap-4">
+          <div className="rounded-md bg-white p-6 shadow-custom">
+            <h2 className="text-2xl font-semibold capitalize">
+              Hai {userData.name}!
+            </h2>
+            <p className="mb-4 text-lg">
+              Selamat datang di Sistem Rekomendasi KPID Jawa Timur!
+            </p>
+            <p>
+              Lorem ipsum, dolor sit amet consectetur adipisicing elit.
+              Blanditiis consectetur voluptatum nostrum facere quae commodi,
+              culpa recusandae illum ut dolorem.
+            </p>
+          </div>
+          <div className="grid gap-4">
+            <div className="gap-4 rounded-md bg-white p-6 shadow-custom">
+              <div className="flex">
+                <div className="flex-1">
+                  <h3 className="">Video Terunggah</h3>
+                  <p className="text-2xl font-bold">2048</p>
+                </div>
+                <div className="my-auto flex h-12 w-12 items-center justify-center rounded-xl bg-green-100">
+                  <FontAwesomeIcon
+                    icon={faEquals}
+                    height="24px"
+                    className="text-2xl text-green-500"
+                  />
+                </div>
+              </div>
+              <div className="mt-4 flex gap-2 rounded-lg bg-slate-100 p-3.5">
+                <span className="flex gap-2 text-green-500">
+                  <FontAwesomeIcon icon={faArrowTrendUp} height="24px" /> 25.25%
+                </span>{" "}
+                dari bulan lalu.
+              </div>
+            </div>
+            <div className="gap-4 rounded-md bg-white p-6 shadow-custom">
+              <div className="flex">
+                <div className="flex-1">
+                  <h3 className="">Video Terdeteksi Melanggar</h3>
+                  <p className="text-2xl font-bold">1024</p>
+                </div>
+                <div className="my-auto flex h-12 w-12 items-center justify-center rounded-xl bg-red-100">
+                  <FontAwesomeIcon
+                    icon={faNotEqual}
+                    height="24px"
+                    className="text-2xl text-red-500"
+                  />
+                </div>
+              </div>
+              <div className="mt-4 flex gap-2 rounded-lg bg-slate-100 p-3.5">
+                <span className="flex gap-2 text-red-500">
+                  <FontAwesomeIcon icon={faArrowTrendUp} height="24px" /> 25.25%
+                </span>{" "}
+                dari bulan lalu.
+              </div>
+            </div>
+          </div>
+        </section>
+        <section className="flex flex-1 flex-col">
+          <div className="relative grow rounded-lg bg-white">
+            <ChartCard chartData={chart1} title={chart1.title}></ChartCard>
+          </div>
+          {/* <div className="flex-1">
           <div
             className={
-              (isLoggedIn ? "bg-sky-50" : "bg-gray-100") +
-              " flex-1 p-4 rounded-xl shadow-xl"
+              (isLoggedIn ? "bg-white" : "bg-slate-100") +
+              " flex-1 rounded-xl p-4 shadow-custom"
             }
           >
             <Dragger
@@ -145,7 +183,7 @@ const Home: NextPageWithLayout = () => {
               accept="video/*"
               disabled={!isLoggedIn}
               className={
-                "flex justify-center items-center h-80 rounded-md border-2 border-dashed border-gray-400 bg-transparent"
+                "flex h-80 items-center justify-center rounded-md border-2 border-dashed border-gray-400 bg-transparent"
               }
             >
               <div className="flex flex-col text-lg">
@@ -161,7 +199,7 @@ const Home: NextPageWithLayout = () => {
                 <div className="flex justify-center">
                   <Button
                     type="primary"
-                    className="flex items-center text-lg mt-2"
+                    className="mt-2 flex items-center text-lg"
                     disabled={!isLoggedIn}
                     icon={<UploadOutlined />}
                   >
@@ -180,7 +218,7 @@ const Home: NextPageWithLayout = () => {
                         </Link>{" "}
                         terlebih dahulu
                       </p>
-                      <div className="text-base text-center">
+                      <div className="text-center text-base">
                         Belum memiliki akun?{" "}
                         <Link href={"/login?tab=register"}>
                           <a className="font-bold">Register</a>
@@ -192,75 +230,78 @@ const Home: NextPageWithLayout = () => {
               </div>
             </Dragger>
           </div>
-        </div>
+        </div> */}
 
-        <Modal centered open={!isNilOrEmpty(uploadFile)} footer={null}>
-          <Form
-            form={form}
-            name="moderation_form"
-            onFinish={onFinish}
-            onFinishFailed={onFinishFailed}
-            autoComplete="off"
-            layout="vertical"
-            className="pt-4"
-          >
-            <div>
-              <Upload {...fileDropProps} accept="video/*"></Upload>
-              <Form.Item
-                className="text-lg my-4"
-                initialValue={""}
-                label="Nama Program"
-                name="program"
-                rules={[
-                  {
-                    required: true,
-                    message: "Masukkan nama program",
-                  },
-                ]}
-              >
-                <Input className="text-lg font-normal" />
-              </Form.Item>
-              <Form.Item
-                className="text-lg my-4"
-                initialValue={""}
-                label="Stasiun Televisi"
-                name="television"
-                rules={[
-                  {
-                    required: true,
-                    message: "Masukkan stasiun televisi",
-                  },
-                ]}
-              >
-                <Input className="text-lg font-normal" />
-              </Form.Item>
-              <Form.Item
-                className="text-lg my-4"
-                initialValue={""}
-                label="Waktu Mulai"
-                name="start_time"
-                rules={[
-                  {
-                    required: true,
-                    message: "Masukkan waktu mulai",
-                  },
-                ]}
-              >
-                <TimePicker
-                  className="text-lg w-full font-normal"
-                  format={"HH:mm"}
-                ></TimePicker>
-              </Form.Item>
-            </div>
+          <Modal centered open={!isNilOrEmpty(uploadFile)} footer={null}>
+            <Form
+              form={form}
+              name="moderation_form"
+              onFinish={onFinish}
+              onFinishFailed={onFinishFailed}
+              autoComplete="off"
+              layout="vertical"
+              className="pt-4"
+            >
+              <div>
+                <Upload {...fileDropProps} accept="video/*"></Upload>
+                <Form.Item
+                  className="my-4 text-lg"
+                  initialValue={""}
+                  label="Nama Program"
+                  name="program_name"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Masukkan nama program",
+                    },
+                  ]}
+                >
+                  <Input className="text-lg font-normal" />
+                </Form.Item>
+                <Form.Item
+                  className="my-4 text-lg"
+                  initialValue={""}
+                  label="Stasiun Televisi"
+                  name="station_name"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Masukkan stasiun televisi",
+                    },
+                  ]}
+                >
+                  <Input className="text-lg font-normal" />
+                </Form.Item>
+                <Form.Item
+                  className="my-4 text-lg"
+                  initialValue={""}
+                  label="Waktu Mulai"
+                  name="start_time"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Masukkan waktu mulai",
+                    },
+                  ]}
+                >
+                  <TimePicker
+                    className="w-full text-lg font-normal"
+                    format={"HH:mm"}
+                  ></TimePicker>
+                </Form.Item>
+              </div>
 
-            <div className="flex justify-end mt-8">
-              <Button className="text-lg" type="primary" htmlType="submit">
-                Upload
-              </Button>
-            </div>
-          </Form>
-        </Modal>
-      </section>
+              <Progress percent={uploadProgressPercent} />
+
+              <div className="mt-8 flex justify-end">
+                <Button className="text-lg" type="primary" htmlType="submit">
+                  Upload
+                </Button>
+              </div>
+            </Form>
+          </Modal>
+        </section>
+      </div>
     </>
   );
 };

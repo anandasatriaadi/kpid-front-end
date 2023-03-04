@@ -35,34 +35,30 @@ class HttpRequest {
     );
   }
 
-  get(url: string, config: AxiosRequestConfig) {
-    return this.axiosInstance
-      .get(url, config)
-      .then((response) => response.data);
+  get(url: string, config: AxiosRequestConfig = {}) {
+    return this.axiosInstance.get(url, config).then((response) => response);
   }
 
-  post(url: string, data: any, config: AxiosRequestConfig) {
+  post(url: string, data: any, config: AxiosRequestConfig = {}) {
     return this.axiosInstance
       .post(url, data, config)
-      .then((response) => response.data);
+      .then((response) => response);
   }
 
-  put(url: string, data: any, config: AxiosRequestConfig) {
+  put(url: string, data: any, config: AxiosRequestConfig = {}) {
     return this.axiosInstance
       .put(url, data, config)
-      .then((response) => response.data);
+      .then((response) => response);
   }
 
-  patch(url: string, data: any, config: AxiosRequestConfig) {
+  patch(url: string, data: any, config: AxiosRequestConfig = {}) {
     return this.axiosInstance
       .patch(url, data, config)
-      .then((response) => response.data);
+      .then((response) => response);
   }
 
-  delete(url: string, config: AxiosRequestConfig) {
-    return this.axiosInstance
-      .delete(url, config)
-      .then((response) => response.data);
+  delete(url: string, config: AxiosRequestConfig = {}) {
+    return this.axiosInstance.delete(url, config).then((response) => response);
   }
 }
 

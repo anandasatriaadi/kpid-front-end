@@ -62,37 +62,33 @@ function ChartCard(props: Props) {
   }, 200);
 
   return (
-    <div className="w-full mb-8">
-      <div className="p-4 last:mb-0 rounded-md shadow-xl border-2 border-gray-100">
-        <h2 className="text-lg mb-4">{title}</h2>
-        <div className="h-[10rem]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={chartData.data}
-              margin={{
-                left: -22,
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" xAxisId={0} />
-              <XAxis dataKey="name" xAxisId={1} hide />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              {chartData.key1 ? (
-                <Bar dataKey={chartData.key1} xAxisId={0} fill="#0285c7" />
-              ) : (
-                ""
-              )}
-              {chartData.key2 ? (
-                <Bar dataKey={chartData.key2} xAxisId={1} fill="#075985" />
-              ) : (
-                ""
-              )}
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+    <div className="absolute top-0 right-0 bottom-0 left-0 w-full p-8 pb-16">
+      <h2 className="mb-4 text-lg font-bold">{title}</h2>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={chartData.data}
+          margin={{
+            left: -22,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" xAxisId={0} />
+          <XAxis dataKey="name" xAxisId={1} hide />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          {chartData.key1 ? (
+            <Bar dataKey={chartData.key1} xAxisId={0} fill="#0285c7" />
+          ) : (
+            ""
+          )}
+          {chartData.key2 ? (
+            <Bar dataKey={chartData.key2} xAxisId={1} fill="#075985" />
+          ) : (
+            ""
+          )}
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   );
 }

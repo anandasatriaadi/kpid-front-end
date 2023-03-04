@@ -20,7 +20,7 @@ const Result: NextPageWithLayout = () => {
         <section className="my-4">
           <div className="flex gap-8">
             <div className="flex gap-2">
-              <p className="text-lg mb-2">Urutkan</p>
+              <p className="mb-2 text-lg">Urutkan</p>
               <Select
                 defaultValue="newest"
                 className="w-60"
@@ -31,7 +31,7 @@ const Result: NextPageWithLayout = () => {
               />
             </div>
             <div className="flex gap-2">
-              <p className="text-lg mb-2">Hasil per halaman</p>
+              <p className="mb-2 text-lg">Hasil per halaman</p>
               <Select
                 defaultValue="5"
                 className="w-40"
@@ -45,7 +45,7 @@ const Result: NextPageWithLayout = () => {
             </div>
           </div>
         </section>
-        <section className="grid lg:grid-cols-3 gap-4">
+        <section className="grid gap-4 lg:grid-cols-3">
           {new Array(resultCount).fill(1).map((_, i) => {
             return <ResultCard key={i} index={i} />;
           })}

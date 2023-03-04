@@ -198,30 +198,30 @@ const SingleResult: NextPageWithLayout = () => {
                 BBS TV_1825_Acara TV.mp4
               </h2>
               <div
-                className={"px-4 py-2 rounded-lg " + getStatusStyling.className}
+                className={"rounded-lg px-4 py-2 " + getStatusStyling.className}
               >
                 {getStatusStyling.text}
               </div>
             </div>
             <div className="flex justify-between text-lg">
-              <div className="flex mt-2 text-center">
-                <div className="flex flex-col items-center pl-0 pr-2 border-r-2 border-gray-100 last:border-0">
+              <div className="mt-2 flex text-center">
+                <div className="flex flex-col items-center border-r-2 border-gray-100 pl-0 pr-2 last:border-0">
                   <p className="text-base text-gray-500">Jam Mulai</p>
                   <p className="font-semibold">18:25:00</p>
                 </div>
-                <div className="flex flex-col items-center pl-2 pr-2 border-r-2 border-gray-100 last:border-0">
+                <div className="flex flex-col items-center border-r-2 border-gray-100 pl-2 pr-2 last:border-0">
                   <p className="text-base text-gray-500">Jam Selesai</p>
                   <p className="font-semibold">19:25:</p>
                 </div>
-                <div className="flex flex-col items-center pl-2 pr-2 border-r-2 border-gray-100 last:border-0">
+                <div className="flex flex-col items-center border-r-2 border-gray-100 pl-2 pr-2 last:border-0">
                   <p className="text-base text-gray-500">Durasi</p>
                   <p className="font-semibold">3600 detik</p>
                 </div>
-                <div className="flex flex-col items-center pl-2 pr-2 border-r-2 border-gray-100 last:border-0">
+                <div className="flex flex-col items-center border-r-2 border-gray-100 pl-2 pr-2 last:border-0">
                   <p className="text-base text-gray-500">FPS</p>
                   <p className="font-semibold">30</p>
                 </div>
-                <div className="flex flex-col items-center pl-2 pr-0 border-r-2 border-gray-100 last:border-0">
+                <div className="flex flex-col items-center border-r-2 border-gray-100 pl-2 pr-0 last:border-0">
                   <p className="text-base text-gray-500">Konten Terdeteksi</p>
                   <p className="font-semibold">2</p>
                 </div>
@@ -231,7 +231,7 @@ const SingleResult: NextPageWithLayout = () => {
                   <FontAwesomeIcon
                     icon={faHandsPraying}
                     height="32px"
-                    className="text-gray-900 text-2xl"
+                    className="text-2xl text-gray-900"
                   />
                   <p className="text-center font-bold">0</p>
                 </Tooltip>
@@ -239,7 +239,7 @@ const SingleResult: NextPageWithLayout = () => {
                   <FontAwesomeIcon
                     icon={faMarsAndVenusBurst}
                     height="32px"
-                    className="text-gray-900 text-2xl"
+                    className="text-2xl text-gray-900"
                   />
                   <p className="text-center font-bold">1</p>
                 </Tooltip>
@@ -247,7 +247,7 @@ const SingleResult: NextPageWithLayout = () => {
                   <FontAwesomeIcon
                     icon={faHandHoldingHeart}
                     height="32px"
-                    className="text-gray-900 text-2xl"
+                    className="text-2xl text-gray-900"
                   />
                   <p className="text-center font-bold">1</p>
                 </Tooltip>
@@ -255,7 +255,7 @@ const SingleResult: NextPageWithLayout = () => {
                   <FontAwesomeIcon
                     icon={faGhost}
                     height="32px"
-                    className="text-gray-900 text-2xl"
+                    className="text-2xl text-gray-900"
                   />
                   <p className="text-center font-bold">0</p>
                 </Tooltip>
@@ -266,7 +266,7 @@ const SingleResult: NextPageWithLayout = () => {
                   <FontAwesomeIcon
                     icon={faPeopleGroup}
                     height="32px"
-                    className="text-gray-900 text-2xl"
+                    className="text-2xl text-gray-900"
                   />
                   <p className="text-center font-bold">0</p>
                 </Tooltip>
@@ -283,11 +283,11 @@ const SingleResult: NextPageWithLayout = () => {
                 <div className="grid grid-cols-4 gap-2">
                   {new Array(16).fill(1).map((_, i) => {
                     return (
-                      <div key={i} className="pt-[56.25%] bg-slate-300"></div>
+                      <div key={i} className="bg-slate-300 pt-[56.25%]"></div>
                     );
                   })}
                 </div>
-                <p className="text-right opacity-70 mt-4">
+                <p className="mt-4 text-right opacity-70">
                   dan 704 potongan frame lainnya.
                 </p>
               </Collapse.Panel>
@@ -310,10 +310,10 @@ const SingleResult: NextPageWithLayout = () => {
                             <p className="text-base">
                               Detik {item.second} | {item.time}
                             </p>
-                            <div className="flex flex-col sm:flex-row mt-2 mb-2">
+                            <div className="mt-2 mb-2 flex flex-col sm:flex-row">
                               <div className="sm:flex-1">
                                 <div
-                                  className="pt-[52%] relative bg-center bg-cover"
+                                  className="relative bg-cover bg-center pt-[52%]"
                                   style={{
                                     backgroundImage: `url(${item.image})`,
                                   }}
@@ -321,7 +321,7 @@ const SingleResult: NextPageWithLayout = () => {
                                   <div className="absolute inset-0 bg-black bg-opacity-50"></div>
                                 </div>
                               </div>
-                              <div className="sm:flex-1 lg:flex-[2] sm:ml-4 mt-2 sm:mt-0 mb-4 sm:mb-0">
+                              <div className="mt-2 mb-4 sm:ml-4 sm:mt-0 sm:mb-0 sm:flex-1 lg:flex-[2]">
                                 <div className="flex gap-4">
                                   <h3 className="text-xl font-semibold">
                                     Dugaan Pelanggaran
@@ -344,11 +344,11 @@ const SingleResult: NextPageWithLayout = () => {
                                       </Button>
                                     ))}
                                 </div>
-                                <ol className="list-decimal list-inside">
+                                <ol className="list-inside list-decimal">
                                   {item.violations.map((violation, vIndex) => {
                                     return (
                                       <li
-                                        className="text-lg items-center mt-2"
+                                        className="mt-2 items-center text-lg"
                                         key={vIndex}
                                       >
                                         {violation.pasal}
@@ -394,7 +394,7 @@ const SingleResult: NextPageWithLayout = () => {
                         )
                       )}
                       {isModerated ? (
-                        <div className="flex justify-end mt-2">
+                        <div className="mt-2 flex justify-end">
                           <Button
                             type="primary"
                             className="button-green mr-4"

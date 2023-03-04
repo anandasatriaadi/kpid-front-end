@@ -6,7 +6,7 @@
       }
     }
     &-body {
-      @apply flex flex-col max-w-[100%];
+      @apply flex max-w-[100%] flex-col;
     }
     &-close {
       @apply flex items-center;
@@ -16,7 +16,7 @@
 
 .anticon {
   &.trigger {
-    @apply flex items-center text-lg leading-[64px] cursor-pointer transition duration-300;
+    @apply flex cursor-pointer items-center text-lg leading-[64px] transition duration-300;
 
     &:hover {
       @apply text-sky-500;
@@ -36,10 +36,10 @@
 
         .ant-tabs {
           &-tab {
-            @apply px-8 rounded-t-lg justify-center;
+            @apply justify-center rounded-t-lg px-8;
 
             &-active {
-              @apply bg-sky-50 shadow-lg border-b-transparent;
+              @apply border-b-transparent bg-sky-50 shadow-custom;
             }
 
             &-btn {
@@ -50,24 +50,8 @@
       }
 
       &-content-holder {
-        @apply bg-sky-50 p-8 shadow-lg rounded-b-lg rounded-tr-lg;
+        @apply rounded-b-lg rounded-tr-lg bg-sky-50 p-8 shadow-custom;
       }
-    }
-
-    .ant-form-item {
-      &-label > label {
-        @apply text-lg;
-      }
-    }
-
-    :not(.ant-input-affix-wrapper) > {
-      .ant-input {
-        @apply px-4 py-2 text-lg;
-      }
-    }
-
-    .ant-input-affix-wrapper.ant-input-password {
-      @apply px-4 py-2 text-lg;
     }
   }
 }

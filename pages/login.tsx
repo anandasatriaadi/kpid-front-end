@@ -1,17 +1,25 @@
-import { Button, Form, Input, Tabs } from "antd";
+import { Button, Divider, Form, Input, message, Tabs } from "antd";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 import { ReactNode, useContext } from "react";
 import Navbar from "../components/Navbar";
 import { AuthContext, AuthContextInterface } from "../context/AuthContext";
 
 const Home: NextPage = () => {
   let router = useRouter();
-  let { tab } = router.query;
-  const { login } = useContext(AuthContext) as AuthContextInterface;
+  const { isLoggedIn, login } = useContext(AuthContext) as AuthContextInterface;
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      message.loading("Redirecting...");
+      router.push("/");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoggedIn]);
 
   const onFinish = (values: any) => {
     login(values);
@@ -21,89 +29,6 @@ const Home: NextPage = () => {
     console.log("Failed:", errorInfo);
   };
 
-  const loginForm: ReactNode = (
-    <Form
-      name="login_form"
-      onFinish={onFinish}
-      onFinishFailed={onFinishFailed}
-      autoComplete="off"
-      layout="vertical"
-    >
-      <Form.Item
-        label="Email"
-        name="email"
-        rules={[{ required: true, message: "Please input your email!" }]}
-      >
-        <Input />
-      </Form.Item>
-
-      <Form.Item
-        label="Password"
-        name="password"
-        rules={[
-          {
-            required: true,
-            message: "Please input your password!",
-          },
-        ]}
-      >
-        <Input.Password />
-      </Form.Item>
-
-      <Form.Item>
-        <Button
-          className="mt-4 py-2 text-xl w-full"
-          type="primary"
-          htmlType="submit"
-        >
-          Login
-        </Button>
-      </Form.Item>
-    </Form>
-  );
-  const registerForm: ReactNode = (
-    <Form
-      name="register_form"
-      onFinish={onFinish}
-      onFinishFailed={onFinishFailed}
-      autoComplete="off"
-      layout="vertical"
-    >
-      <Form.Item
-        label="Nama"
-        name="name"
-        rules={[{ required: true, message: "Please input your name!" }]}
-      >
-        <Input />
-      </Form.Item>
-      <Form.Item
-        label="Email"
-        name="email"
-        rules={[{ required: true, message: "Please input your email!" }]}
-      >
-        <Input />
-      </Form.Item>
-
-      <Form.Item
-        label="Password"
-        name="password"
-        rules={[{ required: true, message: "Please input your password!" }]}
-      >
-        <Input.Password />
-      </Form.Item>
-
-      <Form.Item>
-        <Button
-          className="mt-4 py-2 text-xl w-full"
-          type="primary"
-          htmlType="submit"
-        >
-          Register
-        </Button>
-      </Form.Item>
-    </Form>
-  );
-
   return (
     <div>
       <Head>
@@ -112,53 +37,91 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className="flex">
-        <section className="flex-1 flex flex-col justify-center items-center min-h-screen bg-gradient-to-t from-sky-700 to-sky-400">
-          <Link href="/">
-            <a>
+      <div className="grid grid-cols-1 lg:grid-cols-2">
+        <section className="relative z-[-2] hidden min-h-screen flex-col items-center justify-center bg-gradient-to-t from-sky-700 to-sky-500 lg:flex">
+          <div className="absolute left-0 right-0 bottom-0 z-[-1] h-1/2 opacity-50 mix-blend-multiply grayscale">
+            <div className="relative h-full w-full">
               <Image
-                src={"/logo_kpid.png"}
-                width={626}
-                height={160}
+                src={"/login_image.png"}
+                layout="fill"
+                objectFit="cover"
                 alt="Logo KPID Jawa Timur"
               />
-            </a>
-          </Link>
-          {/* <Image
-            src={"/login_defend.png"}
-            width={423}
-            height={423}
-            alt="KPID Melindungi"
-          /> */}
-          <p className="text-justify text-lg uppercase font-light opacity-80 tracking-tight mt-16 md:w-3/4 text-white">
+            </div>
+          </div>
+          <p className="mt-16 text-justify text-lg font-light uppercase tracking-tight text-white opacity-80 md:w-3/4">
             Website Moderasi Video KPID Jawa Timur 2023
           </p>
-          <p className="text-justify text-2xl mt-4 md:w-3/4 text-white">
+          <p className="mt-4 text-justify text-2xl text-white md:w-3/4">
             Melindungi masyarakat Indonesia dari konten mengandung 5S: SARU,
             SARA, SADIS, SIHIR, dan Siaran Partisan & Ilegal melalui pengawasan
             siaran televisi
           </p>
         </section>
-        <section className="flex-1 flex flex-col min-h-screen">
-          <div className="my-auto mx-16">
-            <div>
-              <Tabs
-                className="custom-tabs"
-                type="card"
-                defaultActiveKey={tab == "register" ? "2" : "1"}
-                items={[
-                  {
-                    label: `Login`,
-                    key: `1`,
-                    children: loginForm,
-                  },
-                  {
-                    label: `Register`,
-                    key: `2`,
-                    children: registerForm,
-                  },
-                ]}
-              />
+        <section className="flex min-h-screen flex-col bg-slate-100 px-16">
+          <div className="my-auto mx-auto max-w-[600px]">
+            <div className="mx-auto mb-6 w-1/2 mix-blend-multiply lg:w-2/5">
+              <Link href={"/"}>
+                <Image
+                  src={"/logo_kpid.png"}
+                  width={626}
+                  height={160}
+                  alt="Logo KPID Jawa Timur"
+                />
+              </Link>
+            </div>
+            <div className="rounded-md bg-white p-6 pb-8 shadow-custom">
+              <h2 className="text-center text-2xl font-semibold">
+                Masuk ke Akun Anda
+              </h2>
+              <Divider className="my-4" />
+              <Form
+                name="login_form"
+                onFinish={onFinish}
+                onFinishFailed={onFinishFailed}
+                autoComplete="off"
+                layout="vertical"
+              >
+                <Form.Item
+                  label="Email"
+                  name="email"
+                  rules={[
+                    { required: true, message: "Please input your email!" },
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+
+                <Form.Item
+                  label="Password"
+                  name="password"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input your password!",
+                    },
+                  ]}
+                >
+                  <Input.Password />
+                </Form.Item>
+
+                <Form.Item>
+                  <Button
+                    className="mt-4 w-full py-2 text-xl"
+                    type="primary"
+                    htmlType="submit"
+                  >
+                    Login
+                  </Button>
+                </Form.Item>
+              </Form>
+            </div>
+
+            <div className="mt-8 rounded-md bg-slate-200 p-4 text-center shadow-custom">
+              Belum memiliki akun?
+              <Link href={"/register"}>
+                <a className="text-blue-500"> Daftar</a>
+              </Link>
             </div>
           </div>
         </section>

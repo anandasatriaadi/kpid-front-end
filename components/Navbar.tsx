@@ -96,11 +96,11 @@ function Navbar() {
   return (
     <div
       id="navbar"
-      className="p-4 rounded-b-md shadow-lg z-50 bg-white mb-8 transition-all duration-300"
+      className="z-50 mb-8 rounded-b-md bg-white p-4 shadow-custom transition-all duration-300"
     >
       <div className="flex justify-between">
         {/* LEFT SECTION */}
-        <div className="text-lg flex gap-x-4 items-center">
+        <div className="flex items-center gap-x-4 text-lg">
           {/* <div className="flex flex-col font-bold text-lg leading-4 pr-4 md:backdrop:border-r-2 border-gray-900">
             <div>Moderasi</div>
             <div className="self-end text-sky-500">Video</div>
@@ -127,12 +127,12 @@ function Navbar() {
         {/* RIGHT SECTION */}
         <div className="flex items-center">
           {/* Desktop View */}
-          <div className="hidden text-lg md:flex gap-x-4 items-center">
+          <div className="hidden items-center gap-x-4 text-lg md:flex">
             {!isLoggedIn ? (
               <>
                 <Navlink route="/login" title="Login" />
                 <Navlink
-                  className="text-lg ant-btn ant-btn-primary"
+                  className="ant-btn ant-btn-primary text-lg"
                   route="/login?tab=register"
                   title="Register"
                   useLinkStyle={false}
@@ -141,7 +141,7 @@ function Navbar() {
               </>
             ) : (
               <div className="flex items-center">
-                <span className="p-4 rounded-full bg-gray-400 mr-2"></span>
+                <span className="mr-2 rounded-full bg-gray-400 p-4"></span>
                 <Dropdown overlay={accountMenu} placement="bottomRight">
                   <a onClick={(e) => e.preventDefault()}>
                     <p>Hai! {userData.name}</p>
@@ -162,7 +162,7 @@ function Navbar() {
             open={open}
             size="default"
           >
-            <div className="flex flex-col flex-1 gap-4">
+            <div className="flex flex-1 flex-col gap-4">
               <Navlink className="text-lg" route="/" title="Moderasi" />
               <Navlink
                 className="text-lg"
@@ -172,9 +172,9 @@ function Navbar() {
               <Navlink className="text-lg" route="/result" title="Hasil" />
             </div>
             {!isLoggedIn ? (
-              <div className="flex gap-4 mt-4 bg-white">
+              <div className="mt-4 flex gap-4 bg-white">
                 <Navlink
-                  className="flex items-center flex-1 justify-center"
+                  className="flex flex-1 items-center justify-center"
                   bottomBorder={false}
                   route="/login"
                   title="Login"
@@ -189,10 +189,10 @@ function Navbar() {
               </div>
             ) : (
               <Button
-                className="h-min flex mt-4 p-2 items-center justify-center"
+                className="mt-4 flex h-min items-center justify-center p-2"
                 type="primary"
               >
-                <span className="p-4 rounded-full bg-sky-200 mr-2"></span>
+                <span className="mr-2 rounded-full bg-sky-200 p-4"></span>
                 Hai! {userData.name}
               </Button>
             )}

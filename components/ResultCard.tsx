@@ -181,26 +181,26 @@ function ResultCard(props: Props) {
   })();
 
   return (
-    <div className="rounded-md shadow-lg border-2 border-gray-100 bg">
+    <div className="bg rounded-md border-2 border-gray-100 shadow-custom">
       <div className="relative pt-[56.25%]">
-        <div className="bg-gray-400 rounded-t-md absolute top-0 bottom-0 left-0 right-0 opacity-70"></div>
+        <div className="absolute top-0 bottom-0 left-0 right-0 rounded-t-md bg-gray-400 opacity-70"></div>
         <div
           className={
-            "absolute top-4 right-4 px-4 py-2 rounded-lg " +
+            "absolute top-4 right-4 rounded-lg px-4 py-2 " +
             getStatusStyling.className
           }
         >
           {getStatusStyling.text}
         </div>
       </div>
-      <div className="p-4 flex flex-col gap-4">
+      <div className="flex flex-col gap-4 p-4">
         <h4 className="font-semibold">BBS TV_1825_Acara TV.mp4</h4>
         <div className="flex gap-4">
           <Tooltip title="SARA">
             <FontAwesomeIcon
               icon={faHandsPraying}
               height="24px"
-              className="text-gray-900 text-2xl"
+              className="text-2xl text-gray-900"
             />
             <p className="text-center font-bold">0</p>
           </Tooltip>
@@ -208,7 +208,7 @@ function ResultCard(props: Props) {
             <FontAwesomeIcon
               icon={faMarsAndVenusBurst}
               height="24px"
-              className="text-gray-900 text-2xl"
+              className="text-2xl text-gray-900"
             />
             <p className="text-center font-bold">0</p>
           </Tooltip>
@@ -216,7 +216,7 @@ function ResultCard(props: Props) {
             <FontAwesomeIcon
               icon={faHandHoldingHeart}
               height="24px"
-              className="text-gray-900 text-2xl"
+              className="text-2xl text-gray-900"
             />
             <p className="text-center font-bold">0</p>
           </Tooltip>
@@ -224,7 +224,7 @@ function ResultCard(props: Props) {
             <FontAwesomeIcon
               icon={faGhost}
               height="24px"
-              className="text-gray-900 text-2xl"
+              className="text-2xl text-gray-900"
             />
             <p className="text-center font-bold">0</p>
           </Tooltip>
@@ -232,7 +232,7 @@ function ResultCard(props: Props) {
             <FontAwesomeIcon
               icon={faPeopleGroup}
               height="24px"
-              className="text-gray-900 text-2xl"
+              className="text-2xl text-gray-900"
             />
             <p className="text-center font-bold">0</p>
           </Tooltip>

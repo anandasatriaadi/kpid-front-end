@@ -4,6 +4,23 @@
       &:last-child {
         @apply mb-0;
       }
+
+      &-label {
+        @apply text-base;
+        & > label {
+          @apply text-base;
+        }
+      }
+
+      :not(.ant-input-affix-wrapper) > {
+        .ant-input {
+          @apply px-4 py-2 text-lg;
+        }
+      }
+
+      .ant-input-affix-wrapper.ant-input-password {
+        @apply px-4 py-2 text-lg;
+      }
     }
   }
 
@@ -15,11 +32,16 @@
     }
 
     &-status-error {
-      
     }
   }
 
   &-picker {
-    @apply rounded-md;
+    @apply rounded-md px-4 py-2;
+
+    &-input {
+      input {
+        @apply text-lg;
+      }
+    }
   }
 }
