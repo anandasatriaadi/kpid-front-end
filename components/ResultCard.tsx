@@ -1,4 +1,4 @@
-import { Button, Collapse, Skeleton, Timeline, Tooltip } from "antd";
+import { Button, Collapse, Divider, Skeleton, Timeline, Tooltip } from "antd";
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -7,9 +7,13 @@ import {
   faHandHoldingHeart,
   faHandsPraying,
   faPeopleGroup,
+  faTelevision,
+  faPenAlt,
+  faPen,
 } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import { randomInt, randomUUID } from "crypto";
+import { faClock, faPenToSquare } from "@fortawesome/free-regular-svg-icons";
 
 const timelineItem = [
   {
@@ -55,45 +59,6 @@ const timelineItem = [
     ],
   },
 ];
-// ,
-//   {
-//     second: 376,
-//     time: "13:06:16",
-//     image: "https://picsum.photos/800/1001",
-//     violations: [
-//       {
-//         pasal: "UU. XX Pasal XX BAB XX Tahun 2012",
-//         deskripsi:
-//           "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Suscipit tenetur fugiat eius asperiores quia error magnam officia necessitatibus cupiditate ratione!",
-//         decision: null,
-//       },
-//       {
-//         pasal: "UU. XX Pasal XX BAB XX Tahun 2012",
-//         deskripsi:
-//           "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Aliquam nisi cupiditate tenetur voluptates perferendis deserunt veniam unde? Assumenda nulla eum mollitia culpa, possimus quibusdam qui.",
-//         decision: null,
-//       },
-//     ],
-//   },
-//   {
-//     second: 376,
-//     time: "13:06:16",
-//     image: "https://picsum.photos/800/1002",
-//     violations: [
-//       {
-//         pasal: "UU. XX Pasal XX BAB XX Tahun 2012",
-//         deskripsi:
-//           "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Suscipit tenetur fugiat eius asperiores quia error magnam officia necessitatibus cupiditate ratione!",
-//         decision: null,
-//       },
-//       {
-//         pasal: "UU. XX Pasal XX BAB XX Tahun 2012",
-//         deskripsi:
-//           "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Aliquam nisi cupiditate tenetur voluptates perferendis deserunt veniam unde? Assumenda nulla eum mollitia culpa, possimus quibusdam qui.",
-//         decision: null,
-//       },
-//     ],
-//   },
 
 interface detectedViolations {
   second: number;
@@ -148,7 +113,7 @@ function ResultCard(props: Props) {
     checkIfAllModerated();
   };
 
-  const testStatus = props.index % 2 ? "uploaded" : "rejected";
+  let testStatus = props.index % 2 ? "uploaded" : "rejected";
   const getStatusStyling = (() => {
     const status = testStatus;
     switch (status) {
@@ -159,91 +124,122 @@ function ResultCard(props: Props) {
         };
       case "on_process":
         return {
-          className: "bg-cyan-300",
+          className: "bg-cyan-500",
           text: "Sedang Diproses",
         };
       case "approved":
         return {
-          className: "bg-green-300",
+          className: "bg-green-500",
           text: "Tidak Ditemukan Pelanggaran",
         };
       case "rejected":
         return {
-          className: "bg-red-300",
+          className: "bg-red-600 text-white",
           text: "Ditemukan Pelanggaran",
         };
       default:
         return {
-          className: "bg-amber-300",
+          className: "bg-amber-500",
           text: "Belum Diproses",
         };
     }
   })();
 
   return (
-    <div className="bg rounded-md border-2 border-gray-100 shadow-custom">
-      <div className="relative pt-[56.25%]">
-        <div className="absolute top-0 bottom-0 left-0 right-0 rounded-t-md bg-gray-400 opacity-70"></div>
-        <div
-          className={
-            "absolute top-4 right-4 rounded-lg px-4 py-2 " +
-            getStatusStyling.className
-          }
-        >
-          {getStatusStyling.text}
+    <Link href={"/result/" + "random_id_" + testStatus}>
+      <div className="bg cursor-pointer rounded-md bg-white shadow-custom transition-shadow hover:shadow-lg">
+        <div className="relative pt-[40%]">
+          <div
+            className="absolute top-0 bottom-0 left-0 right-0 rounded-t-md bg-slate-200 bg-cover"
+            style={{
+              backgroundImage: `url(https://kpid-jatim.storage.googleapis.com/moderation/63de2350984ddb64fc3d675f/frames/Have%20You%20Met%20a%20Hagfish_%20It%E2%80%99s%20About%20Slime%20_%20Deep%20Look_f180.jpg)`,
+            }}
+          ></div>
+          <div
+            className={
+              "absolute top-4 right-4 rounded-lg py-2 px-4 text-sm tracking-wide " +
+              getStatusStyling.className
+            }
+          >
+            {getStatusStyling.text}
+          </div>
+          <div className="hidden flex-wrap justify-end gap-1 text-sm md:absolute md:bottom-4 md:right-4 md:flex lg:text-base 2xl:gap-2">
+            <span className="rounded-full bg-slate-700 bg-opacity-75 py-0.5 px-2 text-white">
+              SARA
+            </span>
+            <span className="rounded-full bg-slate-700 bg-opacity-75 py-0.5 px-2 text-white">
+              SARU
+            </span>
+            <span className="rounded-full bg-slate-700 bg-opacity-75 py-0.5 px-2 text-white">
+              SADIS
+            </span>
+            <span className="rounded-full bg-slate-700 bg-opacity-75 py-0.5 px-2 text-white">
+              SIHIR
+            </span>
+            <span className="rounded-full bg-slate-700 bg-opacity-75 py-0.5 px-2 text-white">
+              Siaran Partisan
+            </span>
+          </div>
+        </div>
+        <div className="py-2 px-4 text-sm md:py-4 md:px-6 lg:text-base">
+          <div className="flex flex-wrap gap-1 text-sm md:hidden">
+            <span className="rounded-full bg-slate-700 bg-opacity-75 py-0.5 px-2 text-white">
+              SARA
+            </span>
+            <span className="rounded-full bg-slate-700 bg-opacity-75 py-0.5 px-2 text-white">
+              SARU
+            </span>
+            <span className="rounded-full bg-slate-700 bg-opacity-75 py-0.5 px-2 text-white">
+              SADIS
+            </span>
+            <span className="rounded-full bg-slate-700 bg-opacity-75 py-0.5 px-2 text-white">
+              SIHIR
+            </span>
+            <span className="rounded-full bg-slate-700 bg-opacity-75 py-0.5 px-2 text-white">
+              Siaran Partisan & Ilegal
+            </span>
+          </div>
+          <h4 className="mt-2 mb-2 font-semibold md:mt-0">
+            BBS TV_1825_Acara TV.mp4
+          </h4>
+          <div>
+            <span className="flex flex-col flex-wrap gap-1 md:flex-row md:items-center">
+              <span className="grid grid-cols-8 ">
+                <span className="flex items-center justify-center">
+                  <FontAwesomeIcon icon={faTelevision} height="12px" />
+                </span>
+                <span className="col-span-7"> BBS TV</span>
+                <Divider
+                  type="vertical"
+                  className="hidden bg-slate-300 md:block"
+                />
+              </span>
+              <span className="grid grid-cols-8">
+                <span className="flex items-center justify-center">
+                  <FontAwesomeIcon icon={faPenToSquare} height="12px" />
+                </span>
+                <span className="col-span-7"> Acara TV</span>
+                <Divider
+                  type="vertical"
+                  className="hidden bg-slate-300 md:block"
+                />
+              </span>
+              <span className="grid grid-cols-8">
+                <span className="flex items-center justify-center">
+                  <FontAwesomeIcon icon={faClock} height="12px" />
+                </span>
+                <span className="col-span-7"> 18:15:00 - 19:00:15</span>
+              </span>
+            </span>
+          </div>
+          <Divider className="m-0 my-2 bg-slate-200"></Divider>
+          <p>
+            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quibusdam
+            animi quod fuga aperiam quasi qui?
+          </p>
         </div>
       </div>
-      <div className="flex flex-col gap-4 p-4">
-        <h4 className="font-semibold">BBS TV_1825_Acara TV.mp4</h4>
-        <div className="flex gap-4">
-          <Tooltip title="SARA">
-            <FontAwesomeIcon
-              icon={faHandsPraying}
-              height="24px"
-              className="text-2xl text-gray-900"
-            />
-            <p className="text-center font-bold">0</p>
-          </Tooltip>
-          <Tooltip title="SARU">
-            <FontAwesomeIcon
-              icon={faMarsAndVenusBurst}
-              height="24px"
-              className="text-2xl text-gray-900"
-            />
-            <p className="text-center font-bold">0</p>
-          </Tooltip>
-          <Tooltip title="SADIS">
-            <FontAwesomeIcon
-              icon={faHandHoldingHeart}
-              height="24px"
-              className="text-2xl text-gray-900"
-            />
-            <p className="text-center font-bold">0</p>
-          </Tooltip>
-          <Tooltip title="SIHIR">
-            <FontAwesomeIcon
-              icon={faGhost}
-              height="24px"
-              className="text-2xl text-gray-900"
-            />
-            <p className="text-center font-bold">0</p>
-          </Tooltip>
-          <Tooltip title="Siaran Partisan & Ilegal">
-            <FontAwesomeIcon
-              icon={faPeopleGroup}
-              height="24px"
-              className="text-2xl text-gray-900"
-            />
-            <p className="text-center font-bold">0</p>
-          </Tooltip>
-        </div>
-        <Link href={"/result/" + "random_id_" + testStatus}>
-          <Button type="primary" className="w-full">
-            Lihat Detail
-          </Button>
-        </Link>
-      </div>
-    </div>
+    </Link>
   );
 }
 

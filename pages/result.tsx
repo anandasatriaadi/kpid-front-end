@@ -6,7 +6,7 @@ import ResultCard from "../components/ResultCard";
 import { NextPageWithLayout } from "./_app";
 
 const Result: NextPageWithLayout = () => {
-  const [resultCount, setResultCount] = useState<Number>(5);
+  const [resultCount, setResultCount] = useState<Number>(10);
   return (
     <div>
       <Head>
@@ -18,9 +18,9 @@ const Result: NextPageWithLayout = () => {
       <div>
         <h1 className="text-2xl font-semibold">Daftar Video Unggahan</h1>
         <section className="my-4">
-          <div className="flex gap-8">
-            <div className="flex gap-2">
-              <p className="mb-2 text-lg">Urutkan</p>
+          <div className="flex flex-wrap gap-2 md:gap-8">
+            <div className="flex flex-col gap-1 md:gap-2">
+              <p>Urutkan</p>
               <Select
                 defaultValue="newest"
                 className="w-60"
@@ -30,22 +30,22 @@ const Result: NextPageWithLayout = () => {
                 ]}
               />
             </div>
-            <div className="flex gap-2">
-              <p className="mb-2 text-lg">Hasil per halaman</p>
+            <div className="flex flex-col gap-1 md:gap-2">
+              <p>Hasil per halaman</p>
               <Select
-                defaultValue="5"
+                defaultValue="10"
                 className="w-40"
                 options={[
-                  { value: "5", label: "5" },
                   { value: "10", label: "10" },
-                  { value: "15", label: "15" },
+                  { value: "20", label: "20" },
+                  { value: "40", label: "40" },
                 ]}
                 onChange={(value) => setResultCount(Number(value))}
               />
             </div>
           </div>
         </section>
-        <section className="grid gap-4 lg:grid-cols-3">
+        <section className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
           {new Array(resultCount).fill(1).map((_, i) => {
             return <ResultCard key={i} index={i} />;
           })}

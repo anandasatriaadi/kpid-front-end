@@ -23,35 +23,3 @@
     }
   }
 }
-
-.ant-tabs {
-  &.custom-tabs {
-    .ant-tabs {
-      &-nav {
-        @apply m-0;
-
-        &-list {
-          @apply w-full;
-        }
-
-        .ant-tabs {
-          &-tab {
-            @apply justify-center rounded-t-lg px-8;
-
-            &-active {
-              @apply border-b-transparent bg-sky-50 shadow-custom;
-            }
-
-            &-btn {
-              @apply text-lg;
-            }
-          }
-        }
-      }
-
-      &-content-holder {
-        @apply rounded-b-lg rounded-tr-lg bg-sky-50 p-8 shadow-custom;
-      }
-    }
-  }
-}

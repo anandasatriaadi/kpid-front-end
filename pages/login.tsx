@@ -9,7 +9,7 @@ import { ReactNode, useContext } from "react";
 import Navbar from "../components/Navbar";
 import { AuthContext, AuthContextInterface } from "../context/AuthContext";
 
-const Home: NextPage = () => {
+const Login: NextPage = () => {
   let router = useRouter();
   const { isLoggedIn, login } = useContext(AuthContext) as AuthContextInterface;
 
@@ -130,4 +130,4 @@ const Home: NextPage = () => {
   );
 };
 
-export default Home;
+export default Login;

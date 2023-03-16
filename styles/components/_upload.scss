@@ -1,8 +1,9 @@
 .ant-upload {
   &-list {
     &-item {
+      @apply h-auto;
       & &-info {
-        @apply rounded-md pl-2 hover:bg-sky-200;
+        @apply rounded-md px-2 py-1 hover:bg-slate-200 text-base;
       }
     }
   }

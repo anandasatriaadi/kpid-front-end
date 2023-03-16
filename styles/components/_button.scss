@@ -1,8 +1,8 @@
 .ant-btn {
-  @apply h-min px-3 py-1;
+  @apply h-min px-3 py-1 rounded-md;
 
   &-primary {
-    @apply rounded-md border-sky-500 bg-sky-500 text-white hover:border-sky-300 hover:bg-sky-300;
+    @apply border-sky-500 bg-sky-500 text-white hover:border-sky-300 hover:bg-sky-300;
 
     &.button {
       &-green {

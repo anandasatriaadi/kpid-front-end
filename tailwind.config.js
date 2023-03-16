@@ -8,7 +8,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        montserrat: ["Inter", "sans-serif"],
+        inter: ["Inter", "sans-serif"],
       },
       boxShadow: {
         custom: "0 10px 20px 0 rgba(140, 144, 164, 0.08)",

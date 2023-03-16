@@ -1,12 +1,17 @@
 import {
+  faClock,
+  faGaugeHigh,
   faGhost,
   faHandHoldingHeart,
   faHandsPraying,
   faMarsAndVenusBurst,
   faPeopleGroup,
+  faStopwatch,
+  faXmarkCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, Collapse, Skeleton, Timeline, Tooltip } from "antd";
+import { Button, Collapse, Skeleton, Tabs, Timeline, Tooltip } from "antd";
+import Paragraph from "antd/lib/typography/Paragraph";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -110,8 +115,44 @@ interface detectedViolations {
   }[];
 }
 
+const labelItems = [
+  { name: "SARA", count: 2 },
+  { name: "SARU", count: 1 },
+  { name: "SADIS", count: 2 },
+  { name: "SIHIR", count: 1 },
+  { name: "Siaran Ilegal", count: 2 },
+];
+
+const tabItems = labelItems.map((item, index) => {
+  let idx = index.toString();
+  return {
+    key: idx,
+    label: (
+      <span className="flex items-center gap-1">
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-200">
+          {item.count}
+        </span>
+        {item.name}
+      </span>
+    ),
+    children: timelineItem[0].violations.map((violation, vIndex) => {
+      return (
+        <Collapse ghost key={vIndex}>
+          <Collapse.Panel header={vIndex + ". " + violation.pasal} key="1">
+            <p
+              dangerouslySetInnerHTML={{
+                __html: violation.deskripsi,
+              }}
+            ></p>
+          </Collapse.Panel>
+        </Collapse>
+      );
+    }),
+  };
+});
+
 const SingleResult: NextPageWithLayout = () => {
-  const [loaded, setLoaded] = useState<boolean>(false);
+  const [loaded, setLoaded] = useState<boolean>(true);
   const [timelines, setTimelines] = useState<any>(timelineItem);
   const [isModerated, setIsModerated] = useState<boolean>(false);
 
@@ -149,8 +190,7 @@ const SingleResult: NextPageWithLayout = () => {
   };
 
   const pathName = router.asPath;
-  console.log(pathName);
-  const status = pathName?.includes("rejected") ? "rejected" : "uploaded";
+  let status = pathName?.includes("rejected") ? "rejected" : "uploaded";
   const getStatusStyling = (() => {
     switch (status) {
       case "uploaded":
@@ -160,26 +200,115 @@ const SingleResult: NextPageWithLayout = () => {
         };
       case "on_process":
         return {
-          className: "bg-cyan-300",
+          className: "bg-cyan-500",
           text: "Sedang Diproses",
         };
       case "approved":
         return {
-          className: "bg-green-300",
+          className: "bg-green-500",
           text: "Tidak Ditemukan Pelanggaran",
         };
       case "rejected":
         return {
-          className: "bg-red-300",
+          className: "bg-red-500 text-white",
           text: "Ditemukan Pelanggaran",
         };
       default:
         return {
-          className: "bg-amber-300",
+          className: "bg-amber-400",
           text: "Belum Diproses",
         };
     }
   })();
+
+  const testing = (
+    height: string,
+    sara: number,
+    saru: number,
+    sadis: number,
+    sihir: number,
+    siaran: number,
+    cardStyle: boolean = false
+  ) => {
+    return (
+      <div className="flex gap-4">
+        <Tooltip
+          className={
+            "flex flex-col justify-center " +
+            (cardStyle ? "rounded-lg bg-white py-3 px-4 shadow-md" : "")
+          }
+          title="SARA"
+        >
+          <FontAwesomeIcon
+            icon={faHandsPraying}
+            height={height}
+            className="text-2xl text-gray-900"
+          />
+          <p className="text-center">{sara}</p>
+        </Tooltip>
+        <Tooltip
+          className={
+            "flex flex-col justify-center " + cardStyle
+              ? "rounded-lg bg-white py-3 px-4 shadow-md"
+              : ""
+          }
+          title="SARU"
+        >
+          <FontAwesomeIcon
+            icon={faMarsAndVenusBurst}
+            height={height}
+            className="text-2xl text-gray-900"
+          />
+          <p className="text-center">{saru}</p>
+        </Tooltip>
+        <Tooltip
+          className={
+            "flex flex-col justify-center " + cardStyle
+              ? "rounded-lg bg-white py-3 px-4 shadow-md"
+              : ""
+          }
+          title="SADIS"
+        >
+          <FontAwesomeIcon
+            icon={faHandHoldingHeart}
+            height={height}
+            className="text-2xl text-gray-900"
+          />
+          <p className="text-center">{sadis}</p>
+        </Tooltip>
+        <Tooltip
+          className={
+            "flex flex-col justify-center " + cardStyle
+              ? "rounded-lg bg-white py-3 px-4 shadow-md"
+              : ""
+          }
+          title="SIHIR"
+        >
+          <FontAwesomeIcon
+            icon={faGhost}
+            height={height}
+            className="text-2xl text-gray-900"
+          />
+          <p className="text-center">{sihir}</p>
+        </Tooltip>
+        <Tooltip
+          className={
+            "flex flex-col justify-center " + cardStyle
+              ? "rounded-lg bg-white py-3 px-4 shadow-md"
+              : ""
+          }
+          title="Siaran Partisan & Ilegal"
+        >
+          <FontAwesomeIcon
+            icon={faPeopleGroup}
+            height={height}
+            className="text-2xl text-gray-900"
+          />
+          <p className="text-center">{siaran}</p>
+        </Tooltip>
+      </div>
+    );
+  };
 
   return (
     <div>
@@ -189,241 +318,209 @@ const SingleResult: NextPageWithLayout = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className="container mx-auto">
-        <div>
-          <h1 className="text-2xl font-semibold">Detail Moderasi Video</h1>
-          <section>
-            <div className="mt-8 flex items-center gap-6">
-              <h2 className="text-lg font-semibold">
-                BBS TV_1825_Acara TV.mp4
-              </h2>
-              <div
-                className={"rounded-lg px-4 py-2 " + getStatusStyling.className}
-              >
-                {getStatusStyling.text}
-              </div>
-            </div>
-            <div className="flex justify-between text-lg">
-              <div className="mt-2 flex text-center">
-                <div className="flex flex-col items-center border-r-2 border-gray-100 pl-0 pr-2 last:border-0">
-                  <p className="text-base text-gray-500">Jam Mulai</p>
+      <div className="relative">
+        <section className="sticky top-0 z-10 flex items-center justify-between gap-6 rounded-xl bg-white px-4 py-2 shadow-custom">
+          <h2 className="text-2xl font-semibold">BBS TV_1825_Acara TV.mp4</h2>
+          <div
+            className={
+              "rounded-lg px-4 py-2 font-semibold tracking-wide " +
+              getStatusStyling.className
+            }
+          >
+            {getStatusStyling.text}
+          </div>
+        </section>
+        <section className="px-4">
+          <div className="mt-4 flex justify-between text-lg">
+            <div className="flex gap-6">
+              <div className="flex items-center gap-3 rounded-lg bg-white py-3 px-4 shadow-md">
+                <div className="rounded-xl bg-slate-100">
+                  <FontAwesomeIcon icon={faClock} height="24px" />
+                </div>
+                <span>
+                  <p className="text-base">Jam Mulai</p>
                   <p className="font-semibold">18:25:00</p>
-                </div>
-                <div className="flex flex-col items-center border-r-2 border-gray-100 pl-2 pr-2 last:border-0">
-                  <p className="text-base text-gray-500">Jam Selesai</p>
-                  <p className="font-semibold">19:25:</p>
-                </div>
-                <div className="flex flex-col items-center border-r-2 border-gray-100 pl-2 pr-2 last:border-0">
-                  <p className="text-base text-gray-500">Durasi</p>
-                  <p className="font-semibold">3600 detik</p>
-                </div>
-                <div className="flex flex-col items-center border-r-2 border-gray-100 pl-2 pr-2 last:border-0">
-                  <p className="text-base text-gray-500">FPS</p>
-                  <p className="font-semibold">30</p>
-                </div>
-                <div className="flex flex-col items-center border-r-2 border-gray-100 pl-2 pr-0 last:border-0">
-                  <p className="text-base text-gray-500">Konten Terdeteksi</p>
-                  <p className="font-semibold">2</p>
-                </div>
+                </span>
               </div>
-              <div className="flex gap-4">
-                <Tooltip className="flex flex-col justify-center" title="SARA">
-                  <FontAwesomeIcon
-                    icon={faHandsPraying}
-                    height="32px"
-                    className="text-2xl text-gray-900"
-                  />
-                  <p className="text-center font-bold">0</p>
-                </Tooltip>
-                <Tooltip className="flex flex-col justify-center" title="SARU">
-                  <FontAwesomeIcon
-                    icon={faMarsAndVenusBurst}
-                    height="32px"
-                    className="text-2xl text-gray-900"
-                  />
-                  <p className="text-center font-bold">1</p>
-                </Tooltip>
-                <Tooltip className="flex flex-col justify-center" title="SADIS">
-                  <FontAwesomeIcon
-                    icon={faHandHoldingHeart}
-                    height="32px"
-                    className="text-2xl text-gray-900"
-                  />
-                  <p className="text-center font-bold">1</p>
-                </Tooltip>
-                <Tooltip className="flex flex-col justify-center" title="SIHIR">
-                  <FontAwesomeIcon
-                    icon={faGhost}
-                    height="32px"
-                    className="text-2xl text-gray-900"
-                  />
-                  <p className="text-center font-bold">0</p>
-                </Tooltip>
-                <Tooltip
-                  className="flex flex-col justify-center"
-                  title="Siaran Partisan & Ilegal"
-                >
-                  <FontAwesomeIcon
-                    icon={faPeopleGroup}
-                    height="32px"
-                    className="text-2xl text-gray-900"
-                  />
-                  <p className="text-center font-bold">0</p>
-                </Tooltip>
+              <div className="flex items-center gap-3 rounded-lg bg-white py-3 px-4 shadow-md">
+                <div className="rounded-xl bg-slate-100">
+                  <FontAwesomeIcon icon={faClock} height="24px" />
+                </div>
+                <span>
+                  <p className="text-base">Jam Selesai</p>
+                  <p className="font-semibold">19:25:00</p>
+                </span>
+              </div>
+              <div className="flex items-center gap-3 rounded-lg bg-white py-3 px-4 shadow-md">
+                <div className="rounded-xl bg-slate-100">
+                  <FontAwesomeIcon icon={faStopwatch} height="24px" />
+                </div>
+                <span>
+                  <p className="text-base">Durasi</p>
+                  <p className="font-semibold">3600 detik</p>
+                </span>
+              </div>
+              <div className="flex items-center gap-3 rounded-lg bg-white py-3 px-4 shadow-md">
+                <div className="rounded-xl bg-slate-100">
+                  <FontAwesomeIcon icon={faGaugeHigh} height="24px" />
+                </div>
+                <span>
+                  <p className="text-base">FPS</p>
+                  <p className="font-semibold">30</p>
+                </span>
+              </div>
+              <div className="flex items-center gap-3 rounded-lg bg-white py-3 px-4 shadow-md">
+                <div className="rounded-xl bg-slate-100">
+                  <FontAwesomeIcon icon={faXmarkCircle} height="24px" />
+                </div>
+                <span>
+                  <p className="text-base">Konten Terdeteksi</p>
+                  <p className="font-semibold">2</p>
+                </span>
               </div>
             </div>
-          </section>
-          <section className="mt-8">
-            <Collapse defaultActiveKey="1" ghost>
-              <Collapse.Panel
-                header="Potongan Frame dari Video"
-                key="1"
-                className="text-lg"
-              >
-                <div className="grid grid-cols-4 gap-2">
-                  {new Array(16).fill(1).map((_, i) => {
-                    return (
-                      <div key={i} className="bg-slate-300 pt-[56.25%]"></div>
-                    );
-                  })}
-                </div>
-                <p className="mt-4 text-right opacity-70">
-                  dan 704 potongan frame lainnya.
-                </p>
-              </Collapse.Panel>
-            </Collapse>
-          </section>
+          </div>
+          {testing("32px", 0, 1, 1, 0, 0, true)}
+        </section>
+        <section className="mt-8">
+          <Collapse defaultActiveKey="1" ghost>
+            <Collapse.Panel
+              header="Potongan Frame Video"
+              key="1"
+              className="text-lg"
+            >
+              <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+                {new Array(16).fill(1).map((_, i) => {
+                  return (
+                    <div
+                      key={i}
+                      className="bg-cover pt-[56.25%]"
+                      style={{
+                        backgroundImage: `url(https://kpid-jatim.storage.googleapis.com/moderation/63de2350984ddb64fc3d675f/frames/Have%20You%20Met%20a%20Hagfish_%20It%E2%80%99s%20About%20Slime%20_%20Deep%20Look_f${
+                          (i + 1) * 8
+                        }.jpg)`,
+                      }}
+                    ></div>
+                  );
+                })}
+              </div>
+              <p className="mt-4 text-right text-base opacity-70">
+                dan 704 potongan frame lainnya.
+              </p>
+            </Collapse.Panel>
+          </Collapse>
+        </section>
 
-          {pathName.includes("rejected") ? (
-            <section className="mt-8">
-              <Collapse onChange={onChange} ghost>
-                <Collapse.Panel
-                  header="Hasil Moderasi"
-                  key="1"
-                  className="text-lg"
-                >
-                  {loaded ? (
-                    <Timeline>
-                      {timelines.map(
-                        (item: detectedViolations, index: number) => (
-                          <Timeline.Item key={index}>
-                            <p className="text-base">
+        {pathName.includes("rejected") ? (
+          <section className="">
+            <>
+              <h2 className="px-4 text-lg font-semibold">Hasil Moderasi</h2>
+              {loaded ? (
+                <Collapse onChange={onChange}>
+                  {timelines.map((item: detectedViolations, index: number) => (
+                    <Collapse.Panel
+                      className="text-base"
+                      header={
+                        <div className="flex items-center justify-between">
+                          <>
+                            <p>
                               Detik {item.second} | {item.time}
                             </p>
-                            <div className="mt-2 mb-2 flex flex-col sm:flex-row">
-                              <div className="sm:flex-1">
-                                <div
-                                  className="relative bg-cover bg-center pt-[52%]"
-                                  style={{
-                                    backgroundImage: `url(${item.image})`,
-                                  }}
-                                >
-                                  <div className="absolute inset-0 bg-black bg-opacity-50"></div>
-                                </div>
-                              </div>
-                              <div className="mt-2 mb-4 sm:ml-4 sm:mt-0 sm:mb-0 sm:flex-1 lg:flex-[2]">
-                                <div className="flex gap-4">
-                                  <h3 className="text-xl font-semibold">
-                                    Dugaan Pelanggaran
-                                  </h3>
-                                  {item.decision != null &&
-                                    (item.decision ? (
-                                      <Button
-                                        type="dashed"
-                                        className="button-green ml-2"
-                                      >
-                                        Valid
-                                      </Button>
-                                    ) : (
-                                      <Button
-                                        className="ml-2"
-                                        type="dashed"
-                                        danger
-                                      >
-                                        Invalid
-                                      </Button>
-                                    ))}
-                                </div>
-                                <ol className="list-inside list-decimal">
-                                  {item.violations.map((violation, vIndex) => {
-                                    return (
-                                      <li
-                                        className="mt-2 items-center text-lg"
-                                        key={vIndex}
-                                      >
-                                        {violation.pasal}
-                                        {/* <div>
-                                        <p
-                                          className="font-normal"
-                                          dangerouslySetInnerHTML={{
-                                            __html: violation.deskripsi,
-                                          }}
-                                        ></p>
-                                      </div> */}
-                                      </li>
-                                    );
-                                  })}
-                                </ol>
-                                {item.decision === null ? (
-                                  <div className="flex justify-end">
-                                    <Button
-                                      type="primary"
-                                      className="button-green mr-4"
-                                      onClick={(e) => {
-                                        onValidatePasal(index);
-                                      }}
-                                    >
-                                      Valid
-                                    </Button>
-                                    <Button
-                                      type="primary"
-                                      danger
-                                      onClick={(e) => {
-                                        onInvalidatePasal(index);
-                                      }}
-                                    >
-                                      Invalid
-                                    </Button>
-                                  </div>
-                                ) : (
-                                  ""
-                                )}
-                              </div>
-                            </div>
-                          </Timeline.Item>
-                        )
-                      )}
-                      {isModerated ? (
-                        <div className="mt-2 flex justify-end">
-                          <Button
-                            type="primary"
-                            className="button-green mr-4"
-                            href="/tv9_result.pdf"
-                            target="_blank"
-                          >
-                            Generate Laporan
-                          </Button>
+                          </>
                         </div>
-                      ) : (
-                        ""
-                      )}
-                    </Timeline>
+                      }
+                      key={index}
+                    >
+                      <div className="flex flex-col lg:flex-row">
+                        <div className="lg:flex-[3]">
+                          <div className="relative bg-cover bg-center pt-[52%]">
+                            <div className="absolute top-0 right-0 bottom-0 left-0 bg-black">
+                              <video
+                                className="h-full w-full"
+                                controls
+                                controlsList="nodownload"
+                                src="https://kpid-jatim.storage.googleapis.com/moderation/63de2350984ddb64fc3d675f/videos/Have You Met a Hagfish_ It’s About Slime _ Deep Look_2.mp4"
+                              ></video>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="mt-4 lg:ml-4 lg:mt-0 lg:mb-0 lg:flex-[3]">
+                          <div className="mb-4 flex gap-4">
+                            <h3 className="text-lg font-semibold">
+                              Dugaan Pelanggaran
+                            </h3>
+                            {item.decision != null &&
+                              (item.decision ? (
+                                <Button
+                                  type="dashed"
+                                  className="button-green ml-2"
+                                >
+                                  Valid
+                                </Button>
+                              ) : (
+                                <Button className="ml-2" type="dashed" danger>
+                                  Invalid
+                                </Button>
+                              ))}
+                          </div>
+                          <Tabs type="card" items={tabItems} />
+
+                          {item.decision === null ? (
+                            <div className="flex justify-end">
+                              <Button
+                                type="primary"
+                                className="mr-4"
+                                onClick={(e) => {
+                                  onValidatePasal(index);
+                                }}
+                              >
+                                Valid
+                              </Button>
+                              <Button
+                                type="dashed"
+                                onClick={(e) => {
+                                  onInvalidatePasal(index);
+                                }}
+                              >
+                                Invalid
+                              </Button>
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                        </div>
+                      </div>
+                    </Collapse.Panel>
+                  ))}
+                  {isModerated ? (
+                    <div className="mt-2 flex justify-end">
+                      <Button
+                        type="primary"
+                        className="button-green mr-4"
+                        href="/tv9_result.pdf"
+                        target="_blank"
+                      >
+                        Generate Laporan
+                      </Button>
+                    </div>
                   ) : (
-                    <Skeleton active />
+                    ""
                   )}
-                </Collapse.Panel>
-              </Collapse>
-            </section>
-          ) : (
-            <div className="flex justify-end">
-              <Button type="primary" className="text-lg">
-                <Link href="/result" passHref={false}>
-                  Mulai Moderasi Video
-                </Link>
-              </Button>
-            </div>
-          )}
-        </div>
+                </Collapse>
+              ) : (
+                <Skeleton active />
+              )}
+            </>
+          </section>
+        ) : (
+          <div className="flex justify-end">
+            <Button type="primary" className="text-lg">
+              <Link href="/result" passHref={false}>
+                Mulai Moderasi Video
+              </Link>
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { Button, DatePicker, Tooltip } from "antd";
+import { Tooltip } from "antd";
 import type { Moment } from "moment";
 import moment from "moment";
 import { useState } from "react";
@@ -64,31 +64,25 @@ function ChartCard(props: Props) {
   return (
     <div className="absolute top-0 right-0 bottom-0 left-0 w-full p-8 pb-16">
       <h2 className="mb-4 text-lg font-bold">{title}</h2>
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={chartData.data}
-          margin={{
-            left: -22,
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" xAxisId={0} />
-          <XAxis dataKey="name" xAxisId={1} hide />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          {chartData.key1 ? (
+      {chartData?.key1 !== undefined && chartData?.key2 !== undefined && (
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            data={chartData.data}
+            margin={{
+              left: -22,
+            }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" xAxisId={0} />
+            <XAxis dataKey="name" xAxisId={1} hide />
+            <YAxis />
+            <Tooltip />
+            <Legend />
             <Bar dataKey={chartData.key1} xAxisId={0} fill="#0285c7" />
-          ) : (
-            ""
-          )}
-          {chartData.key2 ? (
             <Bar dataKey={chartData.key2} xAxisId={1} fill="#075985" />
-          ) : (
-            ""
-          )}
-        </BarChart>
-      </ResponsiveContainer>
+          </BarChart>
+        </ResponsiveContainer>
+      )}
     </div>
   );
 }

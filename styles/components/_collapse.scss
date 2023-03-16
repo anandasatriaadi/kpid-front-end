@@ -1,8 +1,5 @@
-.ant {
-  $p: &;
-  &-collapse {
-    &-expand-icon {
-      @apply flex flex-col self-center;
-    }
+.ant-collapse {
+  &-expand-icon {
+    @apply flex flex-col self-center;
   }
 }

@@ -62,5 +62,5 @@ class HttpRequest {
   }
 }
 
-const httpRequest = new HttpRequest("http://localhost:5000/api");
+const httpRequest = new HttpRequest("http://192.168.43.71:5000/api");
 export default httpRequest;

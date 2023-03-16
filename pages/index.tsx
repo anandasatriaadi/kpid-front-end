@@ -1,6 +1,8 @@
 import {
   faArrowTrendUp,
   faEquals,
+  faFileVideo,
+  faUpload,
   faNotEqual,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -16,8 +18,10 @@ import {
   UploadProps,
 } from "antd";
 import Upload, { RcFile } from "antd/lib/upload";
+import Dragger from "antd/lib/upload/Dragger";
 import { AxiosProgressEvent, AxiosRequestConfig } from "axios";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { ReactElement, useContext, useState } from "react";
 import httpRequest from "../common/HttpRequest";
@@ -108,13 +112,13 @@ const Home: NextPageWithLayout = () => {
       </Head>
 
       <div className="flex flex-1 flex-col gap-4">
-        <section className="grid grid-cols-2 gap-4">
-          <div className="rounded-md bg-white p-6 shadow-custom">
+        <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="hidden rounded-md bg-white p-6 shadow-custom md:block">
             <h2 className="text-2xl font-semibold capitalize">
               Hai {userData.name}!
             </h2>
             <p className="mb-4 text-lg">
-              Selamat datang di Sistem Rekomendasi KPID Jawa Timur!
+              Selamat Datang di Sistem Rekomendasi KPID Jawa Timur!
             </p>
             <p>
               Lorem ipsum, dolor sit amet consectetur adipisicing elit.
@@ -171,135 +175,6 @@ const Home: NextPageWithLayout = () => {
           <div className="relative grow rounded-lg bg-white">
             <ChartCard chartData={chart1} title={chart1.title}></ChartCard>
           </div>
-          {/* <div className="flex-1">
-          <div
-            className={
-              (isLoggedIn ? "bg-white" : "bg-slate-100") +
-              " flex-1 rounded-xl p-4 shadow-custom"
-            }
-          >
-            <Dragger
-              {...fileDropProps}
-              accept="video/*"
-              disabled={!isLoggedIn}
-              className={
-                "flex h-80 items-center justify-center rounded-md border-2 border-dashed border-gray-400 bg-transparent"
-              }
-            >
-              <div className="flex flex-col text-lg">
-                <div className="flex justify-center">
-                  <span>
-                    <FontAwesomeIcon
-                      icon={faFileVideo}
-                      width={"36px"}
-                      className={isLoggedIn ? "text-sky-500" : "text-gray-300"}
-                    />
-                  </span>
-                </div>
-                <div className="flex justify-center">
-                  <Button
-                    type="primary"
-                    className="mt-2 flex items-center text-lg"
-                    disabled={!isLoggedIn}
-                    icon={<UploadOutlined />}
-                  >
-                    Pilih Video
-                  </Button>
-                </div>
-                <span className="mt-2 text-gray-900">
-                  {isLoggedIn ? (
-                    <p>atau letakkan video anda disini</p>
-                  ) : (
-                    <>
-                      <p>
-                        Anda harus{" "}
-                        <Link href={"/login"}>
-                          <a className="font-bold">login</a>
-                        </Link>{" "}
-                        terlebih dahulu
-                      </p>
-                      <div className="text-center text-base">
-                        Belum memiliki akun?{" "}
-                        <Link href={"/login?tab=register"}>
-                          <a className="font-bold">Register</a>
-                        </Link>
-                      </div>
-                    </>
-                  )}
-                </span>
-              </div>
-            </Dragger>
-          </div>
-        </div> */}
-
-          <Modal centered open={!isNilOrEmpty(uploadFile)} footer={null}>
-            <Form
-              form={form}
-              name="moderation_form"
-              onFinish={onFinish}
-              onFinishFailed={onFinishFailed}
-              autoComplete="off"
-              layout="vertical"
-              className="pt-4"
-            >
-              <div>
-                <Upload {...fileDropProps} accept="video/*"></Upload>
-                <Form.Item
-                  className="my-4 text-lg"
-                  initialValue={""}
-                  label="Nama Program"
-                  name="program_name"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Masukkan nama program",
-                    },
-                  ]}
-                >
-                  <Input className="text-lg font-normal" />
-                </Form.Item>
-                <Form.Item
-                  className="my-4 text-lg"
-                  initialValue={""}
-                  label="Stasiun Televisi"
-                  name="station_name"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Masukkan stasiun televisi",
-                    },
-                  ]}
-                >
-                  <Input className="text-lg font-normal" />
-                </Form.Item>
-                <Form.Item
-                  className="my-4 text-lg"
-                  initialValue={""}
-                  label="Waktu Mulai"
-                  name="start_time"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Masukkan waktu mulai",
-                    },
-                  ]}
-                >
-                  <TimePicker
-                    className="w-full text-lg font-normal"
-                    format={"HH:mm"}
-                  ></TimePicker>
-                </Form.Item>
-              </div>
-
-              <Progress percent={uploadProgressPercent} />
-
-              <div className="mt-8 flex justify-end">
-                <Button className="text-lg" type="primary" htmlType="submit">
-                  Upload
-                </Button>
-              </div>
-            </Form>
-          </Modal>
         </section>
       </div>
     </>
