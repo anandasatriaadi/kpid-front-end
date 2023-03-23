@@ -1,12 +1,23 @@
 import { Select } from "antd";
 import Head from "next/head";
-import { ReactElement, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
+import httpRequest from "../common/HttpRequest";
 import Layout from "../components/Layout";
-import ResultCard from "../components/ResultCard";
+import ResultCard from "../components/result/ResultCard";
 import { NextPageWithLayout } from "./_app";
+import useSWR from "swr";
+import { isNil } from "../utils/CommonUtil";
 
 const Result: NextPageWithLayout = () => {
   const [resultCount, setResultCount] = useState<Number>(10);
+
+  const fetcher = () =>
+    httpRequest.get("/moderation-list").then((response) => {
+      const result = response.data;
+      return result.data;
+    });
+
+  const { data: moderationData, error } = useSWR("/moderation-list", fetcher);
   return (
     <div>
       <Head>
@@ -46,9 +57,10 @@ const Result: NextPageWithLayout = () => {
           </div>
         </section>
         <section className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
-          {new Array(resultCount).fill(1).map((_, i) => {
-            return <ResultCard key={i} index={i} />;
-          })}
+          {moderationData != undefined &&
+            moderationData.map((value: any, index: number) => {
+              return <ResultCard key={index} data={value} />;
+            })}
         </section>
       </div>
     </div>

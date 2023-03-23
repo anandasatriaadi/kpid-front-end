@@ -14,6 +14,7 @@ import {
 import Link from "next/link";
 import { randomInt, randomUUID } from "crypto";
 import { faClock, faPenToSquare } from "@fortawesome/free-regular-svg-icons";
+import { isNilOrEmpty } from "../../utils/CommonUtil";
 
 const timelineItem = [
   {
@@ -72,13 +73,14 @@ interface detectedViolations {
 }
 
 type Props = {
-  index: number;
+  data: any;
 };
 
 function ResultCard(props: Props) {
   const [loaded, setLoaded] = useState<boolean>(false);
   const [timelines, setTimelines] = useState<any>(timelineItem);
   const [isModerated, setIsModerated] = useState<boolean>(false);
+  const [moderationData, _] = useState(props.data);
 
   const onChange = (key: string | string[]) => {
     if (!loaded) {
@@ -113,10 +115,8 @@ function ResultCard(props: Props) {
     checkIfAllModerated();
   };
 
-  let testStatus = props.index % 2 ? "uploaded" : "rejected";
-  const getStatusStyling = (() => {
-    const status = testStatus;
-    switch (status) {
+  const getStatusStyling = ((status: string) => {
+    switch (status.toLowerCase()) {
       case "uploaded":
         return {
           className: "bg-amber-400",
@@ -143,16 +143,19 @@ function ResultCard(props: Props) {
           text: "Belum Diproses",
         };
     }
-  })();
+  })(moderationData.status);
 
   return (
-    <Link href={"/result/" + "random_id_" + testStatus}>
+    <Link href={"/result/" + moderationData._id}>
       <div className="bg cursor-pointer rounded-md bg-white shadow-custom transition-shadow hover:shadow-lg">
         <div className="relative pt-[40%]">
           <div
             className="absolute top-0 bottom-0 left-0 right-0 rounded-t-md bg-slate-200 bg-cover"
             style={{
-              backgroundImage: `url(https://kpid-jatim.storage.googleapis.com/moderation/63de2350984ddb64fc3d675f/frames/Have%20You%20Met%20a%20Hagfish_%20It%E2%80%99s%20About%20Slime%20_%20Deep%20Look_f180.jpg)`,
+              backgroundImage: `url(https://kpid-jatim.storage.googleapis.com/${encodeURI(
+                !isNilOrEmpty(moderationData?.frames) &&
+                  moderationData?.frames[moderationData?.frames.length / 2]
+              )})`,
             }}
           ></div>
           <div
@@ -200,42 +203,42 @@ function ResultCard(props: Props) {
             </span>
           </div>
           <h4 className="mt-2 mb-2 font-semibold md:mt-0">
-            BBS TV_1825_Acara TV.mp4
+            {moderationData.filename}
           </h4>
           <div>
             <span className="flex flex-col flex-wrap gap-1 md:flex-row md:items-center">
-              <span className="grid grid-cols-8 ">
+              <span className="grid grid-cols-8 border-slate-400 md:flex md:gap-2 md:border-r-2 md:px-2">
                 <span className="flex items-center justify-center">
                   <FontAwesomeIcon icon={faTelevision} height="12px" />
                 </span>
-                <span className="col-span-7"> BBS TV</span>
-                <Divider
-                  type="vertical"
-                  className="hidden bg-slate-300 md:block"
-                />
+                <span className="col-span-7">
+                  {" "}
+                  {moderationData.station_name}
+                </span>
               </span>
-              <span className="grid grid-cols-8">
+              <span className="grid grid-cols-8 border-slate-400 md:flex md:gap-2 md:border-r-2 md:px-2">
                 <span className="flex items-center justify-center">
                   <FontAwesomeIcon icon={faPenToSquare} height="12px" />
                 </span>
-                <span className="col-span-7"> Acara TV</span>
-                <Divider
-                  type="vertical"
-                  className="hidden bg-slate-300 md:block"
-                />
+                <span className="col-span-7">
+                  {moderationData.program_name}
+                </span>
               </span>
-              <span className="grid grid-cols-8">
+              <span className="grid grid-cols-8 md:flex md:gap-2 md:px-2 ">
                 <span className="flex items-center justify-center">
                   <FontAwesomeIcon icon={faClock} height="12px" />
                 </span>
-                <span className="col-span-7"> 18:15:00 - 19:00:15</span>
+                <span className="col-span-7">
+                  {moderationData.start_time} - {moderationData.end_time}
+                </span>
               </span>
             </span>
           </div>
           <Divider className="m-0 my-2 bg-slate-200"></Divider>
           <p>
-            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quibusdam
-            animi quod fuga aperiam quasi qui?
+            {isNilOrEmpty(moderationData?.description)
+              ? "No description"
+              : moderationData?.description}
           </p>
         </div>
       </div>

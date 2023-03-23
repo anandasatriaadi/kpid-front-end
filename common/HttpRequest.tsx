@@ -1,6 +1,8 @@
 import { message } from "antd";
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
 import { authService } from "./AuthService";
+import { BASE_URL } from "../config/Production";
+import { isNilOrEmpty } from "../utils/CommonUtil";
 
 class HttpRequest {
   axiosInstance: AxiosInstance;
@@ -25,7 +27,7 @@ class HttpRequest {
       (config: AxiosRequestConfig) => {
         const token = localStorage.getItem("token");
 
-        if (token) {
+        if (!isNilOrEmpty(token)) {
           config.headers = config.headers ?? {};
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -62,5 +64,5 @@ class HttpRequest {
   }
 }
 
-const httpRequest = new HttpRequest("http://192.168.43.71:5000/api");
+const httpRequest = new HttpRequest(`${BASE_URL}/api`);
 export default httpRequest;

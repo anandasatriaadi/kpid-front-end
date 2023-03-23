@@ -16,11 +16,14 @@ import {
 import { RcFile } from "antd/lib/upload";
 import Dragger from "antd/lib/upload/Dragger";
 import { AxiosProgressEvent, AxiosRequestConfig } from "axios";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { useContext, useState } from "react";
 import httpRequest from "../common/HttpRequest";
 import { AuthContext, AuthContextInterface } from "../context/AuthContext";
+import {
+  MobileContext,
+  MobileContextInterface,
+} from "../context/MobileContext";
 import { isEmpty } from "../utils/CommonUtil";
 
 type UploadModalProps = {
@@ -31,6 +34,7 @@ type UploadModalProps = {
 function UploadModal(props: UploadModalProps) {
   const { modalOpen, setModalOpen } = props;
   const { isLoggedIn } = useContext(AuthContext) as AuthContextInterface;
+  const { isMobile } = useContext(MobileContext) as MobileContextInterface;
   const [currentStep, setCurrentStep] = useState(0);
   const [uploadProgressPercent, setUploadProgressPercent] = useState<number>(0);
   const [uploadFile, setUploadFile] = useState<UploadFile>();
@@ -46,7 +50,6 @@ function UploadModal(props: UploadModalProps) {
   };
 
   const onFinish = (values: any) => {
-    console.log(values);
     let form = new FormData();
     for (const key in values) {
       form.append(key, values[key]);
@@ -58,25 +61,24 @@ function UploadModal(props: UploadModalProps) {
       onUploadProgress: uploadProgressHandler,
     };
 
-    console.log(form.forEach((value, key) => console.log(key, value)));
-
-    httpRequest.post("/moderation-form", form, formPostConfig).then((res) => {
-      if (res.status == 201) {
-        message.success(res.data);
-        setTimeout(() => {
-          router.push("/login");
-        }, 200);
-      } else {
-        message.error(res.data);
-      }
-    });
+    httpRequest
+      .post("/moderation-form", form, formPostConfig)
+      .then((response) => {
+        const result = response.data;
+        if (result.status == 200) {
+          message.success("Formulir terunggah dengan ID " + result.data);
+          handleCloseModal();
+        } else {
+          message.error(result.data);
+        }
+      });
   };
 
   const onFinishFailed = (errorInfo: any) => {
     if (!isLoggedIn) {
       router.push("/login");
     }
-    console.log("Failed:", errorInfo);
+    console.log("Failed: ", errorInfo);
   };
 
   const handleCloseModal = () => {
@@ -112,9 +114,9 @@ function UploadModal(props: UploadModalProps) {
       open={modalOpen}
       onCancel={() => handleCloseModal()}
       footer={null}
-      className="min-w-[1000px]"
+      className={isMobile ? "" : "min-w-[1000px]"}
     >
-      <div className="p-6">
+      <div className="md:p-6">
         <Steps
           current={currentStep}
           items={[
@@ -152,7 +154,7 @@ function UploadModal(props: UploadModalProps) {
                 }
               }}
             >
-              <div className="flex flex-col text-lg">
+              <div className="flex flex-col text-base md:text-lg">
                 <div className="flex justify-center">
                   <span>
                     <FontAwesomeIcon
@@ -165,31 +167,15 @@ function UploadModal(props: UploadModalProps) {
                 <div className="flex justify-center">
                   <Button
                     type="primary"
-                    className="mt-2 flex items-center justify-center text-lg"
+                    className="mt-2 flex items-center justify-center text-base md:text-lg"
                     disabled={!isLoggedIn}
                   >
                     Pilih Video
                   </Button>
                 </div>
                 <span className="mt-2 text-gray-900">
-                  {isLoggedIn ? (
+                  {isLoggedIn && !isMobile && (
                     <p>atau letakkan video anda disini</p>
-                  ) : (
-                    <>
-                      <p>
-                        Anda harus{" "}
-                        <Link href={"/login"}>
-                          <a className="font-bold">login</a>
-                        </Link>{" "}
-                        terlebih dahulu
-                      </p>
-                      <div className="text-center text-base">
-                        Belum memiliki akun?{" "}
-                        <Link href={"/login?tab=register"}>
-                          <a className="font-bold">Register</a>
-                        </Link>
-                      </div>
-                    </>
                   )}
                 </span>
               </div>
@@ -241,6 +227,9 @@ function UploadModal(props: UploadModalProps) {
                   className="text-lg font-normal"
                   disabled={currentStep === 2}
                 />
+              </Form.Item>
+              <Form.Item label="Deskripsi" name="description">
+                <Input.TextArea rows={4} disabled={currentStep === 2} />
               </Form.Item>
               <Form.Item
                 className="my-4 text-lg"

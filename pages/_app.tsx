@@ -19,9 +19,11 @@ function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page) => page);
 
   return (
-    <AuthProvider>
-      <MobileProvider>{getLayout(<Component {...pageProps} />)}</MobileProvider>
-    </AuthProvider>
+      <AuthProvider>
+        <MobileProvider>
+          {getLayout(<Component {...pageProps} />)}
+        </MobileProvider>
+      </AuthProvider>
   );
 }
 

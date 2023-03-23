@@ -1,107 +1,19 @@
 import {
   faArrowTrendUp,
   faEquals,
-  faFileVideo,
-  faUpload,
   faNotEqual,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  Button,
-  Form,
-  Input,
-  message,
-  Modal,
-  Progress,
-  TimePicker,
-  UploadFile,
-  UploadProps,
-} from "antd";
-import Upload, { RcFile } from "antd/lib/upload";
-import Dragger from "antd/lib/upload/Dragger";
-import { AxiosProgressEvent, AxiosRequestConfig } from "axios";
 import Head from "next/head";
-import Link from "next/link";
-import { useRouter } from "next/router";
-import { ReactElement, useContext, useState } from "react";
-import httpRequest from "../common/HttpRequest";
+import { ReactElement, useContext } from "react";
 import ChartCard from "../components/ChartCard";
 import Layout from "../components/Layout";
 import { AuthContext, AuthContextInterface } from "../context/AuthContext";
-import { isNilOrEmpty } from "../utils/CommonUtil";
 import { chart1 } from "./statistic";
 import { NextPageWithLayout } from "./_app";
 
 const Home: NextPageWithLayout = () => {
-  const router = useRouter();
-  const { isLoggedIn, logout, userData } = useContext(
-    AuthContext
-  ) as AuthContextInterface;
-  const [uploadFile, setUploadFile] = useState<UploadFile>();
-  const [uploading, setUploading] = useState<Boolean>(false);
-  const [uploadProgressPercent, setUploadProgressPercent] = useState<number>(0);
-  const [form] = Form.useForm();
-
-  const uploadProgressHandler = (progress: AxiosProgressEvent) => {
-    const { loaded, total } = progress;
-
-    if (total !== undefined) {
-      setUploadProgressPercent(Math.floor((loaded * 100) / total));
-    }
-  };
-
-  const onFinish = (values: any) => {
-    console.log(values);
-    let form = new FormData();
-    for (const key in values) {
-      form.append(key, values[key]);
-    }
-
-    form.append("video_file", uploadFile as RcFile);
-
-    let formPostConfig: AxiosRequestConfig = {
-      onUploadProgress: uploadProgressHandler,
-    };
-
-    console.log(form.forEach((value, key) => console.log(key, value)));
-
-    httpRequest.post("/moderation-form", form, formPostConfig).then((res) => {
-      if (res.status == 201) {
-        message.success(res.data);
-        setTimeout(() => {
-          router.push("/login");
-        }, 200);
-      } else {
-        message.error(res.data);
-      }
-    });
-  };
-
-  const onFinishFailed = (errorInfo: any) => {
-    if (!isLoggedIn) {
-      router.push("/login");
-    }
-    console.log("Failed:", errorInfo);
-  };
-
-  const fileDropProps: UploadProps = {
-    name: "file",
-    maxCount: 1,
-    beforeUpload: (file) => {
-      if (isLoggedIn) {
-        setUploadFile(file);
-        return false;
-      } else {
-        message.error("Anda harus login terlebih dahulu");
-        return false;
-      }
-    },
-    onRemove: () => {
-      form.resetFields();
-      setUploadFile(undefined);
-    },
-    fileList: uploadFile ? [uploadFile] : [],
-  };
+  const { userData } = useContext(AuthContext) as AuthContextInterface;
 
   return (
     <>
@@ -171,10 +83,8 @@ const Home: NextPageWithLayout = () => {
             </div>
           </div>
         </section>
-        <section className="flex flex-1 flex-col">
-          <div className="relative grow rounded-lg bg-white">
-            <ChartCard chartData={chart1} title={chart1.title}></ChartCard>
-          </div>
+        <section className="flex min-h-[20rem] flex-1 grow flex-col rounded-lg bg-white">
+          <ChartCard chartData={chart1} title={chart1.title}></ChartCard>
         </section>
       </div>
     </>

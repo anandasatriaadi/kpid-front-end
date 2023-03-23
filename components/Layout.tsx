@@ -88,18 +88,26 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       icon: <UserOutlined />,
       label: (
         <Link href="/">
-          <span onClick={() => setDrawerMenuOpen(false)}>Moderasi</span>
+          <span>Moderasi</span>
         </Link>
       ),
+      onClick: () => {
+        setDrawerMenuOpen(false);
+        router.push("/");
+      },
     },
     {
       key: "3",
       icon: <QuestionCircleOutlined />,
       label: (
         <Link href="/help">
-          <span onClick={() => setDrawerMenuOpen(false)}>Panduan</span>
+          <span>Panduan</span>
         </Link>
       ),
+      onClick: () => {
+        setDrawerMenuOpen(false);
+        router.push("/help");
+      },
     },
   ];
 
@@ -109,9 +117,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       icon: <VideoCameraOutlined />,
       label: (
         <Link href="/result">
-          <span onClick={() => setDrawerMenuOpen(false)}>Daftar Video</span>
+          <span>Daftar Video</span>
         </Link>
       ),
+      onClick: () => {
+        setDrawerMenuOpen(false);
+        router.push("/result");
+      },
     });
   }
 
@@ -124,25 +136,27 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {isMobile ? (
         <>
           <AntLayout className={"custom-layout"}>
-            <AntLayout className="site-layout bg-slate-100">
+            <AntLayout className="site-layout min-h-screen bg-slate-100">
               <AntLayout.Header className="flex bg-white p-4">
                 {collapsed ? (
                   <MenuUnfoldOutlined
                     className="trigger"
-                    onClick={() => setDrawerMenuOpen(!collapsed)}
+                    onClick={() => setDrawerMenuOpen(!drawerMenuOpen)}
                   />
                 ) : (
                   <MenuFoldOutlined
                     className="trigger"
-                    onClick={() => setDrawerMenuOpen(!collapsed)}
+                    onClick={() => setDrawerMenuOpen(!drawerMenuOpen)}
                   />
                 )}
-                <div className="flex flex-1 items-center justify-end gap-x-4 text-lg">
+                <div className="flex flex-1 items-center justify-end gap-x-4 text-base">
                   <div className="flex items-center">
-                    <span className="mr-2 rounded-full bg-gray-400 p-4"></span>
                     <Dropdown menu={accountMenu} placement="bottomRight">
                       <a onClick={(e) => e.preventDefault()}>
-                        <p className="capitalize">{userData.name}</p>
+                        <span>Hai! </span>
+                        <span className="font-bold capitalize">
+                          {userData.name}
+                        </span>
                       </a>
                     </Dropdown>
                   </div>
@@ -181,9 +195,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Button
                 type="primary"
                 className="w-full text-lg"
-                onClick={() => setUploadModalOpen(!uploadModalOpen)}
+                onClick={() => {
+                  setDrawerMenuOpen(false);
+                  setUploadModalOpen(!uploadModalOpen);
+                }}
               >
-                <span className="flex justify-center gap-2">
+                <span className="flex items-center justify-center gap-2">
                   <FontAwesomeIcon height={24} icon={faFileUpload} />
                   Unggah Video
                 </span>
@@ -218,15 +235,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 defaultSelectedKeys={[getSelectedMenuKey()]}
                 items={sidebarMenus}
               />
-              <div className="mt-auto px-6 pb-4">
+              <div className={"mt-auto pb-4 " + (collapsed ? "px-2" : "px-6")}>
                 <Button
                   type="primary"
                   className="w-full text-lg"
                   onClick={() => setUploadModalOpen(!uploadModalOpen)}
                 >
-                  <span className="flex justify-center gap-2">
+                  <span className="flex items-center justify-center gap-2">
                     <FontAwesomeIcon height={24} icon={faFileUpload} />
-                    Unggah Video
+                    {!collapsed ? "Unggah Video" : ""}
                   </span>
                 </Button>
               </div>

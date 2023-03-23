@@ -1,9 +1,4 @@
-import { message } from "antd";
-import { useRouter } from "next/router";
 import { createContext, FC, ReactNode, useEffect, useState } from "react";
-import { authService } from "../common/AuthService";
-import httpRequest from "../common/HttpRequest";
-import { BASE_URL } from "../config/Production";
 import debounce from "../utils/Debounce";
 
 export interface MobileContextInterface {
