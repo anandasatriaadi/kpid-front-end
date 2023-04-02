@@ -117,12 +117,17 @@ function ResultCard(props: Props) {
 
   const getStatusStyling = ((status: string) => {
     switch (status.toLowerCase()) {
+      case "initialized":
+        return {
+          className: "bg-slate-300",
+          text: "Sedang Diunggah",
+        };
       case "uploaded":
         return {
           className: "bg-amber-400",
           text: "Belum Diproses",
         };
-      case "on_process":
+      case "in_progress":
         return {
           className: "bg-cyan-500",
           text: "Sedang Diproses",
@@ -147,17 +152,22 @@ function ResultCard(props: Props) {
 
   return (
     <Link href={"/result/" + moderationData._id}>
-      <div className="bg cursor-pointer rounded-md bg-white shadow-custom transition-shadow hover:shadow-lg">
+      <div className="bg cursor-pointer rounded-md bg- bg-white shadow-custom transition-shadow hover:shadow-lg">
         <div className="relative pt-[40%]">
-          <div
-            className="absolute top-0 bottom-0 left-0 right-0 rounded-t-md bg-slate-200 bg-cover"
-            style={{
-              backgroundImage: `url(https://kpid-jatim.storage.googleapis.com/${encodeURI(
-                !isNilOrEmpty(moderationData?.frames) &&
-                  moderationData?.frames[moderationData?.frames.length / 2]
-              )})`,
-            }}
-          ></div>
+          {!isNilOrEmpty(moderationData?.frames) ? (
+            <div
+              className="absolute top-0 bottom-0 left-0 right-0 rounded-t-md bg-cover"
+              style={{
+                backgroundImage: `url(https://kpid-jatim.storage.googleapis.com/${encodeURI(
+                    moderationData?.frames[moderationData?.frames.length / 2]
+                )})`,
+              }}
+            ></div>
+          ) : (
+            <div className="absolute top-0 bottom-0 left-0 right-0 rounded-t-md">
+              <Skeleton.Image active className="w-full h-full"></Skeleton.Image>
+            </div>
+          )}
           <div
             className={
               "absolute top-4 right-4 rounded-lg py-2 px-4 text-sm tracking-wide " +

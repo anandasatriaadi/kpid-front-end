@@ -6,20 +6,20 @@
       }
 
       &-label {
-        @apply text-base;
+        @apply text-sm md:text-base;
         & > label {
-          @apply text-base;
+          @apply text-sm md:text-base;
         }
       }
 
       :not(.ant-input-affix-wrapper) > {
         .ant-input {
-          @apply px-4 py-2 text-lg;
+          @apply px-4 py-2 text-base md:text-lg;
         }
       }
 
       .ant-input-affix-wrapper.ant-input-password {
-        @apply px-4 py-2 text-lg;
+        @apply px-4 py-2 text-base md:text-lg;
       }
     }
   }
@@ -40,7 +40,7 @@
 
     &-input {
       input {
-        @apply text-lg;
+        @apply text-base md:text-lg;
       }
     }
   }

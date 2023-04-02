@@ -1,7 +1,6 @@
 import { message } from "antd";
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
 import { authService } from "./AuthService";
-import { BASE_URL } from "../config/Production";
 import { isNilOrEmpty } from "../utils/CommonUtil";
 
 class HttpRequest {
@@ -64,5 +63,5 @@ class HttpRequest {
   }
 }
 
-const httpRequest = new HttpRequest(`${BASE_URL}/api`);
+const httpRequest = new HttpRequest(`${process.env.NEXT_PUBLIC_BASE_URL}/api`);
 export default httpRequest;

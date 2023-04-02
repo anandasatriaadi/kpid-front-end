@@ -1,13 +1,9 @@
-import {
-  faGhost,
-  faHandHoldingHeart,
-  faHandsPraying,
-  faMarsAndVenusBurst,
-  faPeopleGroup,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip } from "antd";
-import React, { CSSProperties } from "react";
+import Sadis from "../icons/Sadis";
+import Sara from "../icons/Sara";
+import Saru from "../icons/Saru";
+import SiaranPartisan from "../icons/SiaranPartisan";
+import Sihir from "../icons/Sihir";
 
 type IconProps = {
   className?: string;
@@ -39,59 +35,43 @@ function ViolationIconCard(props: IconProps) {
     height: `${height + 24}px`,
     width: `${height + 32}px`,
   };
-  const iconClassName =
-    "absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-400 text-sm";
+  const getIconClassName = (count: number) => {
+    return (
+      "absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full text-sm " +
+      (count > 0 ? (count > 2 ? "bg-red-500" : "bg-amber-400") : "bg-lime-500")
+    );
+  };
 
   return (
     <div className={"flex flex-wrap gap-4 " + className}>
       <Tooltip className={tooltipClassName} title="SARA">
         <span style={iconStyle}>
-          <FontAwesomeIcon
-            icon={faHandsPraying}
-            height={`${height}px`}
-            className="text-2xl text-gray-900"
-          />
-          <p className={iconClassName}>{sara}</p>
+          <Sara width={`${height}px`} height={`${height}px`} />
+          <p className={getIconClassName(sara)}>{sara}</p>
         </span>
       </Tooltip>
       <Tooltip className={tooltipClassName} title="SARU">
         <span style={iconStyle}>
-          <FontAwesomeIcon
-            icon={faMarsAndVenusBurst}
-            height={`${height}px`}
-            className="text-2xl text-gray-900"
-          />
-          <p className={iconClassName}>{saru}</p>
+          <Saru width={`${height}px`} height={`${height}px`} />
+          <p className={getIconClassName(saru)}>{saru}</p>
         </span>
       </Tooltip>
       <Tooltip className={tooltipClassName} title="SADIS">
         <span style={iconStyle}>
-          <FontAwesomeIcon
-            icon={faHandHoldingHeart}
-            height={`${height}px`}
-            className="text-2xl text-gray-900"
-          />
-          <p className={iconClassName}>{sadis}</p>
+          <Sadis width={`${height}px`} height={`${height}px`} />
+          <p className={getIconClassName(sadis)}>{sadis}</p>
         </span>
       </Tooltip>
       <Tooltip className={tooltipClassName} title="SIHIR">
         <span style={iconStyle}>
-          <FontAwesomeIcon
-            icon={faGhost}
-            height={`${height}px`}
-            className="text-2xl text-gray-900"
-          />
-          <p className={iconClassName}>{sihir}</p>
+          <Sihir width={`${height}px`} height={`${height}px`} />
+          <p className={getIconClassName(sihir)}>{sihir}</p>
         </span>
       </Tooltip>
-      <Tooltip className={tooltipClassName} title="Siaran Partisan & Ilegal">
+      <Tooltip className={tooltipClassName} title="Siaran Partisan">
         <span style={iconStyle}>
-          <FontAwesomeIcon
-            icon={faPeopleGroup}
-            height={`${height}px`}
-            className="text-2xl text-gray-900"
-          />
-          <p className={iconClassName}>{siaran}</p>
+          <SiaranPartisan width={`${height}px`} height={`${height}px`} />
+          <p className={getIconClassName(siaran)}>{siaran}</p>
         </span>
       </Tooltip>
     </div>

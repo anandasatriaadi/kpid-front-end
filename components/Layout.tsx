@@ -7,7 +7,7 @@ import {
 } from "@ant-design/icons";
 import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, Drawer, Dropdown, Layout as AntLayout, Menu } from "antd";
+import { Button, Drawer, Dropdown, Layout as AntLayout, Menu, Spin } from "antd";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -53,7 +53,7 @@ const accountMenu: MenuProps = {
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const { isLoggedIn, userData } = useContext(
+  const { isVerifying, isLoggedIn, userData } = useContext(
     AuthContext
   ) as AuthContextInterface;
   const { isMobile } = useContext(MobileContext) as MobileContextInterface;
@@ -64,11 +64,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const unprotectedRoutes = ["/login", "/register"];
   useEffect(() => {
-    if (!isLoggedIn && !unprotectedRoutes.includes(router.pathname)) {
+    if (!isVerifying && !isLoggedIn && !unprotectedRoutes.includes(router.pathname)) {
       router.push("/login");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoggedIn]);
+  }, [isLoggedIn, isVerifying]);
 
   const getSelectedMenuKey = (): string => {
     const paths = ["/", "/result", "/help"];
@@ -163,7 +163,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </div>
               </AntLayout.Header>
               <AntLayout.Content className="mx-4 my-6 flex grow flex-col">
-                {children}
+                {!isVerifying ? children : (
+                  <div className="flex-grow flex items-center justify-center">
+                    <Spin />
+                  </div>
+                )}
               </AntLayout.Content>
             </AntLayout>
           </AntLayout>
@@ -286,7 +290,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 )}
               </div>
             </AntLayout.Header>
-            <AntLayout.Content className="mx-4 my-6 flex grow flex-col overflow-y-scroll">
+            <AntLayout.Content className="mx-4 my-6 flex grow flex-col overflow-y-scroll overflow-x-clip">
               {children}
             </AntLayout.Content>
           </AntLayout>

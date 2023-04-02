@@ -1,21 +1,16 @@
 import {
   faClock,
   faGaugeHigh,
-  faGhost,
-  faHandHoldingHeart,
-  faHandsPraying,
-  faMarsAndVenusBurst,
-  faPeopleGroup,
   faStopwatch,
   faXmarkCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, Collapse, Skeleton, Tabs, Tooltip } from "antd";
+import { Button, Collapse, message, Skeleton, Tabs } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ReactElement, useState } from "react";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import httpRequest from "../../common/HttpRequest";
 import Layout from "../../components/Layout";
 import ViolationIconCard from "../../components/result/ViolationIconCard";
@@ -127,14 +122,15 @@ const labelItems = [
 ];
 
 const tabItems = labelItems.map((item, index) => {
-  let idx = index.toString();
+  let idx: string = index.toString();
+  const className =
+    "flex h-6 w-6 items-center justify-center rounded-full bg-slate-200 text-black " +
+    (item.count > 1 ? "bg-red-500" : item.count > 0 && "bg-amber-400");
   return {
     key: idx,
     label: (
       <span className="flex items-center gap-1">
-        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-200">
-          {item.count}
-        </span>
+        <span className={className}>{item.count}</span>
         {item.name}
       </span>
     ),
@@ -194,8 +190,19 @@ const SingleResult: NextPageWithLayout = () => {
     checkIfAllModerated();
   };
 
-  const getStatusStyling = ((status: string) => {
-    switch (status) {
+  const handleStartModeration = () => {
+    const data = new FormData();
+    data.set("id", moderationID);
+    mutate(fetchURL);
+    httpRequest.put(`/moderation/start`, data).then((response) => {});
+  };
+
+  const handleGenerateLaporan = () => {
+    message.success("Laporan berhasil di-generate");
+  };
+
+  const getStatusStyling = (status: string) => {
+    switch (status.toLowerCase()) {
       case "uploaded":
         return {
           className: "bg-amber-400",
@@ -222,7 +229,7 @@ const SingleResult: NextPageWithLayout = () => {
           text: "Belum Diproses",
         };
     }
-  })(moderationData?.status);
+  };
 
   return (
     <div>
@@ -242,10 +249,12 @@ const SingleResult: NextPageWithLayout = () => {
               <div
                 className={
                   "rounded-lg px-4 py-2 text-sm font-semibold tracking-wide md:text-base " +
-                  getStatusStyling.className
+                  (!isNilOrEmpty(moderationData?.status) &&
+                    getStatusStyling(moderationData?.status).className)
                 }
               >
-                {getStatusStyling.text}
+                {!isNilOrEmpty(moderationData?.status) &&
+                  getStatusStyling(moderationData?.status).text}
               </div>
             </section>
             <section className="px-4">
@@ -351,7 +360,7 @@ const SingleResult: NextPageWithLayout = () => {
               </Collapse>
             </section>
 
-            {moderationData?.status.includes("UPLOADED") ? (
+            {moderationData?.status.includes("REJECTED") && (
               <section className="">
                 <>
                   <h2 className="px-4 text-lg font-semibold">Hasil Moderasi</h2>
@@ -394,7 +403,9 @@ const SingleResult: NextPageWithLayout = () => {
                                         className="h-full w-full"
                                         controls
                                         controlsList="nodownload"
-                                        src="https://kpid-jatim.storage.googleapis.com/moderation/63de2350984ddb64fc3d675f/videos/Have You Met a Hagfish_ It’s About Slime _ Deep Look_2.mp4"
+                                        src={`https://kpid-jatim.storage.googleapis.com/${encodeURI(
+                                          moderationData?.videos[index]
+                                        )}`}
                                       ></video>
                                     </div>
                                   </div>
@@ -436,32 +447,32 @@ const SingleResult: NextPageWithLayout = () => {
                           )
                         )}
                       </Collapse>
-                      {isModerated ? (
-                        <div className="mt-2 flex justify-end">
-                          <Button
-                            type="primary"
-                            className="button-green mr-4"
-                            href="/tv9_result.pdf"
-                            target="_blank"
-                          >
-                            Generate Laporan
-                          </Button>
-                        </div>
-                      ) : (
-                        ""
-                      )}
                     </>
                   ) : (
                     <Skeleton active />
                   )}
                 </>
               </section>
-            ) : (
+            )}
+            {moderationData?.status.includes("UPLOADED") && (
               <div className="flex justify-end">
-                <Button type="primary" className="text-lg">
-                  <Link href="/result" passHref={false}>
-                    Mulai Moderasi Video
-                  </Link>
+                <Button
+                  type="primary"
+                  className="text-lg"
+                  onClick={handleStartModeration}
+                >
+                  Mulai Moderasi Video
+                </Button>
+              </div>
+            )}
+            {isModerated && (
+              <div className="sticky bottom-0 right-4 mt-2 flex justify-end">
+                <Button
+                  type="primary"
+                  className="mr-4 text-base"
+                  onClick={handleGenerateLaporan}
+                >
+                  Generate Laporan
                 </Button>
               </div>
             )}

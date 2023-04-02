@@ -4,8 +4,10 @@ import { createContext, FC, ReactNode, useEffect, useState } from "react";
 import { authService } from "../common/AuthService";
 import httpRequest from "../common/HttpRequest";
 import useSWR from "swr";
+import { signIn } from "next-auth/react";
 
 export interface AuthContextInterface {
+  isVerifying: boolean;
   isLoggedIn: boolean;
   userData: { [key: string]: any };
   register: (values: any) => void;
@@ -22,6 +24,7 @@ export const AuthContext = createContext<AuthContextInterface | null>(null);
 export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   // Initial States
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(true);
   const [userData, setUserData] = useState({});
   const router = useRouter();
 
@@ -47,9 +50,11 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
           localStorage.removeItem("token");
           setIsLoggedIn(false);
           setUserData({});
+          router.push("/login");
         }
       });
     }
+    setIsVerifying(false);
   };
 
   // Login method, values are from login form (AntDesign)
@@ -118,7 +123,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ isLoggedIn, userData, register, login, logout }}
+      value={{ isVerifying, isLoggedIn, userData, register, login, logout }}
     >
       {children}
     </AuthContext.Provider>

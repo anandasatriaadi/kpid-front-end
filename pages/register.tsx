@@ -5,6 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useContext, useEffect } from "react";
+import Sadis from "../components/icons/Sadis";
+import Sara from "../components/icons/Sara";
+import Saru from "../components/icons/Saru";
+import SiaranPartisan from "../components/icons/SiaranPartisan";
+import Sihir from "../components/icons/Sihir";
 import { AuthContext, AuthContextInterface } from "../context/AuthContext";
 
 const Register: NextPage = () => {
@@ -38,7 +43,54 @@ const Register: NextPage = () => {
       </Head>
 
       <div className="grid grid-cols-1 lg:grid-cols-2">
-        <section className="relative z-[-2] hidden min-h-screen flex-col items-center justify-center bg-gradient-to-t from-sky-700 to-sky-500 lg:flex">
+        <section className="relative z-[-2] hidden min-h-screen flex-col bg-gradient-to-t from-sky-700 to-sky-500 lg:flex">
+          <div className="mt-16 px-8 2xl:mt-32">
+            <h2 className="mb-8 text-center font-bold text-white lg:text-4xl">
+              5S Racun Siaran
+            </h2>
+            <div className="grid grid-cols-5 items-center gap-2 text-white">
+              <div className={IconWrapperClass}>
+                <span className={IconCardClass}>
+                  <Sara height="48" width="48"></Sara>
+                </span>
+                <p className={IconSubtitleClass}>SARA</p>
+              </div>
+              <div className={IconWrapperClass}>
+                <span className={IconCardClass}>
+                  <Saru height="48" width="48"></Saru>
+                </span>
+                <p className={IconSubtitleClass}>SARU</p>
+              </div>
+              <div className={IconWrapperClass}>
+                <span className={IconCardClass}>
+                  <Sadis height="48" width="48"></Sadis>
+                </span>
+                <p className={IconSubtitleClass}>SADIS</p>
+              </div>
+              <div className={IconWrapperClass}>
+                <span className={IconCardClass}>
+                  <Sihir height="48" width="48"></Sihir>
+                </span>
+                <p className={IconSubtitleClass}>SIHIR</p>
+              </div>
+              <div className={IconWrapperClass}>
+                <span className={IconCardClass}>
+                  <SiaranPartisan height="48" width="48"></SiaranPartisan>
+                </span>
+                <p className={IconSubtitleClass}>Siaran Partisan</p>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col items-center">
+            <p className="mt-16 text-justify text-base font-light uppercase tracking-tight text-white opacity-80 md:w-3/4 md:text-lg">
+              Website Moderasi Video KPID Jawa Timur 2023
+            </p>
+            <p className="mt-4 text-lg text-white md:w-3/4 md:text-2xl">
+              Melindungi masyarakat Indonesia dari siaran mengandung 5S: SARU,
+              SARA, SADIS, SIHIR, dan Siaran Partisan melalui pengawasan siaran
+              televisi
+            </p>
+          </div>
           <div className="absolute left-0 right-0 bottom-0 z-[-1] h-1/2 opacity-50 mix-blend-multiply grayscale">
             <div className="relative h-full w-full">
               <Image
@@ -49,18 +101,10 @@ const Register: NextPage = () => {
               />
             </div>
           </div>
-          <p className="mt-16 text-justify text-lg font-light uppercase tracking-tight text-white opacity-80 md:w-3/4">
-            Website Moderasi Video KPID Jawa Timur 2023
-          </p>
-          <p className="mt-4 text-justify text-2xl text-white md:w-3/4">
-            Melindungi masyarakat Indonesia dari konten mengandung 5S: SARU,
-            SARA, SADIS, SIHIR, dan Siaran Partisan & Ilegal melalui pengawasan
-            siaran televisi
-          </p>
         </section>
-        <section className="flex min-h-screen flex-col bg-slate-100 px-16">
+        <section className="flex min-h-screen flex-col bg-slate-100 px-8 md:px-16">
           <div className="my-auto mx-auto max-w-[600px]">
-            <div className="mx-auto mb-6 w-1/2 mix-blend-multiply lg:w-2/5">
+            <div className="mx-auto mb-6 w-1/2 mix-blend-multiply md:w-2/5">
               <Link href={"/"}>
                 <Image
                   src={"/logo_kpid.png"}
@@ -71,8 +115,8 @@ const Register: NextPage = () => {
               </Link>
             </div>
             <div className="rounded-md bg-white p-6 pb-8 shadow-custom">
-              <h2 className="text-center text-2xl font-semibold">
-                Daftar Akun
+              <h2 className="text-center text-lg font-semibold md:text-xl">
+                Daftarkan Akun Anda
               </h2>
               <Divider className="my-4 border-slate-300" />
               <Form
@@ -113,7 +157,7 @@ const Register: NextPage = () => {
 
                 <Form.Item>
                   <Button
-                    className="mt-4 w-full py-2 text-xl"
+                    className="mt-4 w-full py-2 text-lg md:text-xl"
                     type="primary"
                     htmlType="submit"
                   >
@@ -123,7 +167,7 @@ const Register: NextPage = () => {
               </Form>
             </div>
 
-            <div className="mt-8 rounded-md bg-slate-200 p-4 text-center shadow-custom">
+            <div className="mt-8 rounded-md bg-slate-200 p-4 text-center text-sm shadow-custom md:text-base">
               Sudah memiliki akun?
               <Link href={"/login"}>
                 <a className="text-blue-500"> Masuk</a>
@@ -135,5 +179,10 @@ const Register: NextPage = () => {
     </div>
   );
 };
+
+const IconWrapperClass =
+  "h-full flex flex-col items-center my-2 odd:justify-start even:justify-end";
+const IconCardClass = "rounded-lg p-2 bg-slate-900 bg-opacity-30 shadow-custom";
+const IconSubtitleClass = "mt-2 text-lg text-center";
 
 export default Register;
