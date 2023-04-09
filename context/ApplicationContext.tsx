@@ -1,17 +1,20 @@
 import { createContext, FC, ReactNode, useEffect, useState } from "react";
 import debounce from "../utils/Debounce";
 
-export interface MobileContextInterface {
+export interface ApplicationContextInterface {
   isMobile: boolean;
 }
 
-type MobileProviderProps = {
+type ApplicationProviderProps = {
   children: ReactNode;
 };
 
-export const MobileContext = createContext<MobileContextInterface | null>(null);
+export const ApplicationContext =
+  createContext<ApplicationContextInterface | null>(null);
 
-export const MobileProvider: FC<MobileProviderProps> = ({ children }) => {
+export const ApplicationProvider: FC<ApplicationProviderProps> = ({
+  children,
+}) => {
   // Initial States
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
@@ -28,8 +31,8 @@ export const MobileProvider: FC<MobileProviderProps> = ({ children }) => {
   }, []);
 
   return (
-    <MobileContext.Provider value={{ isMobile }}>
+    <ApplicationContext.Provider value={{ isMobile }}>
       {children}
-    </MobileContext.Provider>
+    </ApplicationContext.Provider>
   );
 };

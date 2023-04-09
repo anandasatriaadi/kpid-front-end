@@ -30,15 +30,19 @@ function ViolationIconCard(props: IconProps) {
 
   const tooltipClassName =
     "relative flex flex-col justify-center " +
-    (cardStyle ? "rounded-lg bg-white py-3 px-4 shadow-md" : "");
+    (cardStyle ? "rounded-lg bg-slate-200 text-slate-600 py-3 px-4" : "");
   const iconStyle = {
     height: `${height + 24}px`,
     width: `${height + 32}px`,
   };
   const getIconClassName = (count: number) => {
     return (
-      "absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full text-sm " +
-      (count > 0 ? (count > 2 ? "bg-red-500" : "bg-amber-400") : "bg-lime-500")
+      "absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full text-sm text-black font-semibold " +
+      (count > 0
+        ? count > 2
+          ? "bg-red-600 text-white"
+          : "bg-amber-400"
+        : "bg-lime-500")
     );
   };
 

@@ -2,13 +2,14 @@ import { faFileVideo } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   Button,
+  Checkbox,
+  DatePicker,
   Form,
   Input,
   message,
   Modal,
   Progress,
   Steps,
-  TimePicker,
   Upload,
   UploadFile,
   UploadProps,
@@ -21,9 +22,9 @@ import { useContext, useState } from "react";
 import httpRequest from "../common/HttpRequest";
 import { AuthContext, AuthContextInterface } from "../context/AuthContext";
 import {
-  MobileContext,
-  MobileContextInterface,
-} from "../context/MobileContext";
+  ApplicationContext,
+  ApplicationContextInterface,
+} from "../context/ApplicationContext";
 import { isEmpty } from "../utils/CommonUtil";
 
 type UploadModalProps = {
@@ -34,7 +35,9 @@ type UploadModalProps = {
 function UploadModal(props: UploadModalProps) {
   const { modalOpen, setModalOpen } = props;
   const { isLoggedIn } = useContext(AuthContext) as AuthContextInterface;
-  const { isMobile } = useContext(MobileContext) as MobileContextInterface;
+  const { isMobile } = useContext(
+    ApplicationContext
+  ) as ApplicationContextInterface;
   const [currentStep, setCurrentStep] = useState(0);
   const [uploadProgressPercent, setUploadProgressPercent] = useState<number>(0);
   const [uploadFile, setUploadFile] = useState<UploadFile>();
@@ -234,20 +237,28 @@ function UploadModal(props: UploadModalProps) {
               <Form.Item
                 className="my-4 text-lg"
                 initialValue={""}
-                label="Waktu Mulai"
-                name="start_time"
+                label="Tanggal dan Waktu Rekaman"
+                name="recording_date"
                 rules={[
                   {
                     required: true,
-                    message: "Masukkan waktu mulai",
+                    message: "Masukkan tanggal dan waktu rekaman",
                   },
                 ]}
               >
-                <TimePicker
+                <DatePicker
                   className="w-full text-lg font-normal"
-                  format={"HH:mm"}
+                  showTime={{ format: "HH:mm" }}
+                  format="HH:mm - DD/MM/YYYY"
                   disabled={currentStep === 2}
-                ></TimePicker>
+                ></DatePicker>
+              </Form.Item>
+              <Form.Item
+                className="my-4"
+                name="process_now"
+                valuePropName="checked"
+              >
+                <Checkbox defaultChecked>Proses Sekarang</Checkbox>
               </Form.Item>
             </div>
 
@@ -284,7 +295,13 @@ function UploadModal(props: UploadModalProps) {
               <Button
                 className="text-lg"
                 type="primary"
-                onClick={() => setCurrentStep(currentStep + 1)}
+                onClick={() => {
+                  if (currentStep === 1)
+                    form.validateFields().then((values) => {
+                      setCurrentStep(currentStep + 1);
+                    });
+                  else setCurrentStep(currentStep + 1);
+                }}
               >
                 Selanjutnya
               </Button>

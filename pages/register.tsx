@@ -44,8 +44,8 @@ const Register: NextPage = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2">
         <section className="relative z-[-2] hidden min-h-screen flex-col bg-gradient-to-t from-sky-700 to-sky-500 lg:flex">
-          <div className="mt-16 px-8 2xl:mt-32">
-            <h2 className="mb-8 text-center font-bold text-white lg:text-4xl">
+          <div className="mt-16 px-8 2xl:mt-24">
+            <h2 className="mb-16 text-center font-bold text-white lg:text-4xl 2xl:mb-24">
               5S Racun Siaran
             </h2>
             <div className="grid grid-cols-5 items-center gap-2 text-white">
@@ -82,7 +82,7 @@ const Register: NextPage = () => {
             </div>
           </div>
           <div className="flex flex-col items-center">
-            <p className="mt-16 text-justify text-base font-light uppercase tracking-tight text-white opacity-80 md:w-3/4 md:text-lg">
+            <p className="mt-16 text-justify text-base font-light uppercase tracking-tight text-white opacity-80 md:w-3/4 md:text-lg 2xl:mt-24">
               Website Moderasi Video KPID Jawa Timur 2023
             </p>
             <p className="mt-4 text-lg text-white md:w-3/4 md:text-2xl">
@@ -180,8 +180,7 @@ const Register: NextPage = () => {
   );
 };
 
-const IconWrapperClass =
-  "h-full flex flex-col items-center my-2 odd:justify-start even:justify-end";
+const IconWrapperClass = "h-full flex flex-col items-center my-2";
 const IconCardClass = "rounded-lg p-2 bg-slate-900 bg-opacity-30 shadow-custom";
 const IconSubtitleClass = "mt-2 text-lg text-center";
 

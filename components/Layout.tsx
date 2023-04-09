@@ -1,4 +1,7 @@
 import {
+  CaretLeftOutlined,
+  CaretRightOutlined,
+  CloudUploadOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   QuestionCircleOutlined,
@@ -7,18 +10,25 @@ import {
 } from "@ant-design/icons";
 import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, Drawer, Dropdown, Layout as AntLayout, Menu, Spin } from "antd";
+import {
+  Button,
+  Drawer,
+  Dropdown,
+  Layout as AntLayout,
+  Menu,
+  Spin,
+} from "antd";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { MenuProps } from "rc-menu";
 import React, { useContext, useEffect, useState } from "react";
 import { authService } from "../common/AuthService";
-import { AuthContext, AuthContextInterface } from "../context/AuthContext";
 import {
-  MobileContext,
-  MobileContextInterface,
-} from "../context/MobileContext";
+  ApplicationContext,
+  ApplicationContextInterface,
+} from "../context/ApplicationContext";
+import { AuthContext, AuthContextInterface } from "../context/AuthContext";
 import Navlink from "./Navlink";
 import UploadModal from "./UploadModal";
 
@@ -56,15 +66,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { isVerifying, isLoggedIn, userData } = useContext(
     AuthContext
   ) as AuthContextInterface;
-  const { isMobile } = useContext(MobileContext) as MobileContextInterface;
+  const { isMobile } = useContext(
+    ApplicationContext
+  ) as ApplicationContextInterface;
   const [collapsed, setCollapsed] = useState(false);
+  const [showUpload, setShowUpload] = useState(true);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [drawerMenuOpen, setDrawerMenuOpen] = useState(false);
   const router = useRouter();
 
   const unprotectedRoutes = ["/login", "/register"];
   useEffect(() => {
-    if (!isVerifying && !isLoggedIn && !unprotectedRoutes.includes(router.pathname)) {
+    if (
+      !isVerifying &&
+      !isLoggedIn &&
+      !unprotectedRoutes.includes(router.pathname)
+    ) {
       router.push("/login");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -97,6 +114,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       },
     },
     {
+      key: "2",
+      icon: <VideoCameraOutlined />,
+      label: (
+        <Link href="/result">
+          <span>Daftar Video</span>
+        </Link>
+      ),
+      onClick: () => {
+        setDrawerMenuOpen(false);
+        router.push("/result");
+      },
+    },
+    {
       key: "3",
       icon: <QuestionCircleOutlined />,
       label: (
@@ -111,16 +141,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     },
   ];
 
-  if (isLoggedIn) {
-    sidebarMenus.splice(1, 0, {
-      key: "2",
-      icon: <VideoCameraOutlined />,
-      label: (
-        <Link href="/result">
-          <span>Daftar Video</span>
-        </Link>
-      ),
+  if (isMobile) {
+    sidebarMenus.push({
+      key: "4",
+      icon: <CloudUploadOutlined />,
+      label: <>Unggah Video</>,
       onClick: () => {
+        setUploadModalOpen(!uploadModalOpen);
         setDrawerMenuOpen(false);
         router.push("/result");
       },
@@ -163,8 +190,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </div>
               </AntLayout.Header>
               <AntLayout.Content className="mx-4 my-6 flex grow flex-col">
-                {!isVerifying ? children : (
-                  <div className="flex-grow flex items-center justify-center">
+                {!isVerifying ? (
+                  children
+                ) : (
+                  <div className="flex flex-grow items-center justify-center">
                     <Spin />
                   </div>
                 )}
@@ -195,20 +224,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               defaultSelectedKeys={[getSelectedMenuKey()]}
               items={sidebarMenus}
             />
-            <div className="mt-auto px-6 pb-4">
-              <Button
-                type="primary"
-                className="w-full text-lg"
-                onClick={() => {
-                  setDrawerMenuOpen(false);
-                  setUploadModalOpen(!uploadModalOpen);
-                }}
-              >
-                <span className="flex items-center justify-center gap-2">
-                  <FontAwesomeIcon height={24} icon={faFileUpload} />
-                  Unggah Video
-                </span>
-              </Button>
+            <div className="mt-auto">
+              <h2 className="mb-4 text-center text-sm ">Dikembangkan Oleh</h2>
+              <div className="flex justify-center gap-4">
+                <Image src={"/its.png"} height="64" width="64" alt="Logo ITS" />
+                <Image
+                  src={"/aihes.png"}
+                  height="64"
+                  width="96"
+                  alt="Logo AIHES"
+                />
+              </div>
             </div>
           </Drawer>
         </>
@@ -239,17 +265,57 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 defaultSelectedKeys={[getSelectedMenuKey()]}
                 items={sidebarMenus}
               />
-              <div className={"mt-auto pb-4 " + (collapsed ? "px-2" : "px-6")}>
-                <Button
-                  type="primary"
-                  className="w-full text-lg"
-                  onClick={() => setUploadModalOpen(!uploadModalOpen)}
+              <div className="mt-auto px-6 pb-6">
+                <div
+                  className={
+                    "max-h-screen transition-all ease-[cubic-bezier(0.645,0.045,0.355,1)] " +
+                    (collapsed && "max-h-0 opacity-0")
+                  }
                 >
-                  <span className="flex items-center justify-center gap-2">
-                    <FontAwesomeIcon height={24} icon={faFileUpload} />
-                    {!collapsed ? "Unggah Video" : ""}
-                  </span>
-                </Button>
+                  <h2
+                    className={
+                      "mb-4 text-center transition-all " +
+                      (collapsed && "opacity-0")
+                    }
+                  >
+                    Dikembangkan Oleh
+                  </h2>
+                  <div className={"flex justify-center gap-4"}>
+                    <Image
+                      src={"/its.png"}
+                      height="64"
+                      width="64"
+                      alt="Logo ITS"
+                    />
+                    <Image
+                      src={"/aihes.png"}
+                      height="64"
+                      width="96"
+                      alt="Logo AIHES"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <div
+                    className={
+                      "flex max-h-screen flex-col gap-4 transition-all ease-[cubic-bezier(0.645,0.045,0.355,1)] " +
+                      (!collapsed && "max-h-0 opacity-0")
+                    }
+                  >
+                    <Image
+                      src={"/its.png"}
+                      height="64"
+                      width="64"
+                      alt="Logo ITS"
+                    />
+                    <Image
+                      src={"/aihes.png"}
+                      height="64"
+                      width="96"
+                      alt="Logo AIHES"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </AntLayout.Sider>
@@ -290,10 +356,42 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 )}
               </div>
             </AntLayout.Header>
-            <AntLayout.Content className="mx-4 my-6 flex grow flex-col overflow-y-scroll overflow-x-clip">
+            <AntLayout.Content className="mx-4 my-6 flex grow flex-col overflow-x-clip overflow-y-scroll">
               {children}
             </AntLayout.Content>
           </AntLayout>
+          <div
+            className={
+              "absolute bottom-6 flex transition-all duration-500" +
+              (showUpload ? " right-6" : " right-0")
+            }
+          >
+            <Button
+              type="primary"
+              className={
+                "overflow-x-hidden rounded-r-none text-lg" +
+                (showUpload ? "" : " w-0 px-0 opacity-0")
+              }
+              onClick={() => setUploadModalOpen(!uploadModalOpen)}
+            >
+              <span className="flex items-center justify-center gap-2">
+                <FontAwesomeIcon height={24} icon={faFileUpload} />
+                {showUpload ? "Unggah Video" : ""}
+              </span>
+            </Button>
+            <div>
+              <Button
+                type="primary"
+                className={
+                  "flex h-full items-center justify-center px-1 text-lg" +
+                  (showUpload ? " rounded-l-none" : " rounded-r-none")
+                }
+                onClick={() => setShowUpload(!showUpload)}
+              >
+                {showUpload ? <CaretRightOutlined /> : <CaretLeftOutlined />}
+              </Button>
+            </div>
+          </div>
         </AntLayout>
       )}
     </>

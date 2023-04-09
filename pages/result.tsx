@@ -1,31 +1,42 @@
-import { Select, Spin } from "antd";
+import { Empty, Pagination, Select, Spin } from "antd";
 import Head from "next/head";
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement, useContext, useEffect, useState } from "react";
 import httpRequest from "../common/HttpRequest";
 import Layout from "../components/Layout";
 import ResultCard from "../components/result/ResultCard";
+import {
+  ApplicationContext,
+  ApplicationContextInterface,
+} from "../context/ApplicationContext";
+import { isNil, isEmpty } from "../utils/CommonUtil";
 import { NextPageWithLayout } from "./_app";
-import useSWR from "swr";
-import { isNil } from "../utils/CommonUtil";
 
 const Result: NextPageWithLayout = () => {
+  const { isMobile } = useContext(
+    ApplicationContext
+  ) as ApplicationContextInterface;
   const [page, setPage] = useState<Number>(0);
   const [resultCount, setResultCount] = useState<Number>(10);
+  const [isReloading, setIsReloading] = useState<boolean>(false);
+  const [sortBy, setSortBy] = useState<string>("created_at,DESC");
+  const [moderationData, setModerationData] = useState<any>(undefined);
+  const [metadata, setMetadata] = useState<any>({});
 
   const queryParams = {
-    params: { page: page, limit: resultCount },
+    params: { page: page, limit: resultCount, sort: sortBy },
   };
 
-  const fetcher = () =>
+  useEffect(() => {
     httpRequest.get(`/moderation-list`, queryParams).then((response) => {
       const result = response.data;
-      return result.data;
+      setIsReloading(false);
+      setModerationData(result.data);
+      setMetadata(result.metadata);
     });
 
-  const { data: moderationData, error } = useSWR(
-    `/moderation-list?page=${page}&limit=${resultCount}`,
-    fetcher
-  );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, resultCount, sortBy]);
+
   return (
     <div className="flex flex-1 flex-col">
       <Head>
@@ -40,35 +51,50 @@ const Result: NextPageWithLayout = () => {
           <div className="flex flex-col gap-1 md:gap-2">
             <p>Urutkan</p>
             <Select
-              defaultValue="newest"
+              defaultValue="created_at"
               className="w-60"
               options={[
-                { value: "newest", label: "Unggahan Terbaru" },
+                { value: "created_at", label: "Unggahan Terbaru" },
                 { value: "status", label: "Status Video" },
               ]}
-            />
-          </div>
-          <div className="flex flex-col gap-1 md:gap-2">
-            <p>Hasil per halaman</p>
-            <Select
-              defaultValue="10"
-              className="w-40"
-              options={[
-                { value: "10", label: "10" },
-                { value: "20", label: "20" },
-                { value: "40", label: "40" },
-              ]}
-              onChange={(value) => setResultCount(Number(value))}
+              onChange={(value) => {
+                setSortBy(value + ",DESC");
+              }}
             />
           </div>
         </div>
       </section>
-      {moderationData != undefined ? (
-        <section className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
-          {moderationData.map((value: any, index: number) => {
-            return <ResultCard key={index} data={value} />;
-          })}
-        </section>
+      {!isNil(moderationData) ? (
+        isEmpty(moderationData) ? (
+          <Empty description="Tidak ada data moderasi" />
+        ) : (
+          <>
+            <Spin spinning={isReloading}>
+              <section className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                {moderationData.map((value: any, index: number) => {
+                  return <ResultCard key={value._id} data={value} />;
+                })}
+              </section>
+            </Spin>
+            <Pagination
+              className="mx-auto mt-4"
+              total={metadata.total_elements}
+              showTotal={(total, range) => {
+                return !isMobile
+                  ? `${range[0]}-${range[1]} of ${total} items`
+                  : ``;
+              }}
+              defaultPageSize={10}
+              defaultCurrent={1}
+              showSizeChanger
+              onChange={(page, pageSize) => {
+                setIsReloading(true);
+                setPage(page - 1);
+                setResultCount(pageSize);
+              }}
+            />
+          </>
+        )
       ) : (
         <div className="flex flex-1 items-center justify-center">
           <Spin size="large" className="mx-auto my-auto" />

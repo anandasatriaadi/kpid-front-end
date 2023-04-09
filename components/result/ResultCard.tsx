@@ -1,5 +1,5 @@
 import { Button, Collapse, Divider, Skeleton, Timeline, Tooltip } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMarsAndVenusBurst,
@@ -14,7 +14,8 @@ import {
 import Link from "next/link";
 import { randomInt, randomUUID } from "crypto";
 import { faClock, faPenToSquare } from "@fortawesome/free-regular-svg-icons";
-import { isNilOrEmpty } from "../../utils/CommonUtil";
+import { isNil, isNilOrEmpty } from "../../utils/CommonUtil";
+import moment from "moment";
 
 const timelineItem = [
   {
@@ -77,43 +78,7 @@ type Props = {
 };
 
 function ResultCard(props: Props) {
-  const [loaded, setLoaded] = useState<boolean>(false);
-  const [timelines, setTimelines] = useState<any>(timelineItem);
-  const [isModerated, setIsModerated] = useState<boolean>(false);
   const [moderationData, _] = useState(props.data);
-
-  const onChange = (key: string | string[]) => {
-    if (!loaded) {
-      setTimeout(() => {
-        setLoaded(true);
-      }, 100);
-    }
-    console.log(key);
-  };
-
-  const checkIfAllModerated = () => {
-    let isAllModerated = true;
-    timelines.forEach((timeline: detectedViolations) => {
-      timeline.violations.forEach((violation) => {
-        if (violation.decision === null) {
-          isAllModerated = false;
-        }
-      });
-    });
-    setIsModerated(isAllModerated);
-  };
-
-  const onValidatePasal = (timelineKey: number, pasalKey: number) => {
-    timelines[timelineKey].violations[pasalKey].decision = true;
-    setTimelines([...timelines]);
-    checkIfAllModerated();
-  };
-
-  const onInvalidatePasal = (timelineKey: number, pasalKey: number) => {
-    timelines[timelineKey].violations[pasalKey].decision = false;
-    setTimelines([...timelines]);
-    checkIfAllModerated();
-  };
 
   const getStatusStyling = ((status: string) => {
     switch (status.toLowerCase()) {
@@ -144,112 +109,132 @@ function ResultCard(props: Props) {
         };
       default:
         return {
-          className: "bg-amber-500",
-          text: "Belum Diproses",
+          className: "bg-stone-700 text-white",
+          text: "Status Tidak Diketahui",
         };
     }
   })(moderationData.status);
 
+  const summarizeCategories = () => {
+    let temp: Array<String> = [];
+    if (!isNilOrEmpty(moderationData?.result)) {
+      moderationData?.result.forEach((violation: any) => {
+        temp = [...temp, ...violation.category];
+      });
+    }
+
+    return Array.from(new Set(temp)).sort((a, b) => a.length - b.length);
+  };
+  const categories = summarizeCategories();
+
   return (
     <Link href={"/result/" + moderationData._id}>
-      <div className="bg cursor-pointer rounded-md bg- bg-white shadow-custom transition-shadow hover:shadow-lg">
-        <div className="relative pt-[40%]">
+      <div className="flex cursor-pointer flex-col rounded-md bg-white shadow-custom transition-shadow hover:shadow-lg hover:shadow-slate-300">
+        <div className="relative pt-[40%] md:pt-[50%]">
           {!isNilOrEmpty(moderationData?.frames) ? (
             <div
               className="absolute top-0 bottom-0 left-0 right-0 rounded-t-md bg-cover"
               style={{
                 backgroundImage: `url(https://kpid-jatim.storage.googleapis.com/${encodeURI(
-                    moderationData?.frames[moderationData?.frames.length / 2]
+                  moderationData?.frames[
+                    Math.floor(moderationData?.frames.length / 2)
+                  ]
                 )})`,
               }}
             ></div>
           ) : (
             <div className="absolute top-0 bottom-0 left-0 right-0 rounded-t-md">
-              <Skeleton.Image active className="w-full h-full"></Skeleton.Image>
+              <Skeleton.Image active className="h-full w-full"></Skeleton.Image>
             </div>
           )}
           <div
             className={
-              "absolute top-4 right-4 rounded-lg py-2 px-4 text-sm tracking-wide " +
+              "absolute top-0 right-0 rounded-tr-md rounded-bl-md py-2 px-4 text-sm font-semibold tracking-wide " +
               getStatusStyling.className
             }
           >
             {getStatusStyling.text}
           </div>
-          <div className="hidden flex-wrap justify-end gap-1 text-sm md:absolute md:bottom-4 md:right-4 md:flex lg:text-base 2xl:gap-2">
-            <span className="rounded-full bg-slate-700 bg-opacity-75 py-0.5 px-2 text-white">
-              SARA
-            </span>
-            <span className="rounded-full bg-slate-700 bg-opacity-75 py-0.5 px-2 text-white">
-              SARU
-            </span>
-            <span className="rounded-full bg-slate-700 bg-opacity-75 py-0.5 px-2 text-white">
-              SADIS
-            </span>
-            <span className="rounded-full bg-slate-700 bg-opacity-75 py-0.5 px-2 text-white">
-              SIHIR
-            </span>
-            <span className="rounded-full bg-slate-700 bg-opacity-75 py-0.5 px-2 text-white">
-              Siaran Partisan
-            </span>
+          <div className="hidden flex-wrap justify-end gap-1 text-sm md:absolute md:bottom-2 md:right-2 md:flex lg:text-base">
+            {!isNilOrEmpty(categories) &&
+              categories.map((category, idx) => {
+                return (
+                  <span
+                    key={idx}
+                    className="rounded-lg bg-slate-700 bg-opacity-80 py-0.5 px-2 text-sm font-semibold text-white"
+                  >
+                    {category.replace(/_/g, " ")}
+                  </span>
+                );
+              })}
           </div>
         </div>
-        <div className="py-2 px-4 text-sm md:py-4 md:px-6 lg:text-base">
+        <div className="flex flex-1 flex-col p-2 text-sm md:p-4">
           <div className="flex flex-wrap gap-1 text-sm md:hidden">
-            <span className="rounded-full bg-slate-700 bg-opacity-75 py-0.5 px-2 text-white">
-              SARA
-            </span>
-            <span className="rounded-full bg-slate-700 bg-opacity-75 py-0.5 px-2 text-white">
-              SARU
-            </span>
-            <span className="rounded-full bg-slate-700 bg-opacity-75 py-0.5 px-2 text-white">
-              SADIS
-            </span>
-            <span className="rounded-full bg-slate-700 bg-opacity-75 py-0.5 px-2 text-white">
-              SIHIR
-            </span>
-            <span className="rounded-full bg-slate-700 bg-opacity-75 py-0.5 px-2 text-white">
-              Siaran Partisan & Ilegal
-            </span>
+            {!isNilOrEmpty(categories) &&
+              categories.map((category, idx) => {
+                return (
+                  <span
+                    key={idx}
+                    className="rounded-lg bg-slate-700 bg-opacity-80 py-0.5 px-2 text-sm font-semibold text-white"
+                  >
+                    {category.replace(/_/g, " ")}
+                  </span>
+                );
+              })}
           </div>
           <h4 className="mt-2 mb-2 font-semibold md:mt-0">
             {moderationData.filename}
           </h4>
+          <Divider className="m-0 my-2 bg-slate-200"></Divider>
+          <span className="flex-1">
+            <p className="font-semibold">Deskripsi</p>
+            <p>
+              {isNilOrEmpty(moderationData?.description)
+                ? "No description"
+                : moderationData?.description}
+            </p>
+          </span>
+          <Divider className="m-0 my-2 bg-slate-200"></Divider>
           <div>
-            <span className="flex flex-col flex-wrap gap-1 md:flex-row md:items-center">
-              <span className="grid grid-cols-8 border-slate-400 md:flex md:gap-2 md:border-r-2 md:px-2">
-                <span className="flex items-center justify-center">
+            <div className="grid grid-cols-1 gap-y-2 md:grid-cols-2 ">
+              <div className="flex gap-2">
+                <span className="flex min-w-[1.825rem] items-center justify-center rounded-lg p-1 text-slate-600 ">
                   <FontAwesomeIcon icon={faTelevision} height="12px" />
                 </span>
-                <span className="col-span-7">
-                  {" "}
-                  {moderationData.station_name}
+                <span className="flex flex-col justify-center">
+                  <p className="text-sm">Stasiun</p>
+                  <p className="font-semibold">
+                    {moderationData?.station_name}
+                  </p>
                 </span>
-              </span>
-              <span className="grid grid-cols-8 border-slate-400 md:flex md:gap-2 md:border-r-2 md:px-2">
-                <span className="flex items-center justify-center">
+              </div>
+              <div className="flex gap-2">
+                <span className="flex min-w-[1.825rem] items-center justify-center rounded-lg p-1 text-slate-600 ">
                   <FontAwesomeIcon icon={faPenToSquare} height="12px" />
                 </span>
-                <span className="col-span-7">
-                  {moderationData.program_name}
+                <span>
+                  <p className="text-sm">Program</p>
+                  <p className="font-semibold">
+                    {moderationData?.program_name}
+                  </p>
                 </span>
-              </span>
-              <span className="grid grid-cols-8 md:flex md:gap-2 md:px-2 ">
-                <span className="flex items-center justify-center">
+              </div>
+              <div className="flex gap-2">
+                <span className="flex min-w-[1.825rem] items-center justify-center rounded-lg p-1 text-slate-600 ">
                   <FontAwesomeIcon icon={faClock} height="12px" />
                 </span>
-                <span className="col-span-7">
-                  {moderationData.start_time} - {moderationData.end_time}
+                <span>
+                  <p className="text-sm">Tanggal Rekaman</p>
+                  <p className="font-semibold">
+                    {moment(moderationData?.recording_date).format(
+                      "d MMMM YYYY"
+                    )}
+                  </p>
                 </span>
-              </span>
-            </span>
+              </div>
+            </div>
           </div>
-          <Divider className="m-0 my-2 bg-slate-200"></Divider>
-          <p>
-            {isNilOrEmpty(moderationData?.description)
-              ? "No description"
-              : moderationData?.description}
-          </p>
         </div>
       </div>
     </Link>

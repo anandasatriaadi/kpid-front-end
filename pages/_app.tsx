@@ -2,7 +2,7 @@ import type { AppProps } from "next/app";
 import "../styles/style.scss";
 
 import { AuthProvider } from "../context/AuthContext";
-import { MobileProvider } from "../context/MobileContext";
+import { ApplicationProvider } from "../context/ApplicationContext";
 import { NextPage } from "next";
 import { ReactElement, ReactNode } from "react";
 import { ConfigProvider } from "antd";
@@ -21,13 +21,13 @@ function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page) => page);
 
   return (
-    <SessionProvider>
-      <AuthProvider>
-        <MobileProvider>
-          {getLayout(<Component {...pageProps} />)}
-        </MobileProvider>
-      </AuthProvider>
-    </SessionProvider>
+    // <SessionProvider>
+    <AuthProvider>
+      <ApplicationProvider>
+        {getLayout(<Component {...pageProps} />)}
+      </ApplicationProvider>
+    </AuthProvider>
+    // </SessionProvider>
   );
 }
 
