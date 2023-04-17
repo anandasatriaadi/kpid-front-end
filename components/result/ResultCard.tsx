@@ -228,7 +228,20 @@ function ResultCard(props: Props) {
                   <p className="text-sm">Tanggal Rekaman</p>
                   <p className="font-semibold">
                     {moment(moderationData?.recording_date).format(
-                      "d MMMM YYYY"
+                      "DD MMMM YYYY"
+                    )}
+                  </p>
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <span className="flex min-w-[1.825rem] items-center justify-center rounded-lg p-1 text-slate-600 ">
+                  <FontAwesomeIcon icon={faClock} height="12px" />
+                </span>
+                <span>
+                  <p className="text-sm">Tanggal Unggah</p>
+                  <p className="font-semibold">
+                    {moment(moderationData?.created_at).format(
+                      "DD MMMM YYYY"
                     )}
                   </p>
                 </span>

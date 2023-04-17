@@ -3,15 +3,17 @@ import { useRouter } from "next/router";
 import { createContext, FC, ReactNode, useEffect, useState } from "react";
 import { authService } from "../common/AuthService";
 import httpRequest from "../common/HttpRequest";
-import useSWR from "swr";
-import { signIn } from "next-auth/react";
+
+export interface UserData {
+  [key: string]: any;
+}
 
 export interface AuthContextInterface {
   isVerifying: boolean;
   isLoggedIn: boolean;
-  userData: { [key: string]: any };
-  register: (values: any) => void;
-  login: (values: any) => void;
+  userData: UserData;
+  register: (values: UserData) => void;
+  login: (values: UserData) => void;
   logout: () => void;
 }
 
@@ -22,10 +24,9 @@ type AuthProviderProps = {
 export const AuthContext = createContext<AuthContextInterface | null>(null);
 
 export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
-  // Initial States
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isVerifying, setIsVerifying] = useState(true);
-  const [userData, setUserData] = useState({});
+  const [userData, setUserData] = useState<UserData>({});
   const router = useRouter();
 
   useEffect(() => {
@@ -39,82 +40,91 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const checkToken = async () => {
-    let userToken = localStorage.getItem("token");
-    if (userToken != null) {
-      httpRequest.get("/user").then((response) => {
-        const result = response.data;
-        if (result.status == 200) {
+    const userToken = localStorage.getItem("token");
+    
+    if (userToken) {
+      try {
+        const response = await httpRequest.get("/user").catch((err) => {
+          throw err;
+        });
+        const { status, data } = response?.data;
+        
+        if (status === 200) {
           setIsLoggedIn(true);
-          setUserData(result.data);
+          setUserData(data);
         } else {
-          localStorage.removeItem("token");
-          setIsLoggedIn(false);
-          setUserData({});
-          router.push("/login");
+          logout();
         }
-      });
+      } catch (error) {
+        console.error(error);
+        logout();
+      }
     }
+    
     setIsVerifying(false);
   };
 
-  // Login method, values are from login form (AntDesign)
-  const login = (values: { [key: string]: any }) => {
-    let form = new FormData();
+  const login = async (values: UserData) => {
+    const form = new FormData();
     for (const key in values) {
       form.append(key, values[key]);
     }
 
-    let requestOptions: RequestInit = {
-      method: "POST",
-      body: form,
-      redirect: "follow",
-    };
-
-    httpRequest.post("/login", form).then((response) => {
-      const result = response.data;
-      if (result.status == 200) {
-        localStorage.setItem("token", result.data.token);
+    try {
+      const response = await httpRequest.post("/login", form).catch((err) => {
+        throw err;
+      });
+      const { status, data } = response.data;
+      
+      if (status === 200) {
+        localStorage.setItem("token", data.token);
         setIsLoggedIn(true);
-        setUserData(result.data.user_data);
+        setUserData(data.user_data);
         message.success("Login Success");
         setTimeout(() => {
           router.push("/");
         }, 200);
       } else {
-        message.error(result.data.message);
+        message.error(data.message);
       }
-    });
+    } catch (error) {
+      console.error(error);
+      message.error("Something went wrong while logging in");
+    }
   };
 
-  // Register method, values are from login form (AntDesign)
-  const register = (values: { [key: string]: any }) => {
-    let form = new FormData();
+  const register = async (values: UserData) => {
+    const form = new FormData();
     for (const key in values) {
       form.append(key, values[key]);
     }
 
-    let requestOptions: RequestInit = {
-      method: "POST",
-      body: form,
-      redirect: "follow",
-    };
-
-    httpRequest.post("/signup", form).then((response) => {
-      const result = response.data;
-      if (result.status == 201) {
-        message.success(result.data);
+    try {
+      const response = await httpRequest.post("/signup", form).catch((err) => {
+        throw err;
+      });
+      const { status, data } = response.data;
+      
+      if (status === 201) {
+        message.success(data);
         setTimeout(() => {
           router.push("/login");
         }, 200);
       } else {
-        message.error(result.data);
+        message.error(data);
       }
-    });
+    } catch (error) {
+      console.error(error);
+      message.error("Something went wrong while registering");
+    }
   };
 
-  // Logout method
   const logout = () => {
     message.loading("Logging Out", 0.5);
+    logoutUser();
+  };
+
+  const logoutUser = () => {
     localStorage.removeItem("token");
     setIsLoggedIn(false);
     setUserData({});

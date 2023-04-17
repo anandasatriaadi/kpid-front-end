@@ -2,9 +2,11 @@ import { message } from "antd";
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
 import { authService } from "./AuthService";
 import { isNilOrEmpty } from "../utils/CommonUtil";
+import debounce from "../utils/Debounce";
 
 class HttpRequest {
   axiosInstance: AxiosInstance;
+
   constructor(baseURL: string) {
     this.axiosInstance = axios.create({
       baseURL,
@@ -14,8 +16,10 @@ class HttpRequest {
       (response) => response,
       (error: AxiosError) => {
         if (error.response?.status === 401) {
-          message.error("Your session has expired. Please login again.");
-          authService.logout();
+          debounce(() => {
+            message.error("Your session has expired. Please login again.");
+            authService.logout();
+          }, 200);
         }
 
         return Promise.reject(error);
@@ -36,32 +40,32 @@ class HttpRequest {
     );
   }
 
-  get(url: string, config: AxiosRequestConfig = {}) {
-    return this.axiosInstance.get(url, config).then((response) => response);
+  async get(url: string, config: AxiosRequestConfig = {}) {
+    const response = await this.axiosInstance.get(url, config);
+    return response;
   }
 
-  post(url: string, data: any, config: AxiosRequestConfig = {}) {
-    return this.axiosInstance
-      .post(url, data, config)
-      .then((response) => response);
+  async post(url: string, data: any, config: AxiosRequestConfig = {}) {
+    const response = await this.axiosInstance.post(url, data, config);
+    return response;
   }
 
-  put(url: string, data: any, config: AxiosRequestConfig = {}) {
-    return this.axiosInstance
-      .put(url, data, config)
-      .then((response) => response);
+  async put(url: string, data: any, config: AxiosRequestConfig = {}) {
+    const response = await this.axiosInstance.put(url, data, config);
+    return response;
   }
 
-  patch(url: string, data: any, config: AxiosRequestConfig = {}) {
-    return this.axiosInstance
-      .patch(url, data, config)
-      .then((response) => response);
+  async patch(url: string, data: any, config: AxiosRequestConfig = {}) {
+    const response = await this.axiosInstance.patch(url, data, config);
+    return response;
   }
 
-  delete(url: string, config: AxiosRequestConfig = {}) {
-    return this.axiosInstance.delete(url, config).then((response) => response);
+  async delete(url: string, config: AxiosRequestConfig = {}) {
+    const response = await this.axiosInstance.delete(url, config);
+    return response;
   }
 }
 
 const httpRequest = new HttpRequest(`${process.env.NEXT_PUBLIC_BASE_URL}/api`);
+
 export default httpRequest;

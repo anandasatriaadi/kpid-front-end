@@ -26,6 +26,8 @@ import {
   ApplicationContextInterface,
 } from "../context/ApplicationContext";
 import { isEmpty } from "../utils/CommonUtil";
+import { RangePickerProps } from "antd/lib/date-picker";
+import moment from "moment";
 
 type UploadModalProps = {
   modalOpen: boolean;
@@ -52,7 +54,7 @@ function UploadModal(props: UploadModalProps) {
     }
   };
 
-  const onFinish = (values: any) => {
+  const onFinishHandler = (values: any) => {
     let form = new FormData();
     for (const key in values) {
       form.append(key, values[key]);
@@ -74,10 +76,12 @@ function UploadModal(props: UploadModalProps) {
         } else {
           message.error(result.data);
         }
-      });
+      }).catch((err) => {
+        console.error(err);
+      })
   };
 
-  const onFinishFailed = (errorInfo: any) => {
+  const onFormFailedHandler = (errorInfo: any) => {
     if (!isLoggedIn) {
       router.push("/login");
     }
@@ -109,6 +113,10 @@ function UploadModal(props: UploadModalProps) {
       setUploadFile(undefined);
     },
     fileList: uploadFile ? [uploadFile] : [],
+  };
+
+  const disabledDate: RangePickerProps['disabledDate'] = current => {
+    return current && current > moment().endOf('day');
   };
 
   return (
@@ -189,8 +197,8 @@ function UploadModal(props: UploadModalProps) {
           <Form
             form={form}
             name="moderation_form"
-            onFinish={onFinish}
-            onFinishFailed={onFinishFailed}
+            onFinish={onFinishHandler}
+            onFinishFailed={onFormFailedHandler}
             autoComplete="off"
             layout="vertical"
             className="pt-4"
@@ -248,8 +256,9 @@ function UploadModal(props: UploadModalProps) {
               >
                 <DatePicker
                   className="w-full text-lg font-normal"
-                  showTime={{ format: "HH:mm" }}
-                  format="HH:mm - DD/MM/YYYY"
+                  showTime={{ format: "HH:mm", defaultValue: moment('00:00:00', 'HH:mm:ss')}}
+                  format="DD/MM/YYYY HH:mm"
+                  disabledDate={disabledDate}
                   disabled={currentStep === 2}
                 ></DatePicker>
               </Form.Item>

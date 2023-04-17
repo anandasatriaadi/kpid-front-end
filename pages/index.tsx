@@ -1,4 +1,5 @@
 import {
+  faArrowTrendDown,
   faArrowTrendUp,
   faEquals,
   faNotEqual,
@@ -6,12 +7,19 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import moment from "moment-timezone";
 import Head from "next/head";
-import { ReactElement, useContext, useEffect, useState } from "react";
+import {
+  ReactElement,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import httpRequest from "../common/HttpRequest";
 import ChartCard from "../components/ChartCard";
 import Layout from "../components/Layout";
 import { AuthContext, AuthContextInterface } from "../context/AuthContext";
-import { isNil, isNilOrEmpty } from "../utils/CommonUtil";
+import { isEmpty, isNil, isNilOrEmpty } from "../utils/CommonUtil";
+import debounce from "../utils/Debounce";
 import { chart1 } from "./statistic";
 import { NextPageWithLayout } from "./_app";
 
@@ -22,7 +30,14 @@ type StatisticResult = {
 
 const Home: NextPageWithLayout = () => {
   const { userData } = useContext(AuthContext) as AuthContextInterface;
-  const [videoData, setVideoData] = useState<any>(undefined);
+  const [videoData, setVideoData] = useState<any>({
+    totalVideo: 0,
+    totalDetected: 0,
+    lastTotalVideo: 0,
+    lastTotalDetected: 0,
+    totalVideoPercentage: 0,
+    totalDetectedPercentage: 0,
+  });
   const [chartData, setChartData] = useState<any>({
     title: "Statistik Moderasi Sebulan Terakhir",
     key1: "Total Video",
@@ -54,120 +69,136 @@ const Home: NextPageWithLayout = () => {
     });
 
     let formatted_date;
-    data.all.forEach((item: any) => {
-      formatted_date = moment(item._id, "YYYY-MM-DD").format("D MMMM YYYY");
-      if (result_object[formatted_date]) {
-        result_object[formatted_date]["Total Video"] = item.count;
-      }
-      totalVideo += item.count;
-    });
+    if (!isNilOrEmpty(data?.all) && !isNilOrEmpty(data?.detected)) {
+      data.all.forEach((item: any) => {
+        formatted_date = moment(item._id, "YYYY-MM-DD").format("D MMMM YYYY");
+        if (result_object[formatted_date]) {
+          result_object[formatted_date]["Total Video"] = item.count;
+        }
+        totalVideo += item.count;
+      });
 
-    data.detected.forEach((item: any) => {
-      formatted_date = moment(item._id, "YYYY-MM-DD").format("D MMMM YYYY");
-      if (result_object[formatted_date]) {
-        result_object[formatted_date]["Video Melanggar"] = item.count;
-      }
-      totalDetected += item.count;
-    });
+      data.detected.forEach((item: any) => {
+        formatted_date = moment(item._id, "YYYY-MM-DD").format("D MMMM YYYY");
+        if (result_object[formatted_date]) {
+          result_object[formatted_date]["Video Melanggar"] = item.count;
+        }
+        totalDetected += item.count;
+      });
+    }
+
 
     return Object.values(result_object);
   };
 
-  const recalculatePercentage = () => {
-    console.log({ ...videoData });
+  const recalculatePercentage = (currVideoData: any) => {
     if (
-      !isNil(videoData?.totalVideo) &&
-      !isNil(videoData?.totalDetected) &&
-      !isNil(videoData?.lastTotalVideo) &&
-      !isNil(videoData?.lastTotalDetected)
+      !isNil(currVideoData?.totalVideo) &&
+      !isNil(currVideoData?.totalDetected) &&
+      !isNil(currVideoData?.lastTotalVideo) &&
+      !isNil(currVideoData?.lastTotalDetected)
     ) {
-      if (videoData.lastTotalVideo != 0) {
+      if (currVideoData.lastTotalVideo != 0) {
         let totalVideoPercentage = Math.round(
-          (videoData.totalVideo / videoData.lastTotalVideo) * 100
+          ((currVideoData.totalVideo - currVideoData.lastTotalVideo) / currVideoData.lastTotalVideo) * 100
         );
-        setVideoData({ ...videoData, totalVideoPercentage });
+        currVideoData = { ...currVideoData, totalVideoPercentage };
       } else {
-        setVideoData({ ...videoData, totalVideoPercentage: 0 });
+        currVideoData = { ...currVideoData, totalVideoPercentage: 0 };
       }
 
-      if (videoData.lastTotalDetected != 0) {
+      if (currVideoData.lastTotalDetected != 0) {
         let totalDetectedPercentage = Math.round(
-          (videoData.totalDetected / videoData.lastTotalDetected) * 100
+          ((currVideoData.totalDetected - currVideoData.lastTotalDetected) / currVideoData.lastTotalDetected) * 100
         );
-        setVideoData({ ...videoData, totalDetectedPercentage });
+        currVideoData = { ...currVideoData, totalDetectedPercentage };
       } else {
-        setVideoData({ ...videoData, totalDetectedPercentage: 0 });
+        currVideoData = { ...currVideoData, totalDetectedPercentage: 0 };
       }
+      setVideoData(currVideoData);
     }
   };
 
-  useEffect(() => {
-    let twoMonths = moment.tz("Asia/Jakarta").add(-60, "days");
-    let lastMonth = moment.tz("Asia/Jakarta").add(-30, "days");
-    let currentDate = moment.tz("Asia/Jakarta");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const getStatisticData = useCallback(
+    debounce(async () => {
+      let lastMonth = moment.tz("Asia/Jakarta").add(-30, "days");
+      let currentDate = moment.tz("Asia/Jakarta");
+      let twoMonths = moment.tz("Asia/Jakarta").add(-60, "days");
 
-    httpRequest
-      .get("/moderation/statistics", {
+      let thisMonthResult = await httpRequest.get("/moderation/statistics", {
         params: {
           start_date: lastMonth.format("YYYY-MM-DD"),
           end_date: currentDate.format("YYYY-MM-DD"),
         },
+      }).then((res) => {
+        return res.data;
       })
-      .then((res) => {
-        let result: StatisticResult = res.data.data;
-        setChartData({
-          ...chartData,
-          data: filterChartData(result),
-        });
-
-        let totalVideo: number = 0;
-        let totalDetected: number = 0;
-        if (!isNilOrEmpty(result)) {
-          result.all.forEach((item: any) => {
-            totalVideo += item.count;
-          });
-          result.detected.forEach((item: any) => {
-            totalDetected += item.count;
-          });
-        }
-
-        setVideoData({ ...videoData, totalVideo, totalDetected });
-
-        console.log(result);
-        recalculatePercentage();
+      .catch((err) => {
+        console.log(err)
+        return null;
       });
 
-    httpRequest
-      .get("/moderation/statistics", {
+      let lastMonthResult = await httpRequest.get("/moderation/statistics", {
         params: {
           start_date: twoMonths.format("YYYY-MM-DD"),
           end_date: lastMonth.format("YYYY-MM-DD"),
         },
+      }).then((res) => {
+        return res.data;
       })
-      .then((res) => {
-        let result: StatisticResult = res.data.data;
+      .catch((err) => {
+        console.log(err)
+        return null;
+      });;
 
-        let lastTotalVideo: number = 0;
-        let lastTotalDetected: number = 0;
-        if (!isNilOrEmpty(result)) {
-          result.all.forEach((item: any) => {
-            lastTotalVideo += item.count;
-          });
-          result.detected.forEach((item: any) => {
-            console.log(item);
-            lastTotalDetected += item.count;
-          });
-        }
-
-        setVideoData({
-          ...videoData,
-          lastTotalVideo,
-          lastTotalDetected,
-        });
-
-        console.log(result);
-        recalculatePercentage();
+      let thisMonthData: StatisticResult = thisMonthResult?.data;
+      let lastMonthData: StatisticResult = lastMonthResult?.data;
+      
+      setChartData({
+        ...chartData,
+        data: filterChartData(thisMonthData),
       });
+
+      let totalVideo: number = 0;
+      let totalDetected: number = 0;
+      let lastTotalVideo: number = 0;
+      let lastTotalDetected: number = 0;
+      if (!isNilOrEmpty(thisMonthData)) {
+        thisMonthData.all.forEach((item: any) => {
+          totalVideo += item.count;
+        });
+        thisMonthData.detected.forEach((item: any) => {
+          totalDetected += item.count;
+        });
+      }
+
+      if (!isNilOrEmpty(lastMonthData)) {
+        lastMonthData.all.forEach((item: any) => {
+          lastTotalVideo += item.count;
+        });
+        lastMonthData.detected.forEach((item: any) => {
+          lastTotalDetected += item.count;
+        });
+      }
+
+      let currVideoData = {
+        ...videoData,
+        totalVideo,
+        totalDetected,
+        lastTotalVideo,
+        lastTotalDetected,
+      };
+
+      console.log(currVideoData)
+
+      recalculatePercentage(currVideoData);
+    }, 200),
+    []
+  );
+
+  useEffect(() => {
+    getStatisticData();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -211,17 +242,17 @@ const Home: NextPageWithLayout = () => {
                   <h3 className="">Video Terunggah</h3>
                   <p className="text-2xl font-bold">{videoData?.totalVideo}</p>
                 </div>
-                <div className="my-auto flex h-12 w-12 items-center justify-center rounded-xl bg-green-100">
+                <div className={"my-auto flex h-12 w-12 items-center justify-center rounded-xl " +  (videoData?.totalVideoPercentage >= 0 ? "bg-green-100" : "bg-red-100")}>
                   <FontAwesomeIcon
                     icon={faEquals}
                     height="24px"
-                    className="text-2xl text-green-500"
+                    className={"text-2xl " + (videoData?.totalVideoPercentage >= 0 ? "text-green-500" : "text-red-500")}
                   />
                 </div>
               </div>
               <div className="mt-4 flex gap-2 rounded-lg bg-slate-100 p-3.5">
-                <span className="flex gap-2 text-green-500">
-                  <FontAwesomeIcon icon={faArrowTrendUp} height="24px" />{" "}
+                <span className={"flex gap-2 " + (videoData?.totalVideoPercentage >= 0 ? "text-green-500" : "text-red-500")}>
+                  <FontAwesomeIcon icon={videoData?.totalVideoPercentage >= 0 ? faArrowTrendUp : faArrowTrendDown} height="24px" />{" "}
                   {videoData?.totalVideoPercentage}%
                 </span>{" "}
                 dari bulan lalu.
@@ -235,17 +266,17 @@ const Home: NextPageWithLayout = () => {
                     {videoData?.totalDetected}
                   </p>
                 </div>
-                <div className="my-auto flex h-12 w-12 items-center justify-center rounded-xl bg-red-100">
+                <div className={"my-auto flex h-12 w-12 items-center justify-center rounded-xl " +  (videoData?.totalDetectedPercentage >= 0 ? "bg-green-100" : "bg-red-100")}>
                   <FontAwesomeIcon
                     icon={faNotEqual}
                     height="24px"
-                    className="text-2xl text-red-500"
+                    className={"text-2xl " + (videoData?.totalDetectedPercentage >= 0 ? "text-green-500" : "text-red-500")}
                   />
                 </div>
               </div>
               <div className="mt-4 flex gap-2 rounded-lg bg-slate-100 p-3.5">
-                <span className="flex gap-2 text-red-500">
-                  <FontAwesomeIcon icon={faArrowTrendUp} height="24px" />{" "}
+                <span className={"flex gap-2 " + (videoData?.totalDetectedPercentage >= 0 ? "text-green-500" : "text-red-500")}>
+                  <FontAwesomeIcon icon={videoData?.totalDetectedPercentage >= 0 ? faArrowTrendUp : faArrowTrendDown} height="24px" />{" "}
                   {videoData?.totalDetectedPercentage}%
                 </span>{" "}
                 dari bulan lalu.

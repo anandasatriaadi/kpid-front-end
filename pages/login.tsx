@@ -1,24 +1,19 @@
-import { Button, Divider, Form, Input, message, Tabs } from "antd";
+import { Button, Divider, Form, Input, message } from "antd";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
-import { ReactNode, useContext } from "react";
+import { useContext, useEffect } from "react";
 import Sadis from "../components/icons/Sadis";
 import Sara from "../components/icons/Sara";
 import Saru from "../components/icons/Saru";
 import SiaranPartisan from "../components/icons/SiaranPartisan";
 import Sihir from "../components/icons/Sihir";
-import Navbar from "../components/Navbar";
-import { useSession } from "next-auth/react";
 import { AuthContext, AuthContextInterface } from "../context/AuthContext";
-import { signIn } from "next-auth/react";
 
 const Login: NextPage = () => {
-  let router = useRouter();
-  // const { status, data } = useSession();
+  const router = useRouter();
   const { isLoggedIn, login } = useContext(AuthContext) as AuthContextInterface;
 
   useEffect(() => {
@@ -34,8 +29,9 @@ const Login: NextPage = () => {
   };
 
   const onFinishFailed = (errorInfo: any) => {
-    console.log("Failed:", errorInfo);
+    console.error("Failed:", errorInfo);
   };
+
 
   return (
     <div>
@@ -109,12 +105,14 @@ const Login: NextPage = () => {
           <div className="my-auto mx-auto max-w-[600px]">
             <div className="mx-auto mb-6 w-1/2 mix-blend-multiply md:w-2/5">
               <Link href={"/"}>
+                <div>
                 <Image
                   src={"/logo_kpid.png"}
                   width={626}
                   height={160}
                   alt="Logo KPID Jawa Timur"
                 />
+                </div>
               </Link>
             </div>
             <div className="rounded-md bg-white p-6 pb-8 shadow-custom">

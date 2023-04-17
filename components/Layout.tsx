@@ -32,37 +32,11 @@ import { AuthContext, AuthContextInterface } from "../context/AuthContext";
 import Navlink from "./Navlink";
 import UploadModal from "./UploadModal";
 
-const accountMenu: MenuProps = {
-  items: [
-    {
-      key: "1",
-      label: (
-        <Link className="text-lg" href="/result">
-          Daftar Video
-        </Link>
-      ),
-    },
-    {
-      type: "divider",
-    },
-    {
-      key: "3",
-      label: (
-        <Link className="text-lg" href="/">
-          <a
-            onClick={() => {
-              authService.logout();
-            }}
-          >
-            Logout
-          </a>
-        </Link>
-      ),
-    },
-  ],
+type LayoutProps = {
+  children: React.ReactNode;
 };
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+const Layout = ({ children }: LayoutProps) => {
   const { isVerifying, isLoggedIn, userData } = useContext(
     AuthContext
   ) as AuthContextInterface;
@@ -76,14 +50,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   const unprotectedRoutes = ["/login", "/register"];
+
   useEffect(() => {
-    if (
+    const shouldRedirect =
       !isVerifying &&
       !isLoggedIn &&
-      !unprotectedRoutes.includes(router.pathname)
-    ) {
+      !unprotectedRoutes.includes(router.pathname);
+
+    if (shouldRedirect) {
       router.push("/login");
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn, isVerifying]);
 
@@ -97,6 +74,47 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     });
 
     return index.toString();
+  };
+
+  const accountMenu: MenuProps = {
+    items: [
+      {
+        key: "1",
+        label: (
+          <Link href="/result">
+            Daftar Video
+          </Link>
+        ),
+      },
+      {
+        key: "2",
+        label: (
+          <p onClick={() => {
+            setUploadModalOpen(!uploadModalOpen);
+            setDrawerMenuOpen(false);
+          }}>
+            Unggah Video
+          </p>
+        ),
+      },
+      {
+        type: "divider",
+      },
+      {
+        key: "3",
+        label: (
+          <Link href="/">
+            <a
+              onClick={() => {
+                authService.logout();
+              }}
+            >
+              Logout
+            </a>
+          </Link>
+        ),
+      },
+    ],
   };
 
   const sidebarMenus = [
@@ -149,7 +167,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       onClick: () => {
         setUploadModalOpen(!uploadModalOpen);
         setDrawerMenuOpen(false);
-        router.push("/result");
       },
     });
   }
@@ -396,4 +413,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       )}
     </>
   );
-}
+};
+
+export default Layout;

@@ -17,6 +17,9 @@ import { ReactElement, useEffect, useState } from "react";
 import httpRequest from "../../common/HttpRequest";
 import Layout from "../../components/Layout";
 import ViolationIconCard from "../../components/result/ViolationIconCard";
+import ModerationDecision from "../../types/ModerationDecision";
+import ModerationResponse from "../../types/ModerationResponse";
+import ModerationResult from "../../types/ModerationResult";
 import { isNil, isNilOrEmpty } from "../../utils/CommonUtil";
 import { NextPageWithLayout } from "../_app";
 
@@ -105,19 +108,12 @@ const timelineItem = [
   },
 ];
 
-interface detectedViolations {
-  second: number;
-  clip_url: string;
-  decision?: "valid" | "invalid" | "pending";
-  category: string[];
-}
-
 const SingleResult: NextPageWithLayout = () => {
   const [categorySummary, setCategorySummary] = useState<any | undefined>(
     undefined
   );
-  const [isModerated, setIsModerated] = useState<boolean>(false);
-  const [moderationData, setModerationData] = useState<any>(undefined);
+  const [isModerated, setIsModerated] = useState<boolean>(true);
+  const [moderationData, setModerationData] = useState<ModerationResponse>();
 
   const router = useRouter();
   const pathname = router.asPath;
@@ -126,24 +122,29 @@ const SingleResult: NextPageWithLayout = () => {
 
   const checkIfAllModerated = () => {
     let isAllModerated = true;
-    moderationData.result.forEach((timeline: detectedViolations) => {
-      if (timeline.decision === "pending") {
-        isAllModerated = false;
-      }
-    });
+    if(moderationData?.result !== undefined) {
+      moderationData.result.forEach((timeline: ModerationResult) => {
+        if (timeline.decision.toString() === "PENDING") {
+          isAllModerated = false;
+        }
+      });
+    }
     setIsModerated(isAllModerated);
   };
 
-  const onValidatePasal = (timelineKey: number) => {
-    let temp = { ...moderationData };
-    temp.result[timelineKey].decision = "valid";
-    setModerationData(temp);
-    checkIfAllModerated();
-  };
-
-  const onInvalidatePasal = (timelineKey: number) => {
-    let temp = { ...moderationData };
-    temp.result[timelineKey].decision = "invalid";
+  const handlePasalValidation = (timelineKey: number, decision: ModerationDecision) => {
+    const data = new FormData();
+    data.set("id", moderationID);
+    data.set("index", timelineKey.toString());
+    data.set("decision", decision.toUpperCase());
+    httpRequest.put(`/moderation/validate`, data).then((_) => {}).catch((err) => {
+      console.error(err);
+    });
+    if(moderationData === undefined) return;
+    let temp: ModerationResponse = moderationData;
+    
+    if(temp?.result === undefined) return;
+    temp.result[timelineKey].decision = decision;
     setModerationData(temp);
     checkIfAllModerated();
   };
@@ -151,7 +152,9 @@ const SingleResult: NextPageWithLayout = () => {
   const handleStartModeration = () => {
     const data = new FormData();
     data.set("id", moderationID);
-    httpRequest.put(`/moderation/start`, data).then((response) => {});
+    httpRequest.put(`/moderation/start`, data).then((_) => {}).catch((err) => {
+      console.error(err);
+    });
     message.success("Video sedang diproses");
     router.push(`/result`);
   };
@@ -160,6 +163,7 @@ const SingleResult: NextPageWithLayout = () => {
     httpRequest
       .get(`/moderation/report/${moderationID}`, { responseType: "blob" })
       .then((response) => {
+        if (moderationData === undefined) return;
         const type = response.headers["content-type"];
         const blob = new Blob([response.data], { type: type });
         const link = document.createElement("a");
@@ -171,13 +175,23 @@ const SingleResult: NextPageWithLayout = () => {
   };
 
   useEffect(() => {
-    httpRequest.get(fetchURL).then((response) => {
-      const result = response.data;
-      setModerationData(result.data);
+    (async() => {
+      const response = await httpRequest.get(fetchURL).catch((err) => {
+        console.error(err);
+        return null;
+      });
+      
+      if (response === null) return;
+
+      const result: ModerationResponse = response.data.data;
+      setModerationData(result);
 
       let temp: any[] = [];
-      if (!isNilOrEmpty(result?.data?.result)) {
-        result.data.result.forEach((item: any) => {
+      if (result?.result !== undefined) {
+        result.result.forEach((item: ModerationResult) => {
+          if (item.decision.toUpperCase() === "PENDING") {
+            setIsModerated(false);
+          }
           temp = [...temp, ...item.category];
         });
       }
@@ -193,7 +207,7 @@ const SingleResult: NextPageWithLayout = () => {
       }, {});
 
       setCategorySummary(summary);
-    });
+    })();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -274,6 +288,7 @@ const SingleResult: NextPageWithLayout = () => {
               <div className="grid grid-cols-4 gap-x-4 ">
                 {/* Video Informations --- Hidden on Mobile */}
                 <div className="hidden flex-col gap-2 rounded-md bg-white p-4 shadow-lg shadow-slate-200 lg:flex">
+                  <p className="text-base font-semibold md:text-lg">Informasi Rekaman</p>
                   <div className="flex items-center gap-4">
                     <span className="flex min-w-[2.825rem] justify-center rounded-lg bg-slate-200 p-2 text-slate-600">
                       <FontAwesomeIcon icon={faClock} height="24px" />
@@ -332,11 +347,11 @@ const SingleResult: NextPageWithLayout = () => {
                   <div
                     className={
                       "mb-4 rounded-lg px-4 py-2 font-semibold tracking-wide md:hidden " +
-                      (!isNilOrEmpty(moderationData?.status) &&
+                      (moderationData?.status &&
                         getStatusStyling(moderationData?.status).className)
                     }
                   >
-                    {!isNilOrEmpty(moderationData?.status) &&
+                    {moderationData?.status &&
                       getStatusStyling(moderationData?.status).text}
                   </div>
                   <div className="flex justify-between">
@@ -346,11 +361,11 @@ const SingleResult: NextPageWithLayout = () => {
                     <div
                       className={
                         "hidden rounded-lg px-4 py-2 font-semibold tracking-wide md:inline-block " +
-                        (!isNilOrEmpty(moderationData?.status) &&
+                        (moderationData?.status &&
                           getStatusStyling(moderationData?.status).className)
                       }
                     >
-                      {!isNilOrEmpty(moderationData?.status) &&
+                      {moderationData?.status &&
                         getStatusStyling(moderationData?.status).text}
                     </div>
                   </div>
@@ -480,60 +495,6 @@ const SingleResult: NextPageWithLayout = () => {
                   </div>
                 </div>
               </div>
-
-              {/* <div className="mt-4 grid gap-y-2 gap-x-4 text-base md:grid-cols-2 md:text-lg lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-                <div className="flex items-center gap-3 rounded-lg bg-white py-3 px-4 shadow-md">
-                  <div className="rounded-xl bg-slate-100">
-                    <FontAwesomeIcon icon={faClock} height="24px" />
-                  </div>
-                  <span>
-                    <p className="text-sm md:text-base">Jam Mulai</p>
-                    <p className="font-semibold">
-                      {moderationData?.start_time}
-                    </p>
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 rounded-lg bg-white py-3 px-4 shadow-md">
-                  <div className="rounded-xl bg-slate-100">
-                    <FontAwesomeIcon icon={faClock} height="24px" />
-                  </div>
-                  <span>
-                    <p className="text-sm md:text-base">Jam Selesai</p>
-                    <p className="font-semibold">{moderationData?.end_time}</p>
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 rounded-lg bg-white py-3 px-4 shadow-md">
-                  <div className="rounded-xl bg-slate-100">
-                    <FontAwesomeIcon icon={faStopwatch} height="24px" />
-                  </div>
-                  <span>
-                    <p className="text-sm md:text-base">Durasi</p>
-                    <p className="font-semibold">
-                      {moderationData?.duration} detik
-                    </p>
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 rounded-lg bg-white py-3 px-4 shadow-md">
-                  <div className="rounded-xl bg-slate-100">
-                    <FontAwesomeIcon icon={faGaugeHigh} height="24px" />
-                  </div>
-                  <span>
-                    <p className="text-sm md:text-base">FPS</p>
-                    <p className="font-semibold">{moderationData?.fps}</p>
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 rounded-lg bg-white py-3 px-4 shadow-md">
-                  <div className="rounded-xl bg-slate-100">
-                    <FontAwesomeIcon icon={faXmarkCircle} height="24px" />
-                  </div>
-                  <span>
-                    <p className="text-sm md:text-base">Konten Terdeteksi</p>
-                    <p className="font-semibold">
-                      {moderationData?.result?.length}
-                    </p>
-                  </span>
-                </div>
-              </div> */}
             </section>
             <section className="mt-8">
               <Collapse defaultActiveKey="1" ghost>
@@ -543,7 +504,7 @@ const SingleResult: NextPageWithLayout = () => {
                   className="text-lg"
                 >
                   <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
-                    {moderationData?.frames
+                    {moderationData?.frames !== undefined && moderationData.frames
                       .slice(0, 20)
                       .map((url: string, index: number) => {
                         return (
@@ -559,7 +520,7 @@ const SingleResult: NextPageWithLayout = () => {
                         );
                       })}
                   </div>
-                  {moderationData?.frames.length > 20 && (
+                  {(moderationData?.frames !== undefined && moderationData?.frames.length > 20) && (
                     <p className="mt-4 text-right text-base opacity-70">
                       dan {moderationData?.frames.length - 20} potongan frame
                       lainnya.
@@ -569,22 +530,22 @@ const SingleResult: NextPageWithLayout = () => {
               </Collapse>
             </section>
 
-            {moderationData?.status.includes("REJECTED") && (
+            {(moderationData?.status !== undefined && moderationData?.status.includes("REJECTED")) && (
               <section className="">
                 <>
                   <h2 className="px-4 text-lg font-semibold">Hasil Moderasi</h2>
-                  {!isNilOrEmpty(moderationData?.result) &&
+                  {moderationData?.result !== undefined &&
                     moderationData?.result.length > 0 && (
                       <Collapse>
                         {moderationData.result.map(
-                          (item: detectedViolations, index: number) => (
+                          (item: ModerationResult, index: number) => (
                             <Collapse.Panel
                               className="text-base"
                               header={
                                 <div className="flex items-center justify-between">
-                                  <p>Detik {item.second}</p>
-                                  {item.decision != "pending" ? (
-                                    item.decision == "valid" ? (
+                                  <p>Detik {item.second.toFixed(2)}</p>
+                                  {item.decision?.toUpperCase() != "PENDING" ? (
+                                    item.decision?.toUpperCase() == "VALID" ? (
                                       <div className="ml-2 border-2 border-dashed border-green-500 px-2 py-0.5 text-sm">
                                         Valid
                                       </div>
@@ -628,13 +589,13 @@ const SingleResult: NextPageWithLayout = () => {
                                     items={RenderViolationTabs(item)}
                                   />
 
-                                  {item.decision === "pending" ? (
+                                  {item.decision.toUpperCase() === "PENDING" && (
                                     <div className="flex justify-end">
                                       <Button
                                         type="primary"
                                         className="mr-4"
                                         onClick={(e) => {
-                                          onValidatePasal(index);
+                                          handlePasalValidation(index, ModerationDecision.VALID);
                                         }}
                                       >
                                         Valid
@@ -642,14 +603,12 @@ const SingleResult: NextPageWithLayout = () => {
                                       <Button
                                         type="dashed"
                                         onClick={(e) => {
-                                          onInvalidatePasal(index);
+                                          handlePasalValidation(index, ModerationDecision.INVALID);
                                         }}
                                       >
                                         Invalid
                                       </Button>
                                     </div>
-                                  ) : (
-                                    ""
                                   )}
                                 </div>
                               </div>
@@ -661,9 +620,8 @@ const SingleResult: NextPageWithLayout = () => {
                 </>
               </section>
             )}
-            {(moderationData?.status.includes("UPLOADED") || isModerated) && (
+            {(moderationData?.status !== undefined && (moderationData?.status.includes("UPLOADED") || isModerated)) && (
               <div className="sticky bottom-0 mt-4 flex gap-2">
-                {console.log(isModerated)}
                 {moderationData?.status.includes("UPLOADED") && (
                   <div className="flex justify-end">
                     <Button

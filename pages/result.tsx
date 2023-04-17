@@ -1,4 +1,4 @@
-import { Empty, Pagination, Select, Spin } from "antd";
+import { DatePicker, Empty, Pagination, Select, SelectProps, Spin } from "antd";
 import Head from "next/head";
 import { ReactElement, useContext, useEffect, useState } from "react";
 import httpRequest from "../common/HttpRequest";
@@ -11,19 +11,47 @@ import {
 import { isNil, isEmpty } from "../utils/CommonUtil";
 import { NextPageWithLayout } from "./_app";
 
+type PageFilterType = {
+  page: number;
+  limit: number;
+  sort: string;
+  status?: string;
+  "created_at.lte"?: string;
+  "created_at.gte"?: string;
+  "recording_date.lte"?: string;
+  "recording_date.gte"?: string;
+}
+
+const statusFilterOptions: SelectProps["options"] = [
+  { value: "", label: "Tanpa Filter" },
+  { value: "initialized", label: "Sedang Diunggah" },
+  { value: "in_progress", label: "Sedang Diproses" },
+  { value: "uploaded", label: "Belum Diproses" },
+  { value: "rejected", label: "Ditemukan Pelanggaran" },
+  { value: "approved", label: "Tanpa Pelanggaran" },
+]
+
+const sortOptions: SelectProps["options"] = [
+  { value: "created_at", label: "Unggahan Terbaru" },
+  { value: "status", label: "Status Video" },
+]
+
 const Result: NextPageWithLayout = () => {
   const { isMobile } = useContext(
     ApplicationContext
   ) as ApplicationContextInterface;
-  const [page, setPage] = useState<Number>(0);
-  const [resultCount, setResultCount] = useState<Number>(10);
+
   const [isReloading, setIsReloading] = useState<boolean>(false);
-  const [sortBy, setSortBy] = useState<string>("created_at,DESC");
   const [moderationData, setModerationData] = useState<any>(undefined);
   const [metadata, setMetadata] = useState<any>({});
+  const [pageFilter, setPageFilter] = useState<PageFilterType>({
+    page: 0,
+    limit: 10,
+    sort: "created_at,DESC",
+  })
 
   const queryParams = {
-    params: { page: page, limit: resultCount, sort: sortBy },
+    params: { ...pageFilter },
   };
 
   useEffect(() => {
@@ -32,10 +60,12 @@ const Result: NextPageWithLayout = () => {
       setIsReloading(false);
       setModerationData(result.data);
       setMetadata(result.metadata);
+    }).catch((err) => {
+      console.error(err);
     });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, resultCount, sortBy]);
+  }, [pageFilter]);
 
   return (
     <div className="flex flex-1 flex-col">
@@ -47,31 +77,74 @@ const Result: NextPageWithLayout = () => {
 
       <h1 className="text-2xl font-semibold">Daftar Video Unggahan</h1>
       <section className="my-4">
-        <div className="flex flex-wrap gap-2 md:gap-8">
-          <div className="flex flex-col gap-1 md:gap-2">
-            <p>Urutkan</p>
-            <Select
-              defaultValue="created_at"
-              className="w-60"
-              options={[
-                { value: "created_at", label: "Unggahan Terbaru" },
-                { value: "status", label: "Status Video" },
-              ]}
-              onChange={(value) => {
-                setSortBy(value + ",DESC");
-              }}
-            />
-          </div>
+          <div>
+            <p className="font-bold">Filter</p>
+            <div className="flex flex-wrap gap-4">
+              <div className="flex gap-2 items-center">
+                <p className="text-sm">Status</p>
+                <Select
+                  defaultValue=""
+                  className="w-60"
+                  options={statusFilterOptions}
+                  onChange={(value) => {
+                    setIsReloading(true);
+                    if (!isEmpty(value))
+                      setPageFilter({...pageFilter, status: value.toUpperCase()});
+                    else {
+                      const { status, ...rest } = pageFilter;
+                      setPageFilter(rest);
+                    }
+                  }}
+                />
+              </div>
+              <div className="flex gap-2 items-center">
+                <p className="text-sm">Tanggal Unggah</p>
+                <DatePicker
+                  format="DD/MM/YYYY"
+                  onChange={(value) => {
+                    setIsReloading(true);
+                    if (!isNil(value))
+                      setPageFilter({...pageFilter, "created_at.lte": value?.format("YYYY-MM-DD"), "created_at.gte": value?.format("YYYY-MM-DD")});
+                    else {
+                      let temp = {...pageFilter};
+                      delete temp["created_at.lte"]
+                      delete temp["created_at.gte"]
+                      setPageFilter(temp);
+                    }
+                  }}
+                />
+              </div>
+              <div className="flex gap-2 items-center">
+                <p className="text-sm">Tanggal Rekaman</p>
+                <DatePicker
+                  format="DD/MM/YYYY"
+                  onChange={(value) => {
+                    setIsReloading(true);
+                    if (!isNil(value))
+                      setPageFilter({...pageFilter, "recording_date.lte": value?.format("YYYY-MM-DD"), "recording_date.gte": value?.format("YYYY-MM-DD")});
+                    else {
+                      
+                      let temp = {...pageFilter};
+                      delete temp["recording_date.lte"]
+                      delete temp["recording_date.gte"]
+                      setPageFilter(temp);
+                    }
+                  }}
+                />
+              </div>
+            </div>
         </div>
       </section>
       {!isNil(moderationData) ? (
         isEmpty(moderationData) ? (
-          <Empty description="Tidak ada data moderasi" />
+          <Spin spinning={isReloading}>
+            <Empty description="Tidak ada data moderasi" />
+          </Spin>
         ) : (
           <>
-            <Spin spinning={isReloading}>
+            <Spin spinning={isReloading} >
               <section className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-                {moderationData.map((value: any, index: number) => {
+                {moderationData.map((value: any, _: number) => {
                   return <ResultCard key={value._id} data={value} />;
                 })}
               </section>
@@ -89,8 +162,7 @@ const Result: NextPageWithLayout = () => {
               showSizeChanger
               onChange={(page, pageSize) => {
                 setIsReloading(true);
-                setPage(page - 1);
-                setResultCount(pageSize);
+                setPageFilter({...pageFilter, page: page - 1, limit: pageSize});
               }}
             />
           </>
