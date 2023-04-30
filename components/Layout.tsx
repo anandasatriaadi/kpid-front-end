@@ -1,6 +1,12 @@
+import { authService } from "@/common/AuthService";
+import Navlink from "@/components/Navlink";
+import UploadModal from "@/components/UploadModal";
 import {
-  CaretLeftOutlined,
-  CaretRightOutlined,
+  ApplicationContext,
+  ApplicationContextInterface,
+} from "@/context/ApplicationContext";
+import { AuthContext, AuthContextInterface } from "@/context/AuthContext";
+import {
   CloudUploadOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -8,7 +14,11 @@ import {
   UserOutlined,
   VideoCameraOutlined,
 } from "@ant-design/icons";
-import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
+import {
+  faAngleLeft,
+  faAngleRight,
+  faFileUpload,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   Button,
@@ -23,14 +33,6 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { MenuProps } from "rc-menu";
 import React, { useContext, useEffect, useState } from "react";
-import { authService } from "../common/AuthService";
-import {
-  ApplicationContext,
-  ApplicationContextInterface,
-} from "../context/ApplicationContext";
-import { AuthContext, AuthContextInterface } from "../context/AuthContext";
-import Navlink from "./Navlink";
-import UploadModal from "./UploadModal";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -49,13 +51,8 @@ const Layout = ({ children }: LayoutProps) => {
   const [drawerMenuOpen, setDrawerMenuOpen] = useState(false);
   const router = useRouter();
 
-  const unprotectedRoutes = ["/login", "/register"];
-
   useEffect(() => {
-    const shouldRedirect =
-      !isVerifying &&
-      !isLoggedIn &&
-      !unprotectedRoutes.includes(router.pathname);
+    const shouldRedirect = !isVerifying && !isLoggedIn;
 
     if (shouldRedirect) {
       router.push("/login");
@@ -80,19 +77,17 @@ const Layout = ({ children }: LayoutProps) => {
     items: [
       {
         key: "1",
-        label: (
-          <Link href="/result">
-            Daftar Video
-          </Link>
-        ),
+        label: <Link href="/result">Daftar Video</Link>,
       },
       {
         key: "2",
         label: (
-          <p onClick={() => {
-            setUploadModalOpen(!uploadModalOpen);
-            setDrawerMenuOpen(false);
-          }}>
+          <p
+            onClick={() => {
+              setUploadModalOpen(!uploadModalOpen);
+              setDrawerMenuOpen(false);
+            }}
+          >
             Unggah Video
           </p>
         ),
@@ -178,44 +173,47 @@ const Layout = ({ children }: LayoutProps) => {
         setModalOpen={setUploadModalOpen}
       />
       {isMobile ? (
+        // ========================================================================
+        //   MOBILE LAYOUT
+        // ========================================================================
         <>
-          <AntLayout className={"custom-layout"}>
-            <AntLayout className="site-layout min-h-screen bg-slate-100">
-              <AntLayout.Header className="flex bg-white p-4">
-                {collapsed ? (
-                  <MenuUnfoldOutlined
-                    className="trigger"
-                    onClick={() => setDrawerMenuOpen(!drawerMenuOpen)}
-                  />
-                ) : (
-                  <MenuFoldOutlined
-                    className="trigger"
-                    onClick={() => setDrawerMenuOpen(!drawerMenuOpen)}
-                  />
-                )}
-                <div className="flex flex-1 items-center justify-end gap-x-4 text-base">
-                  <div className="flex items-center">
-                    <Dropdown menu={accountMenu} placement="bottomRight">
-                      <a onClick={(e) => e.preventDefault()}>
-                        <span>Hai! </span>
-                        <span className="font-bold capitalize">
-                          {userData.name}
-                        </span>
-                      </a>
-                    </Dropdown>
-                  </div>
+          <AntLayout className="custom-layout site-layout max-h-screen min-h-screen bg-white">
+            <AntLayout.Header className="flex bg-white p-4">
+              {collapsed ? (
+                <MenuUnfoldOutlined
+                  className="trigger"
+                  onClick={() => setDrawerMenuOpen(!drawerMenuOpen)}
+                />
+              ) : (
+                <MenuFoldOutlined
+                  className="trigger"
+                  onClick={() => setDrawerMenuOpen(!drawerMenuOpen)}
+                />
+              )}
+              <div className="flex flex-1 items-center justify-end gap-x-4 text-base">
+                <div className="flex items-center">
+                  <Dropdown menu={accountMenu} placement="bottomRight">
+                    <a onClick={(e) => e.preventDefault()}>
+                      <span>Hai! </span>
+                      <span className="font-bold capitalize">
+                        {userData.name}
+                      </span>
+                    </a>
+                  </Dropdown>
                 </div>
-              </AntLayout.Header>
-              <AntLayout.Content className="mx-4 my-6 flex grow flex-col">
-                {!isVerifying ? (
-                  children
-                ) : (
-                  <div className="flex flex-grow items-center justify-center">
-                    <Spin />
-                  </div>
-                )}
-              </AntLayout.Content>
-            </AntLayout>
+              </div>
+            </AntLayout.Header>
+            <AntLayout.Content className="flex grow flex-col rounded-tl-lg bg-slate-100">
+              {!isVerifying ? (
+                <div className="relative m-4 mr-2 flex h-full grow flex-col overflow-x-clip overflow-y-scroll rounded-lg scrollbar-thin scrollbar-track-slate-300 scrollbar-thumb-slate-500 scrollbar-track-rounded-full scrollbar-thumb-rounded-full">
+                  {children}
+                </div>
+              ) : (
+                <div className="flex flex-grow items-center justify-center">
+                  <Spin />
+                </div>
+              )}
+            </AntLayout.Content>
           </AntLayout>
           <Drawer
             title={
@@ -256,6 +254,9 @@ const Layout = ({ children }: LayoutProps) => {
           </Drawer>
         </>
       ) : (
+        // ========================================================================
+        //   DESKTOP LAYOUT
+        // ========================================================================
         <AntLayout className={"custom-layout"}>
           <AntLayout.Sider
             trigger={null}
@@ -263,9 +264,10 @@ const Layout = ({ children }: LayoutProps) => {
             collapsed={collapsed}
             theme={"light"}
             width={280}
+            className="pr-2"
           >
             <div className="flex h-full flex-col">
-              <div className="flex items-center justify-center px-3 pt-4 pb-2">
+              <div className="flex h-[72px] flex-col items-center justify-center px-3 pt-4 pb-2">
                 <Link href="/">
                   <a>
                     <Image
@@ -336,9 +338,21 @@ const Layout = ({ children }: LayoutProps) => {
               </div>
             </div>
           </AntLayout.Sider>
-          <AntLayout className="site-layout max-h-screen min-h-screen bg-slate-100">
+          <AntLayout className="site-layout max-h-screen min-h-screen bg-white">
             <AntLayout.Header className="flex bg-white p-4">
-              {collapsed ? (
+              <div
+                className="trigger flex flex-col justify-center"
+                onClick={() => setCollapsed(!collapsed)}
+              >
+                <FontAwesomeIcon
+                  height={24}
+                  icon={faAngleLeft}
+                  className={
+                    "transform duration-300" + (collapsed && " -rotate-180")
+                  }
+                />
+              </div>
+              {/* {collapsed ? (
                 <MenuUnfoldOutlined
                   className="trigger"
                   onClick={() => setCollapsed(!collapsed)}
@@ -348,7 +362,7 @@ const Layout = ({ children }: LayoutProps) => {
                   className="trigger"
                   onClick={() => setCollapsed(!collapsed)}
                 />
-              )}
+              )} */}
               <div className="flex flex-1 items-center justify-end gap-x-4 text-lg">
                 {!isLoggedIn ? (
                   <>
@@ -373,8 +387,10 @@ const Layout = ({ children }: LayoutProps) => {
                 )}
               </div>
             </AntLayout.Header>
-            <AntLayout.Content className="mx-4 my-6 flex grow flex-col overflow-x-clip overflow-y-scroll">
-              {children}
+            <AntLayout.Content className="flex grow flex-col rounded-tl-lg bg-slate-100">
+              <div className="relative m-4 mr-2 flex h-full grow flex-col overflow-x-clip overflow-y-scroll rounded-lg scrollbar-thin scrollbar-track-slate-300 scrollbar-thumb-slate-500 scrollbar-track-rounded-full scrollbar-thumb-rounded-full">
+                {children}
+              </div>
             </AntLayout.Content>
           </AntLayout>
           <div
@@ -405,7 +421,12 @@ const Layout = ({ children }: LayoutProps) => {
                 }
                 onClick={() => setShowUpload(!showUpload)}
               >
-                {showUpload ? <CaretRightOutlined /> : <CaretLeftOutlined />}
+                <div className="px-1">
+                  <FontAwesomeIcon
+                    height={16}
+                    icon={showUpload ? faAngleRight : faAngleLeft}
+                  />
+                </div>
               </Button>
             </div>
           </div>

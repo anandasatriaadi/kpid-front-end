@@ -11,9 +11,16 @@ module.exports = {
         inter: ["Inter", "sans-serif"],
       },
       boxShadow: {
-        custom: "0 10px 20px 0 rgba(140, 144, 164, 0.08)",
+        "custom": "0 10px 20px 0 rgba(140, 144, 164, 0.08)",
+        "custom-lg": "0 15px 20px 0 rgba(140, 144, 164, 0.15)",
       },
     },
   },
-  plugins: [require("prettier-plugin-tailwindcss")],
+  plugins: [
+    require("prettier-plugin-tailwindcss"),
+    require("tailwind-scrollbar")({ nocompatible: true }),
+  ],
+  variants: {
+    scrollbar: ["rounded"],
+  },
 };
