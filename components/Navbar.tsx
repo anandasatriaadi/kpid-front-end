@@ -2,9 +2,9 @@ import { Button, Drawer, Dropdown, Menu } from "antd";
 import Image from "next/image";
 import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
-import { AuthContext, AuthContextInterface } from "../context/AuthContext";
-import debounce from "../utils/Debounce";
-import Navlink from "./Navlink";
+import { AuthContext, AuthContextInterface } from "@/context/AuthContext";
+import debounce from "@/utils/Debounce";
+import Navlink from "@/components/Navlink";
 
 function Navbar() {
   const [open, setOpen] = useState(false);

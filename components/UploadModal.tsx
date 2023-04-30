@@ -1,3 +1,10 @@
+import httpRequest from "@/common/HttpRequest";
+import {
+  ApplicationContext,
+  ApplicationContextInterface,
+} from "@/context/ApplicationContext";
+import { AuthContext, AuthContextInterface } from "@/context/AuthContext";
+import { isEmpty } from "@/utils/CommonUtil";
 import { faFileVideo } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -14,20 +21,13 @@ import {
   UploadFile,
   UploadProps,
 } from "antd";
+import { RangePickerProps } from "antd/lib/date-picker";
 import { RcFile } from "antd/lib/upload";
 import Dragger from "antd/lib/upload/Dragger";
 import { AxiosProgressEvent, AxiosRequestConfig } from "axios";
+import moment from "moment";
 import { useRouter } from "next/router";
 import { useContext, useState } from "react";
-import httpRequest from "../common/HttpRequest";
-import { AuthContext, AuthContextInterface } from "../context/AuthContext";
-import {
-  ApplicationContext,
-  ApplicationContextInterface,
-} from "../context/ApplicationContext";
-import { isEmpty } from "../utils/CommonUtil";
-import { RangePickerProps } from "antd/lib/date-picker";
-import moment from "moment";
 
 type UploadModalProps = {
   modalOpen: boolean;
@@ -72,19 +72,22 @@ function UploadModal(props: UploadModalProps) {
         const result = response.data;
         if (result.status == 200) {
           message.success("Formulir terunggah dengan ID " + result.data);
+          if (router.pathname !== "/result") {
+            router.replace("/result");
+          } else {
+            router.reload();
+          }
           handleCloseModal();
         } else {
           message.error(result.data);
         }
-      }).catch((err) => {
-        console.error(err);
       })
+      .catch((err) => {
+        console.error(err);
+      });
   };
 
   const onFormFailedHandler = (errorInfo: any) => {
-    if (!isLoggedIn) {
-      router.push("/login");
-    }
     console.log("Failed: ", errorInfo);
   };
 
@@ -115,8 +118,8 @@ function UploadModal(props: UploadModalProps) {
     fileList: uploadFile ? [uploadFile] : [],
   };
 
-  const disabledDate: RangePickerProps['disabledDate'] = current => {
-    return current && current > moment().endOf('day');
+  const disabledDate: RangePickerProps["disabledDate"] = (current) => {
+    return current && current > moment().endOf("day");
   };
 
   return (
@@ -256,7 +259,10 @@ function UploadModal(props: UploadModalProps) {
               >
                 <DatePicker
                   className="w-full text-lg font-normal"
-                  showTime={{ format: "HH:mm", defaultValue: moment('00:00:00', 'HH:mm:ss')}}
+                  showTime={{
+                    format: "HH:mm",
+                    defaultValue: moment("00:00:00", "HH:mm:ss"),
+                  }}
                   format="DD/MM/YYYY HH:mm"
                   disabledDate={disabledDate}
                   disabled={currentStep === 2}

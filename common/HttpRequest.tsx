@@ -1,8 +1,8 @@
 import { message } from "antd";
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
-import { authService } from "./AuthService";
-import { isNilOrEmpty } from "../utils/CommonUtil";
-import debounce from "../utils/Debounce";
+import { authService } from "@/common/AuthService";
+import { isNilOrEmpty } from "@/utils/CommonUtil";
+import debounce from "@/utils/Debounce";
 
 class HttpRequest {
   axiosInstance: AxiosInstance;
@@ -12,14 +12,16 @@ class HttpRequest {
       baseURL,
     });
 
+    const logout = debounce(() => {
+      message.error("Your session has expired. Please login again.");
+      authService.logout();
+    }, 500);
+
     this.axiosInstance.interceptors.response.use(
       (response) => response,
       (error: AxiosError) => {
         if (error.response?.status === 401) {
-          debounce(() => {
-            message.error("Your session has expired. Please login again.");
-            authService.logout();
-          }, 200);
+          logout();
         }
 
         return Promise.reject(error);

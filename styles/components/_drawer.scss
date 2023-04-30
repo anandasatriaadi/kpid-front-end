@@ -14,12 +14,10 @@
   }
 }
 
-.anticon {
-  &.trigger {
+    .trigger {
     @apply flex cursor-pointer items-center text-lg leading-[64px] transition duration-300;
 
     &:hover {
       @apply text-sky-500;
     }
-  }
-}
+    }

@@ -1,7 +1,7 @@
+import ChartCard from "@/components/ChartCard";
+import Navbar from "@/components/Navbar";
 import type { NextPage } from "next";
 import Head from "next/head";
-import ChartCard from "../components/ChartCard";
-import Navbar from "../components/Navbar";
 
 export const chart1 = {
   title: "Statistik Moderasi Sebulan Terakhir",

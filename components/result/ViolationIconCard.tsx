@@ -1,4 +1,9 @@
 import { Tooltip } from "antd";
+import { useContext } from "react";
+import {
+  ApplicationContext,
+  ApplicationContextInterface,
+} from "../../context/ApplicationContext";
 import Sadis from "../icons/Sadis";
 import Sara from "../icons/Sara";
 import Saru from "../icons/Saru";
@@ -13,7 +18,9 @@ type IconProps = {
   sadis: number;
   sihir: number;
   siaran: number;
-  cardStyle: boolean;
+  cardStyle?: boolean;
+  hideWhenZero?: boolean;
+  darkStyle?: boolean;
 };
 
 function ViolationIconCard(props: IconProps) {
@@ -26,14 +33,21 @@ function ViolationIconCard(props: IconProps) {
     sihir,
     siaran,
     cardStyle = false,
+    hideWhenZero = false,
+    darkStyle = false,
   } = props;
 
+  const { isMobile } = useContext(
+    ApplicationContext
+  ) as ApplicationContextInterface;
+
   const tooltipClassName =
-    "relative flex flex-col justify-center " +
-    (cardStyle ? "rounded-lg bg-slate-200 text-slate-600 py-3 px-4" : "");
+    "relative flex flex-col justify-center bg-opacity-75 " +
+    (cardStyle ? "rounded-lg py-2 md:py-3 px-3 md:px-4 " : "") +
+    (darkStyle ? "bg-slate-600 text-slate-50" : "bg-slate-200 text-slate-600");
   const iconStyle = {
-    height: `${height + 24}px`,
-    width: `${height + 32}px`,
+    height: isMobile ? `${height + 16}px` : `${height + 24}px`,
+    width: isMobile ? `${height + 24}px` : `${height + 32}px`,
   };
   const getIconClassName = (count: number) => {
     return (
@@ -48,36 +62,46 @@ function ViolationIconCard(props: IconProps) {
 
   return (
     <div className={"flex flex-wrap gap-4 " + className}>
-      <Tooltip className={tooltipClassName} title="SARA">
-        <span style={iconStyle}>
-          <Sara width={`${height}px`} height={`${height}px`} />
-          <p className={getIconClassName(sara)}>{sara}</p>
-        </span>
-      </Tooltip>
-      <Tooltip className={tooltipClassName} title="SARU">
-        <span style={iconStyle}>
-          <Saru width={`${height}px`} height={`${height}px`} />
-          <p className={getIconClassName(saru)}>{saru}</p>
-        </span>
-      </Tooltip>
-      <Tooltip className={tooltipClassName} title="SADIS">
-        <span style={iconStyle}>
-          <Sadis width={`${height}px`} height={`${height}px`} />
-          <p className={getIconClassName(sadis)}>{sadis}</p>
-        </span>
-      </Tooltip>
-      <Tooltip className={tooltipClassName} title="SIHIR">
-        <span style={iconStyle}>
-          <Sihir width={`${height}px`} height={`${height}px`} />
-          <p className={getIconClassName(sihir)}>{sihir}</p>
-        </span>
-      </Tooltip>
-      <Tooltip className={tooltipClassName} title="Siaran Partisan">
-        <span style={iconStyle}>
-          <SiaranPartisan width={`${height}px`} height={`${height}px`} />
-          <p className={getIconClassName(siaran)}>{siaran}</p>
-        </span>
-      </Tooltip>
+      {(!hideWhenZero || sara > 0) && (
+        <Tooltip className={tooltipClassName} title="SARA">
+          <span style={iconStyle}>
+            <Sara width={`${height}px`} height={`${height}px`} />
+            <p className={getIconClassName(sara)}>{sara}</p>
+          </span>
+        </Tooltip>
+      )}
+      {(!hideWhenZero || saru > 0) && (
+        <Tooltip className={tooltipClassName} title="SARU">
+          <span style={iconStyle}>
+            <Saru width={`${height}px`} height={`${height}px`} />
+            <p className={getIconClassName(saru)}>{saru}</p>
+          </span>
+        </Tooltip>
+      )}
+      {(!hideWhenZero || sadis > 0) && (
+        <Tooltip className={tooltipClassName} title="SADIS">
+          <span style={iconStyle}>
+            <Sadis width={`${height}px`} height={`${height}px`} />
+            <p className={getIconClassName(sadis)}>{sadis}</p>
+          </span>
+        </Tooltip>
+      )}
+      {(!hideWhenZero || sihir > 0) && (
+        <Tooltip className={tooltipClassName} title="SIHIR">
+          <span style={iconStyle}>
+            <Sihir width={`${height}px`} height={`${height}px`} />
+            <p className={getIconClassName(sihir)}>{sihir}</p>
+          </span>
+        </Tooltip>
+      )}
+      {(!hideWhenZero || siaran > 0) && (
+        <Tooltip className={tooltipClassName} title="Siaran Partisan">
+          <span style={iconStyle}>
+            <SiaranPartisan width={`${height}px`} height={`${height}px`} />
+            <p className={getIconClassName(siaran)}>{siaran}</p>
+          </span>
+        </Tooltip>
+      )}
     </div>
   );
 }

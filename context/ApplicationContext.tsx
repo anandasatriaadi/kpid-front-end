@@ -1,5 +1,5 @@
+import debounce from "@/utils/Debounce";
 import { createContext, FC, ReactNode, useEffect, useState } from "react";
-import debounce from "../utils/Debounce";
 
 export interface ApplicationContextInterface {
   isMobile: boolean;

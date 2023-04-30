@@ -2,4 +2,34 @@
   &-expand-icon {
     @apply flex flex-col self-center;
   }
+
+  &-item {
+    &.panel-disabled {
+      .ant-collapse-header {
+        @apply cursor-default;
+      }
+    }
+  }
+
+  &.custom-panel {
+    @apply border-none bg-white;
+
+    .ant-collapse {
+      &-item {
+        @apply border-[1px] border-slate-200 mb-2 rounded-md;
+
+        &:last-child {
+          @apply mb-0;
+        }
+
+        &-active {
+          @apply shadow-custom;
+        }
+      }
+
+      &-content {
+        @apply bg-transparent;
+      }
+    }
+  }
 }

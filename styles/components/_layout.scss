@@ -20,4 +20,23 @@
       @apply rounded-md;
     }
   }
+.ant-menu {
+  @apply bg-transparent border-0;
+
+  &-item {
+    @apply rounded-r-lg mt-0;
+
+    &:hover {
+      @apply text-sky-600;
+    }
+
+    &-selected {
+      @apply bg-sky-100 text-sky-600;
+
+      &::after {
+        @apply scale-y-0;
+      }
+    }
+  }
+}
 }

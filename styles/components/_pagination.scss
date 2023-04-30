@@ -1,0 +1,9 @@
+.ant-pagination {
+
+    &-prev,
+    &-next {
+        .ant-pagination-item-link {
+            @apply flex flex-col justify-center items-center;
+        }
+    }
+}

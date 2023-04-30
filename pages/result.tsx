@@ -1,14 +1,14 @@
-import { DatePicker, Empty, Pagination, Select, SelectProps, Spin } from "antd";
-import Head from "next/head";
-import { ReactElement, useContext, useEffect, useState } from "react";
-import httpRequest from "../common/HttpRequest";
-import Layout from "../components/Layout";
-import ResultCard from "../components/result/ResultCard";
+import httpRequest from "@/common/HttpRequest";
+import Layout from "@/components/Layout";
+import ResultCard from "@/components/result/ResultCard";
 import {
   ApplicationContext,
   ApplicationContextInterface,
-} from "../context/ApplicationContext";
-import { isNil, isEmpty } from "../utils/CommonUtil";
+} from "@/context/ApplicationContext";
+import { isEmpty, isNil } from "@/utils/CommonUtil";
+import { DatePicker, Empty, Pagination, Select, SelectProps, Spin } from "antd";
+import Head from "next/head";
+import { ReactElement, useContext, useEffect, useState } from "react";
 import { NextPageWithLayout } from "./_app";
 
 type PageFilterType = {
@@ -20,7 +20,7 @@ type PageFilterType = {
   "created_at.gte"?: string;
   "recording_date.lte"?: string;
   "recording_date.gte"?: string;
-}
+};
 
 const statusFilterOptions: SelectProps["options"] = [
   { value: "", label: "Tanpa Filter" },
@@ -29,12 +29,12 @@ const statusFilterOptions: SelectProps["options"] = [
   { value: "uploaded", label: "Belum Diproses" },
   { value: "rejected", label: "Ditemukan Pelanggaran" },
   { value: "approved", label: "Tanpa Pelanggaran" },
-]
+];
 
 const sortOptions: SelectProps["options"] = [
   { value: "created_at", label: "Unggahan Terbaru" },
   { value: "status", label: "Status Video" },
-]
+];
 
 const Result: NextPageWithLayout = () => {
   const { isMobile } = useContext(
@@ -46,23 +46,26 @@ const Result: NextPageWithLayout = () => {
   const [metadata, setMetadata] = useState<any>({});
   const [pageFilter, setPageFilter] = useState<PageFilterType>({
     page: 0,
-    limit: 10,
+    limit: 12,
     sort: "created_at,DESC",
-  })
+  });
 
   const queryParams = {
     params: { ...pageFilter },
   };
 
   useEffect(() => {
-    httpRequest.get(`/moderation-list`, queryParams).then((response) => {
-      const result = response.data;
-      setIsReloading(false);
-      setModerationData(result.data);
-      setMetadata(result.metadata);
-    }).catch((err) => {
-      console.error(err);
-    });
+    httpRequest
+      .get(`/moderation-list`, queryParams)
+      .then((response) => {
+        const result = response.data;
+        setIsReloading(false);
+        setModerationData(result.data);
+        setMetadata(result.metadata);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageFilter]);
@@ -75,64 +78,73 @@ const Result: NextPageWithLayout = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <h1 className="text-2xl font-semibold">Daftar Video Unggahan</h1>
-      <section className="my-4">
-          <div>
-            <p className="font-bold">Filter</p>
-            <div className="flex flex-wrap gap-4">
-              <div className="flex gap-2 items-center">
-                <p className="text-sm">Status</p>
-                <Select
-                  defaultValue=""
-                  className="w-60"
-                  options={statusFilterOptions}
-                  onChange={(value) => {
-                    setIsReloading(true);
-                    if (!isEmpty(value))
-                      setPageFilter({...pageFilter, status: value.toUpperCase()});
-                    else {
-                      const { status, ...rest } = pageFilter;
-                      setPageFilter(rest);
-                    }
-                  }}
-                />
-              </div>
-              <div className="flex gap-2 items-center">
-                <p className="text-sm">Tanggal Unggah</p>
-                <DatePicker
-                  format="DD/MM/YYYY"
-                  onChange={(value) => {
-                    setIsReloading(true);
-                    if (!isNil(value))
-                      setPageFilter({...pageFilter, "created_at.lte": value?.format("YYYY-MM-DD"), "created_at.gte": value?.format("YYYY-MM-DD")});
-                    else {
-                      let temp = {...pageFilter};
-                      delete temp["created_at.lte"]
-                      delete temp["created_at.gte"]
-                      setPageFilter(temp);
-                    }
-                  }}
-                />
-              </div>
-              <div className="flex gap-2 items-center">
-                <p className="text-sm">Tanggal Rekaman</p>
-                <DatePicker
-                  format="DD/MM/YYYY"
-                  onChange={(value) => {
-                    setIsReloading(true);
-                    if (!isNil(value))
-                      setPageFilter({...pageFilter, "recording_date.lte": value?.format("YYYY-MM-DD"), "recording_date.gte": value?.format("YYYY-MM-DD")});
-                    else {
-                      
-                      let temp = {...pageFilter};
-                      delete temp["recording_date.lte"]
-                      delete temp["recording_date.gte"]
-                      setPageFilter(temp);
-                    }
-                  }}
-                />
-              </div>
-            </div>
+      <h1 className="mb-4 text-lg font-semibold md:text-xl">
+        Daftar Unggahan Video
+      </h1>
+      <section className="mb-4 rounded-md bg-white p-4 shadow-custom">
+        <p className="font-bold">Filter</p>
+        <div className="grid flex-wrap gap-4 md:flex">
+          <div className="grid grid-cols-2 items-center gap-2 md:flex">
+            <p className="text-sm">Status</p>
+            <Select
+              defaultValue=""
+              options={statusFilterOptions}
+              onChange={(value) => {
+                setIsReloading(true);
+                if (!isEmpty(value))
+                  setPageFilter({
+                    ...pageFilter,
+                    status: value.toUpperCase(),
+                  });
+                else {
+                  const { status, ...rest } = pageFilter;
+                  setPageFilter(rest);
+                }
+              }}
+            />
+          </div>
+          <div className="grid grid-cols-2 items-center gap-2 md:flex">
+            <p className="text-sm">Tanggal Unggah</p>
+            <DatePicker
+              format="DD/MM/YYYY"
+              onChange={(value) => {
+                setIsReloading(true);
+                if (!isNil(value))
+                  setPageFilter({
+                    ...pageFilter,
+                    "created_at.lte": value?.format("YYYY-MM-DD"),
+                    "created_at.gte": value?.format("YYYY-MM-DD"),
+                  });
+                else {
+                  let temp = { ...pageFilter };
+                  delete temp["created_at.lte"];
+                  delete temp["created_at.gte"];
+                  setPageFilter(temp);
+                }
+              }}
+            />
+          </div>
+          <div className="grid grid-cols-2 items-center gap-2 md:flex">
+            <p className="text-sm">Tanggal Rekaman</p>
+            <DatePicker
+              format="DD/MM/YYYY"
+              onChange={(value) => {
+                setIsReloading(true);
+                if (!isNil(value))
+                  setPageFilter({
+                    ...pageFilter,
+                    "recording_date.lte": value?.format("YYYY-MM-DD"),
+                    "recording_date.gte": value?.format("YYYY-MM-DD"),
+                  });
+                else {
+                  let temp = { ...pageFilter };
+                  delete temp["recording_date.lte"];
+                  delete temp["recording_date.gte"];
+                  setPageFilter(temp);
+                }
+              }}
+            />
+          </div>
         </div>
       </section>
       {!isNil(moderationData) ? (
@@ -142,27 +154,32 @@ const Result: NextPageWithLayout = () => {
           </Spin>
         ) : (
           <>
-            <Spin spinning={isReloading} >
-              <section className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            <Spin spinning={isReloading}>
+              <section className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3 ">
                 {moderationData.map((value: any, _: number) => {
                   return <ResultCard key={value._id} data={value} />;
                 })}
               </section>
             </Spin>
             <Pagination
-              className="mx-auto mt-4"
+              className="mx-auto mt-4 rounded-md bg-white p-2 shadow-custom"
               total={metadata.total_elements}
+              pageSizeOptions={["12", "24", "48", "96"]}
+              defaultPageSize={12}
+              defaultCurrent={1}
+              showSizeChanger
               showTotal={(total, range) => {
                 return !isMobile
                   ? `${range[0]}-${range[1]} of ${total} items`
                   : ``;
               }}
-              defaultPageSize={10}
-              defaultCurrent={1}
-              showSizeChanger
               onChange={(page, pageSize) => {
                 setIsReloading(true);
-                setPageFilter({...pageFilter, page: page - 1, limit: pageSize});
+                setPageFilter({
+                  ...pageFilter,
+                  page: page - 1,
+                  limit: pageSize,
+                });
               }}
             />
           </>

@@ -1,8 +1,14 @@
+import httpRequest from "@/common/HttpRequest";
+import ChartCard from "@/components/ChartCard";
+import Layout from "@/components/Layout";
+import { AuthContext, AuthContextInterface } from "@/context/AuthContext";
+import { isNil, isNilOrEmpty } from "@/utils/CommonUtil";
+import debounce from "@/utils/Debounce";
 import {
   faArrowTrendDown,
   faArrowTrendUp,
   faEquals,
-  faNotEqual,
+  faNotEqual
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import moment from "moment-timezone";
@@ -12,14 +18,8 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useState,
+  useState
 } from "react";
-import httpRequest from "../common/HttpRequest";
-import ChartCard from "../components/ChartCard";
-import Layout from "../components/Layout";
-import { AuthContext, AuthContextInterface } from "../context/AuthContext";
-import { isEmpty, isNil, isNilOrEmpty } from "../utils/CommonUtil";
-import debounce from "../utils/Debounce";
 import { chart1 } from "./statistic";
 import { NextPageWithLayout } from "./_app";
 
@@ -126,35 +126,39 @@ const Home: NextPageWithLayout = () => {
       let currentDate = moment.tz("Asia/Jakarta");
       let twoMonths = moment.tz("Asia/Jakarta").add(-60, "days");
 
-      let thisMonthResult = await httpRequest.get("/moderation/statistics", {
-        params: {
-          start_date: lastMonth.format("YYYY-MM-DD"),
-          end_date: currentDate.format("YYYY-MM-DD"),
-        },
-      }).then((res) => {
-        return res.data;
-      })
-      .catch((err) => {
-        console.log(err)
-        return null;
-      });
+      let thisMonthResult = await httpRequest
+        .get("/moderation/statistics", {
+          params: {
+            start_date: lastMonth.format("YYYY-MM-DD"),
+            end_date: currentDate.format("YYYY-MM-DD"),
+          },
+        })
+        .then((res) => {
+          return res.data;
+        })
+        .catch((err) => {
+          console.log(err);
+          return null;
+        });
 
-      let lastMonthResult = await httpRequest.get("/moderation/statistics", {
-        params: {
-          start_date: twoMonths.format("YYYY-MM-DD"),
-          end_date: lastMonth.format("YYYY-MM-DD"),
-        },
-      }).then((res) => {
-        return res.data;
-      })
-      .catch((err) => {
-        console.log(err)
-        return null;
-      });;
+      let lastMonthResult = await httpRequest
+        .get("/moderation/statistics", {
+          params: {
+            start_date: twoMonths.format("YYYY-MM-DD"),
+            end_date: lastMonth.format("YYYY-MM-DD"),
+          },
+        })
+        .then((res) => {
+          return res.data;
+        })
+        .catch((err) => {
+          console.log(err);
+          return null;
+        });
 
       let thisMonthData: StatisticResult = thisMonthResult?.data;
       let lastMonthData: StatisticResult = lastMonthResult?.data;
-      
+
       setChartData({
         ...chartData,
         data: filterChartData(thisMonthData),
@@ -190,8 +194,6 @@ const Home: NextPageWithLayout = () => {
         lastTotalDetected,
       };
 
-      console.log(currVideoData)
-
       recalculatePercentage(currVideoData);
     }, 200),
     []
@@ -211,7 +213,7 @@ const Home: NextPageWithLayout = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className="flex flex-1 flex-col gap-4">
+      <div className="flex h-full flex-col gap-4">
         <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="hidden rounded-md bg-white p-6 shadow-custom md:block">
             <h2 className="text-2xl font-semibold capitalize">
@@ -242,17 +244,43 @@ const Home: NextPageWithLayout = () => {
                   <h3 className="">Video Terunggah</h3>
                   <p className="text-2xl font-bold">{videoData?.totalVideo}</p>
                 </div>
-                <div className={"my-auto flex h-12 w-12 items-center justify-center rounded-xl " +  (videoData?.totalVideoPercentage >= 0 ? "bg-green-100" : "bg-red-100")}>
+                <div
+                  className={
+                    "my-auto flex h-12 w-12 items-center justify-center rounded-xl " +
+                    (videoData?.totalVideoPercentage >= 0
+                      ? "bg-green-100"
+                      : "bg-red-100")
+                  }
+                >
                   <FontAwesomeIcon
                     icon={faEquals}
                     height="24px"
-                    className={"text-2xl " + (videoData?.totalVideoPercentage >= 0 ? "text-green-500" : "text-red-500")}
+                    className={
+                      "text-2xl " +
+                      (videoData?.totalVideoPercentage >= 0
+                        ? "text-green-500"
+                        : "text-red-500")
+                    }
                   />
                 </div>
               </div>
               <div className="mt-4 flex gap-2 rounded-lg bg-slate-100 p-3.5">
-                <span className={"flex gap-2 " + (videoData?.totalVideoPercentage >= 0 ? "text-green-500" : "text-red-500")}>
-                  <FontAwesomeIcon icon={videoData?.totalVideoPercentage >= 0 ? faArrowTrendUp : faArrowTrendDown} height="24px" />{" "}
+                <span
+                  className={
+                    "flex gap-2 " +
+                    (videoData?.totalVideoPercentage >= 0
+                      ? "text-green-500"
+                      : "text-red-500")
+                  }
+                >
+                  <FontAwesomeIcon
+                    icon={
+                      videoData?.totalVideoPercentage >= 0
+                        ? faArrowTrendUp
+                        : faArrowTrendDown
+                    }
+                    height="24px"
+                  />{" "}
                   {videoData?.totalVideoPercentage}%
                 </span>{" "}
                 dari bulan lalu.
@@ -266,17 +294,43 @@ const Home: NextPageWithLayout = () => {
                     {videoData?.totalDetected}
                   </p>
                 </div>
-                <div className={"my-auto flex h-12 w-12 items-center justify-center rounded-xl " +  (videoData?.totalDetectedPercentage >= 0 ? "bg-green-100" : "bg-red-100")}>
+                <div
+                  className={
+                    "my-auto flex h-12 w-12 items-center justify-center rounded-xl " +
+                    (videoData?.totalDetectedPercentage >= 0
+                      ? "bg-green-100"
+                      : "bg-red-100")
+                  }
+                >
                   <FontAwesomeIcon
                     icon={faNotEqual}
                     height="24px"
-                    className={"text-2xl " + (videoData?.totalDetectedPercentage >= 0 ? "text-green-500" : "text-red-500")}
+                    className={
+                      "text-2xl " +
+                      (videoData?.totalDetectedPercentage >= 0
+                        ? "text-green-500"
+                        : "text-red-500")
+                    }
                   />
                 </div>
               </div>
               <div className="mt-4 flex gap-2 rounded-lg bg-slate-100 p-3.5">
-                <span className={"flex gap-2 " + (videoData?.totalDetectedPercentage >= 0 ? "text-green-500" : "text-red-500")}>
-                  <FontAwesomeIcon icon={videoData?.totalDetectedPercentage >= 0 ? faArrowTrendUp : faArrowTrendDown} height="24px" />{" "}
+                <span
+                  className={
+                    "flex gap-2 " +
+                    (videoData?.totalDetectedPercentage >= 0
+                      ? "text-green-500"
+                      : "text-red-500")
+                  }
+                >
+                  <FontAwesomeIcon
+                    icon={
+                      videoData?.totalDetectedPercentage >= 0
+                        ? faArrowTrendUp
+                        : faArrowTrendDown
+                    }
+                    height="24px"
+                  />{" "}
                   {videoData?.totalDetectedPercentage}%
                 </span>{" "}
                 dari bulan lalu.
@@ -284,7 +338,7 @@ const Home: NextPageWithLayout = () => {
             </div>
           </div>
         </section>
-        <section className="min-h-[20rem] flex-1 grow flex-col rounded-lg bg-white">
+        <section className="flex min-h-[20rem] flex-1 grow flex-col rounded-lg bg-white">
           <>
             {chartData?.data?.length != undefined &&
               chartData?.data?.length > 0 && (

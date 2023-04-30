@@ -1,8 +1,8 @@
+import { authService } from "@/common/AuthService";
+import httpRequest from "@/common/HttpRequest";
 import { message } from "antd";
 import { useRouter } from "next/router";
 import { createContext, FC, ReactNode, useEffect, useState } from "react";
-import { authService } from "../common/AuthService";
-import httpRequest from "../common/HttpRequest";
 
 export interface UserData {
   [key: string]: any;
@@ -37,18 +37,18 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       authService.unsubscribe(logout);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [router]);
 
   const checkToken = async () => {
     const userToken = localStorage.getItem("token");
-    
+
     if (userToken) {
       try {
         const response = await httpRequest.get("/user").catch((err) => {
           throw err;
         });
         const { status, data } = response?.data;
-        
+
         if (status === 200) {
           setIsLoggedIn(true);
           setUserData(data);
@@ -60,7 +60,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         logout();
       }
     }
-    
+
     setIsVerifying(false);
   };
 
@@ -75,7 +75,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         throw err;
       });
       const { status, data } = response.data;
-      
+
       if (status === 200) {
         localStorage.setItem("token", data.token);
         setIsLoggedIn(true);
@@ -104,7 +104,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         throw err;
       });
       const { status, data } = response.data;
-      
+
       if (status === 201) {
         message.success(data);
         setTimeout(() => {

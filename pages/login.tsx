@@ -1,3 +1,9 @@
+import Sadis from "@/components/icons/Sadis";
+import Sara from "@/components/icons/Sara";
+import Saru from "@/components/icons/Saru";
+import SiaranPartisan from "@/components/icons/SiaranPartisan";
+import Sihir from "@/components/icons/Sihir";
+import { AuthContext, AuthContextInterface } from "@/context/AuthContext";
 import { Button, Divider, Form, Input, message } from "antd";
 import type { NextPage } from "next";
 import Head from "next/head";
@@ -5,12 +11,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useContext, useEffect } from "react";
-import Sadis from "../components/icons/Sadis";
-import Sara from "../components/icons/Sara";
-import Saru from "../components/icons/Saru";
-import SiaranPartisan from "../components/icons/SiaranPartisan";
-import Sihir from "../components/icons/Sihir";
-import { AuthContext, AuthContextInterface } from "../context/AuthContext";
 
 const Login: NextPage = () => {
   const router = useRouter();
@@ -31,7 +31,6 @@ const Login: NextPage = () => {
   const onFinishFailed = (errorInfo: any) => {
     console.error("Failed:", errorInfo);
   };
-
 
   return (
     <div>
@@ -106,12 +105,12 @@ const Login: NextPage = () => {
             <div className="mx-auto mb-6 w-1/2 mix-blend-multiply md:w-2/5">
               <Link href={"/"}>
                 <div>
-                <Image
-                  src={"/logo_kpid.png"}
-                  width={626}
-                  height={160}
-                  alt="Logo KPID Jawa Timur"
-                />
+                  <Image
+                    src={"/logo_kpid.png"}
+                    width={626}
+                    height={160}
+                    alt="Logo KPID Jawa Timur"
+                  />
                 </div>
               </Link>
             </div>

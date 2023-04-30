@@ -1,21 +1,16 @@
-import { Button, Collapse, Divider, Skeleton, Timeline, Tooltip } from "antd";
-import { useEffect, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faMarsAndVenusBurst,
-  faGhost,
-  faHandHoldingHeart,
-  faHandsPraying,
-  faPeopleGroup,
-  faTelevision,
-  faPenAlt,
-  faPen,
-} from "@fortawesome/free-solid-svg-icons";
-import Link from "next/link";
-import { randomInt, randomUUID } from "crypto";
+import ViolationIconCard from "@/components/result/ViolationIconCard";
+import ModerationResponse from "@/types/ModerationResponse";
+import ModerationResult from "@/types/ModerationResult";
+import { isNilOrEmpty } from "@/utils/CommonUtil";
 import { faClock, faPenToSquare } from "@fortawesome/free-regular-svg-icons";
-import { isNil, isNilOrEmpty } from "../../utils/CommonUtil";
+import {
+  faTelevision
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Divider, Skeleton } from "antd";
 import moment from "moment";
+import Link from "next/link";
+import { useState } from "react";
 
 const timelineItem = [
   {
@@ -78,7 +73,7 @@ type Props = {
 };
 
 function ResultCard(props: Props) {
-  const [moderationData, _] = useState(props.data);
+  const [moderationData, _] = useState<ModerationResponse>(props.data);
 
   const getStatusStyling = ((status: string) => {
     switch (status.toLowerCase()) {
@@ -113,32 +108,44 @@ function ResultCard(props: Props) {
           text: "Status Tidak Diketahui",
         };
     }
-  })(moderationData.status);
+  })(moderationData?.status !== undefined ? moderationData?.status : "");
 
   const summarizeCategories = () => {
-    let temp: Array<String> = [];
-    if (!isNilOrEmpty(moderationData?.result)) {
-      moderationData?.result.forEach((violation: any) => {
+    let temp: string[] = [];
+    if (moderationData?.result !== undefined) {
+      moderationData?.result.forEach((violation: ModerationResult) => {
         temp = [...temp, ...violation.category];
       });
     }
 
-    return Array.from(new Set(temp)).sort((a, b) => a.length - b.length);
+    const stringCounts: { [key: string]: number } = {};
+
+    temp.forEach((str) => {
+      let tempString = str.toLowerCase();
+      if (stringCounts[tempString]) {
+        stringCounts[tempString]++;
+      } else {
+        stringCounts[tempString] = 1;
+      }
+    });
+
+    return stringCounts;
   };
   const categories = summarizeCategories();
 
   return (
     <Link href={"/result/" + moderationData._id}>
-      <div className="flex cursor-pointer flex-col rounded-md bg-white shadow-custom transition-shadow hover:shadow-lg hover:shadow-slate-300">
-        <div className="relative pt-[40%] md:pt-[50%]">
-          {!isNilOrEmpty(moderationData?.frames) ? (
+      <div className="flex cursor-pointer flex-col rounded-md bg-white shadow-custom transition-shadow hover:shadow-custom-lg">
+        <div className="relative pt-[50%]">
+          {moderationData?.frames !== undefined &&
+          moderationData?.frames !== null ? (
             <div
               className="absolute top-0 bottom-0 left-0 right-0 rounded-t-md bg-cover"
               style={{
                 backgroundImage: `url(https://kpid-jatim.storage.googleapis.com/${encodeURI(
                   moderationData?.frames[
                     Math.floor(moderationData?.frames.length / 2)
-                  ]
+                  ].frame_url
                 )})`,
               }}
             ></div>
@@ -155,34 +162,38 @@ function ResultCard(props: Props) {
           >
             {getStatusStyling.text}
           </div>
-          <div className="hidden flex-wrap justify-end gap-1 text-sm md:absolute md:bottom-2 md:right-2 md:flex lg:text-base">
-            {!isNilOrEmpty(categories) &&
-              categories.map((category, idx) => {
-                return (
-                  <span
-                    key={idx}
-                    className="rounded-lg bg-slate-700 bg-opacity-80 py-0.5 px-2 text-sm font-semibold text-white"
-                  >
-                    {category.replace(/_/g, " ")}
-                  </span>
-                );
-              })}
+          <div className="absolute bottom-2 right-2 flex flex-wrap justify-end gap-1 text-sm lg:text-base">
+            {!isNilOrEmpty(categories) && (
+              <ViolationIconCard
+                height={24}
+                cardStyle
+                hideWhenZero
+                darkStyle
+                sara={categories["sara"]}
+                saru={categories["saru"]}
+                sihir={categories["sihir"]}
+                sadis={categories["sadis"]}
+                siaran={categories["siaran_partisan"]}
+              />
+            )}
           </div>
         </div>
         <div className="flex flex-1 flex-col p-2 text-sm md:p-4">
-          <div className="flex flex-wrap gap-1 text-sm md:hidden">
-            {!isNilOrEmpty(categories) &&
-              categories.map((category, idx) => {
-                return (
-                  <span
-                    key={idx}
-                    className="rounded-lg bg-slate-700 bg-opacity-80 py-0.5 px-2 text-sm font-semibold text-white"
-                  >
-                    {category.replace(/_/g, " ")}
-                  </span>
-                );
-              })}
-          </div>
+          {/* <div className="flex flex-wrap gap-1 text-sm md:hidden">
+            {!isNilOrEmpty(categories) && (
+              <ViolationIconCard
+                height={24}
+                cardStyle
+                hideWhenZero
+                darkStyle
+                sara={categories["sara"]}
+                saru={categories["saru"]}
+                sihir={categories["sihir"]}
+                sadis={categories["sadis"]}
+                siaran={categories["siaran_partisan"]}
+              />
+            )}
+          </div> */}
           <h4 className="mt-2 mb-2 font-semibold md:mt-0">
             {moderationData.filename}
           </h4>
@@ -240,9 +251,7 @@ function ResultCard(props: Props) {
                 <span>
                   <p className="text-sm">Tanggal Unggah</p>
                   <p className="font-semibold">
-                    {moment(moderationData?.created_at).format(
-                      "DD MMMM YYYY"
-                    )}
+                    {moment(moderationData?.created_at).format("DD MMMM YYYY")}
                   </p>
                 </span>
               </div>
