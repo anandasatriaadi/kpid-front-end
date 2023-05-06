@@ -2,13 +2,18 @@ import Layout from "@/components/Layout";
 import { NextPageWithLayout } from "@/pages/_app";
 import { Collapse } from "antd";
 import Head from "next/head";
-import { ReactElement } from "react";
+import * as React from "react";
+import Lightbox, { SlideImage } from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
 
 const HelpPage: NextPageWithLayout = () => {
+  const [lightboxOpen, setLightboxOpen] = React.useState<boolean>(false);
+  const [lightboxIndex, setLightboxIndex] = React.useState<number>(0);
+
   const UPLOAD_VIDEO_STEPS = [
     {
       title: 'Pilih menu "Unggah Video"',
-      image: "/login_image.png",
+      image: "/help_upload_1.png",
       description: (
         <ol className="ml-5 grid list-outside list-disc gap-2">
           <li>
@@ -24,7 +29,7 @@ const HelpPage: NextPageWithLayout = () => {
     },
     {
       title: "Unggah Video",
-      image: "",
+      image: "/help_upload_2.png",
       description: (
         <ol className="ml-5 grid list-outside list-disc gap-2">
           <li>
@@ -37,7 +42,7 @@ const HelpPage: NextPageWithLayout = () => {
     },
     {
       title: "Isi Formulir Informasi Video",
-      image: "",
+      image: "/help_upload_3.png",
       description: (
         <ol className="ml-5 grid list-outside list-disc gap-2">
           <li>
@@ -66,7 +71,7 @@ const HelpPage: NextPageWithLayout = () => {
     },
     {
       title: "Verifikasi Isian Formulir",
-      image: "",
+      image: "/help_upload_4.png",
       description: (
         <ol className="ml-5 grid list-outside list-disc gap-2">
           <li>
@@ -81,12 +86,16 @@ const HelpPage: NextPageWithLayout = () => {
     },
     {
       title: "Unggah Formulir",
-      image: "",
+      image: "/help_upload_5.png",
       description: (
         <ol className="ml-5 grid list-outside list-disc gap-2">
           <li>
             Untuk mengunggah video serta formulir yang anda isi, pilih menu
             unggah.
+          </li>
+          <li>
+            Setelah berhasil terunggah, akan muncul pesan berupa ID dari
+            moderasi yang sedang dilakukan.
           </li>
           <li className="font-semibold">
             Perhatian: Diharap untuk tidak menutup halaman sampai video selesai
@@ -156,6 +165,11 @@ const HelpPage: NextPageWithLayout = () => {
     },
   ];
 
+  const UPLOAD_VIDEO_IMAGES = UPLOAD_VIDEO_STEPS.map((step) => {
+    let image: SlideImage = {src: step.image};
+    return image
+    });
+
   return (
     <div>
       <Head>
@@ -167,10 +181,13 @@ const HelpPage: NextPageWithLayout = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <h1 className="mb-4 text-lg font-semibold md:text-xl">
+      <h1 className="mb-4 text-xl font-semibold md:text-2xl">
         Panduan Penggunaan Sistem Rekomendasi
       </h1>
-      <div className="rounded-md bg-white p-4">
+      <div className="rounded-lg bg-white p-4 shadow-custom">
+        <h2 className="mb-2 text-base font-semibold md:text-lg">
+          Bagaimana Mengunggah Video ke Sistem Rekomendasi?
+        </h2>
         <Collapse className="custom-panel">
           <Collapse.Panel
             className="text-base"
@@ -179,14 +196,24 @@ const HelpPage: NextPageWithLayout = () => {
           >
             <section>
               <ol className="grid list-inside list-decimal gap-6 lg:grid-cols-2">
+              <Lightbox
+                open={lightboxOpen}
+                index={lightboxIndex}
+                close={() => setLightboxOpen(false)}
+                slides={UPLOAD_VIDEO_IMAGES}
+              />
                 {UPLOAD_VIDEO_STEPS.map((val, index) => {
                   return (
                     <li className="font-semibold" key={index}>
                       <p className="mb-2 inline-block">{val.title}</p>
                       <div className="gap-4">
                         <div
-                          className="mb-2 bg-slate-300 bg-cover bg-no-repeat pt-[56%]"
+                          className="mb-2 bg-slate-300 bg-cover bg-no-repeat pt-[56%] hover:cursor-pointer"
                           style={{ backgroundImage: `url(${val.image})` }}
+                          onClick={() => {
+                            setLightboxIndex(index);
+                            setLightboxOpen(true);
+                          }}
                         ></div>
                         <div className="text-justify font-normal">
                           {val.description}
@@ -198,6 +225,13 @@ const HelpPage: NextPageWithLayout = () => {
               </ol>
             </section>
           </Collapse.Panel>
+        </Collapse>
+      </div>
+      <div className="mt-4 rounded-lg bg-white p-4 shadow-custom">
+        <h2 className="mb-2 text-base font-semibold md:text-lg">
+          Bagaimana Melakukan Moderasi terhadap Video yang Sudah Diunggah?
+        </h2>
+        <Collapse className="custom-panel">
           <Collapse.Panel
             className="text-base"
             header={<h2>Moderasi Video</h2>}
@@ -232,6 +266,6 @@ const HelpPage: NextPageWithLayout = () => {
 
 export default HelpPage;
 
-HelpPage.getLayout = function getLayout(page: ReactElement) {
+HelpPage.getLayout = function getLayout(page: React.ReactElement) {
   return <Layout>{page}</Layout>;
 };

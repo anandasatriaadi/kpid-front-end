@@ -1,0 +1,20 @@
+.ant-segmented {
+    @apply overflow-hidden;
+
+    &-thumb {
+        @apply bg-sky-100;
+    }
+    
+    &-item {
+        $item: &;
+        @apply rounded-none flex-1;
+
+        &-label {
+            @apply py-[0.125rem] hover:text-sky-600 transition-all duration-300;
+        }
+
+        &-selected {
+            @apply bg-sky-100 text-sky-600 shadow-custom-lg;
+        }
+    }
+}

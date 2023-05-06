@@ -1,0 +1,20 @@
+.ant-picker {
+    &-cell {
+        $cell: &;
+
+        &-in-view#{$cell}-today {
+            #{$cell}-inner::before {
+                @apply border-sky-600;
+            }
+        }
+        &-in-view#{$cell}-selected {
+            #{$cell}-inner {
+                @apply bg-sky-600;
+            }
+        }
+    }
+
+    &-today-btn {
+        @apply text-sky-600;
+    }
+}

@@ -10,7 +10,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Divider, Skeleton } from "antd";
 import moment from "moment";
 import Link from "next/link";
-import { useState } from "react";
+import * as React from "react";
 
 const timelineItem = [
   {
@@ -73,7 +73,7 @@ type Props = {
 };
 
 function ResultCard(props: Props) {
-  const [moderationData, _] = useState<ModerationResponse>(props.data);
+  const [moderationData, _] = React.useState<ModerationResponse>(props.data);
 
   const getStatusStyling = ((status: string) => {
     switch (status.toLowerCase()) {
@@ -89,7 +89,7 @@ function ResultCard(props: Props) {
         };
       case "in_progress":
         return {
-          className: "bg-cyan-500",
+          className: "bg-blue-600 text-white",
           text: "Sedang Diproses",
         };
       case "approved":
@@ -135,14 +135,16 @@ function ResultCard(props: Props) {
 
   return (
     <Link href={"/result/" + moderationData._id}>
-      <div className="flex cursor-pointer flex-col rounded-md bg-white shadow-custom transition-shadow hover:shadow-custom-lg">
-        <div className="relative pt-[50%]">
+      <div className="group flex cursor-pointer flex-col rounded-lg bg-white shadow-custom transition-shadow hover:shadow-custom-lg">
+        <div className="relative overflow-hidden rounded-t-lg pt-[50%]">
           {moderationData?.frames !== undefined &&
           moderationData?.frames !== null ? (
             <div
-              className="absolute top-0 bottom-0 left-0 right-0 rounded-t-md bg-cover"
+              className="absolute top-0 bottom-0 left-0 right-0 bg-cover transition-transform duration-300 group-hover:scale-[1.025]"
               style={{
-                backgroundImage: `url(https://kpid-jatim.storage.googleapis.com/${encodeURI(
+                backgroundImage: `url(https://${
+                  process.env.NEXT_PUBLIC_BUCKET_NAME
+                }.storage.googleapis.com/${encodeURI(
                   moderationData?.frames[
                     Math.floor(moderationData?.frames.length / 2)
                   ].frame_url
@@ -150,19 +152,19 @@ function ResultCard(props: Props) {
               }}
             ></div>
           ) : (
-            <div className="absolute top-0 bottom-0 left-0 right-0 rounded-t-md">
+            <div className="absolute top-0 bottom-0 left-0 right-0">
               <Skeleton.Image active className="h-full w-full"></Skeleton.Image>
             </div>
           )}
           <div
             className={
-              "absolute top-0 right-0 rounded-tr-md rounded-bl-md py-2 px-4 text-sm font-semibold tracking-wide " +
+              "absolute top-0 right-0 rounded-tr-lg rounded-bl-lg py-2 px-4 text-sm font-semibold tracking-wide " +
               getStatusStyling.className
             }
           >
             {getStatusStyling.text}
           </div>
-          <div className="absolute bottom-2 right-2 flex flex-wrap justify-end gap-1 text-sm lg:text-base">
+          <div className="absolute bottom-2 right-2 flex flex-wrap justify-end gap-1">
             {!isNilOrEmpty(categories) && (
               <ViolationIconCard
                 height={24}
@@ -174,27 +176,13 @@ function ResultCard(props: Props) {
                 sihir={categories["sihir"]}
                 sadis={categories["sadis"]}
                 siaran={categories["siaran_partisan"]}
+                className="flex-wrap-reverse justify-end"
               />
             )}
           </div>
         </div>
         <div className="flex flex-1 flex-col p-2 text-sm md:p-4">
-          {/* <div className="flex flex-wrap gap-1 text-sm md:hidden">
-            {!isNilOrEmpty(categories) && (
-              <ViolationIconCard
-                height={24}
-                cardStyle
-                hideWhenZero
-                darkStyle
-                sara={categories["sara"]}
-                saru={categories["saru"]}
-                sihir={categories["sihir"]}
-                sadis={categories["sadis"]}
-                siaran={categories["siaran_partisan"]}
-              />
-            )}
-          </div> */}
-          <h4 className="mt-2 mb-2 font-semibold md:mt-0">
+          <h4 className="mt-2 mb-2 text-sm font-semibold transition-colors duration-300 group-hover:text-sky-600 md:mt-0 md:text-base">
             {moderationData.filename}
           </h4>
           <Divider className="m-0 my-2 bg-slate-200"></Divider>
@@ -214,9 +202,13 @@ function ResultCard(props: Props) {
                   <FontAwesomeIcon icon={faTelevision} height="12px" />
                 </span>
                 <span className="flex flex-col justify-center">
-                  <p className="text-sm">Stasiun</p>
+                  <p className="hidden md:block">Stasiun</p>
                   <p className="font-semibold">
-                    {moderationData?.station_name}
+                    {typeof moderationData?.station_name === "object" &&
+                    !Array.isArray(moderationData?.station_name) &&
+                    moderationData?.station_name !== null
+                      ? moderationData?.station_name.name
+                      : moderationData?.station_name}
                   </p>
                 </span>
               </div>
@@ -225,7 +217,7 @@ function ResultCard(props: Props) {
                   <FontAwesomeIcon icon={faPenToSquare} height="12px" />
                 </span>
                 <span>
-                  <p className="text-sm">Program</p>
+                  <p className="hidden md:block">Program</p>
                   <p className="font-semibold">
                     {moderationData?.program_name}
                   </p>
@@ -236,7 +228,7 @@ function ResultCard(props: Props) {
                   <FontAwesomeIcon icon={faClock} height="12px" />
                 </span>
                 <span>
-                  <p className="text-sm">Tanggal Rekaman</p>
+                  <p className="hidden md:block">Tanggal Rekaman</p>
                   <p className="font-semibold">
                     {moment(moderationData?.recording_date).format(
                       "DD MMMM YYYY"
@@ -249,7 +241,7 @@ function ResultCard(props: Props) {
                   <FontAwesomeIcon icon={faClock} height="12px" />
                 </span>
                 <span>
-                  <p className="text-sm">Tanggal Unggah</p>
+                  <p className="hidden md:block">Tanggal Unggah</p>
                   <p className="font-semibold">
                     {moment(moderationData?.created_at).format("DD MMMM YYYY")}
                   </p>

@@ -1,14 +1,14 @@
 import { Button, Drawer, Dropdown, Menu } from "antd";
 import Image from "next/image";
 import Link from "next/link";
-import { useContext, useEffect, useState } from "react";
+import * as React from "react";
 import { AuthContext, AuthContextInterface } from "@/context/AuthContext";
 import debounce from "@/utils/Debounce";
 import Navlink from "@/components/Navlink";
 
 function Navbar() {
-  const [open, setOpen] = useState(false);
-  const { isLoggedIn, userData, logout } = useContext(
+  const [open, setOpen] = React.useState(false);
+  const { isLoggedIn, userData, logout } = React.useContext(
     AuthContext
   ) as AuthContextInterface;
 
@@ -56,7 +56,7 @@ function Navbar() {
   );
 
   // Adding event listener to make navbar hide and show on scroll
-  useEffect(() => {
+  React.useEffect(() => {
     document.addEventListener(
       "scroll",
       debounce((e: any) => {
@@ -96,7 +96,7 @@ function Navbar() {
   return (
     <div
       id="navbar"
-      className="z-50 mb-8 rounded-b-md bg-white p-4 shadow-custom transition-all duration-300"
+      className="z-50 mb-8 rounded-b-lg bg-white p-4 shadow-custom transition-all duration-300"
     >
       <div className="flex justify-between">
         {/* LEFT SECTION */}

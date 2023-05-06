@@ -14,7 +14,7 @@ import {
   faPenToSquare,
   faStopwatch,
   faTelevision,
-  faXmarkCircle
+  faXmarkCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, Collapse, message, Skeleton, Tabs } from "antd";
@@ -22,7 +22,7 @@ import moment from "moment";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { Tab } from "rc-tabs/lib/interface";
-import { ReactElement, useEffect, useState } from "react";
+import * as React from "react";
 
 const timelineItem = [
   {
@@ -110,12 +110,13 @@ const timelineItem = [
 ];
 
 const SingleResult: NextPageWithLayout = () => {
-  const [categorySummary, setCategorySummary] = useState<any | undefined>(
+  const [categorySummary, setCategorySummary] = React.useState<any | undefined>(
     undefined
   );
-  const [isModerated, setIsModerated] = useState<boolean>(true);
-  const [moderationData, setModerationData] = useState<ModerationResponse>();
-  const [framesToShow, setFramesToShow] = useState<FrameResult[]>([]);
+  const [isModerated, setIsModerated] = React.useState<boolean>(true);
+  const [moderationData, setModerationData] =
+    React.useState<ModerationResponse>();
+  const [framesToShow, setFramesToShow] = React.useState<FrameResult[]>([]);
 
   const router = useRouter();
   const pathname = router.asPath;
@@ -125,11 +126,15 @@ const SingleResult: NextPageWithLayout = () => {
   const checkIfAllModerated = () => {
     let isAllModerated = true;
     if (moderationData?.result !== undefined) {
-      moderationData.result.forEach((timeline: ModerationResult) => {
-        if (timeline.decision.toString() === "PENDING") {
-          isAllModerated = false;
-        }
-      });
+      if (moderationData?.result.length === 0) {
+        isAllModerated = false;
+      } else {
+        moderationData.result.forEach((timeline: ModerationResult) => {
+          if (timeline.decision.toString() === "PENDING") {
+            isAllModerated = false;
+          }
+        });
+      }
     }
     setIsModerated(isAllModerated);
   };
@@ -179,13 +184,19 @@ const SingleResult: NextPageWithLayout = () => {
         const blob = new Blob([response.data], { type: type });
         const link = document.createElement("a");
         link.href = window.URL.createObjectURL(blob);
-        link.download = `Laporan_${moderationData.station_name}_${moderationData.created_at}.pdf`;
+        const station_name =
+          typeof moderationData?.station_name === "object" &&
+          !Array.isArray(moderationData?.station_name) &&
+          moderationData?.station_name !== null
+            ? moderationData?.station_name.name
+            : moderationData?.station_name;
+        link.download = `Laporan_${station_name}_${moderationData.created_at}.pdf`;
         link.click();
       });
     message.success("Laporan berhasil di-generate");
   };
 
-  useEffect(() => {
+  React.useEffect(() => {
     (async () => {
       const response = await httpRequest.get(fetchURL).catch((err) => {
         console.error(err);
@@ -199,12 +210,16 @@ const SingleResult: NextPageWithLayout = () => {
 
       let temp: any[] = [];
       if (result?.result !== undefined) {
-        result.result.forEach((item: ModerationResult) => {
-          if (item.decision.toUpperCase() === "PENDING") {
+          if (result?.result.length === 0) {
             setIsModerated(false);
+          } else {
+            result.result.forEach((item: ModerationResult) => {
+              if (item.decision.toUpperCase() === "PENDING") {
+                setIsModerated(false);
+              }
+              temp = [...temp, ...item.category];
+            });
           }
-          temp = [...temp, ...item.category];
-        });
       }
 
       const summary = temp.reduce((res, val) => {
@@ -246,33 +261,32 @@ const SingleResult: NextPageWithLayout = () => {
     })();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [router]);
 
   const RenderViolationTabs = (result: any) => {
     let responses = result.category.map((item: any, index: any) => {
       let idx: string = index.toString();
-      const className =
-        "flex h-6 w-6 items-center justify-center rounded-full bg-slate-200 text-black " +
-        (item.count > 1 ? "bg-red-500" : item.count > 0 && "bg-amber-400");
       let response: Tab = {
         key: idx,
         label: <span className="flex items-center">{item}</span>,
-        children: timelineItem[0].violations.map((violation, vIndex) => {
-          return (
-            <Collapse ghost key={vIndex}>
-              <Collapse.Panel
-                header={vIndex + 1 + ". " + violation.pasal}
-                key="1"
-              >
-                <p
-                  dangerouslySetInnerHTML={{
-                    __html: violation.deskripsi,
-                  }}
-                ></p>
-              </Collapse.Panel>
-            </Collapse>
-          );
-        }),
+        children: (
+          <Collapse className="custom-panel">
+            {timelineItem[0].violations.map((violation, vIndex) => {
+              return (
+                <Collapse.Panel
+                  header={vIndex + 1 + ". " + violation.pasal}
+                  key={vIndex}
+                >
+                  <p
+                    dangerouslySetInnerHTML={{
+                      __html: violation.deskripsi,
+                    }}
+                  ></p>
+                </Collapse.Panel>
+              );
+            })}
+          </Collapse>
+        ),
       };
       return response;
     });
@@ -318,7 +332,7 @@ const SingleResult: NextPageWithLayout = () => {
       </Head>
 
       <div className="mb-2 flex items-center gap-4">
-        <h1 className="text-lg font-semibold md:text-xl">Detail Video</h1>
+        <h1 className="text-xl font-semibold md:text-2xl">Detail Video</h1>
         <div
           className={
             "rounded-lg px-4 py-2 font-semibold tracking-wide " +
@@ -335,7 +349,7 @@ const SingleResult: NextPageWithLayout = () => {
           <>
             <section className="grid grid-cols-4 gap-x-4 ">
               {/* Video Informations --- Hidden on Mobile */}
-              <div className="hidden flex-col gap-2 rounded-md bg-white p-4 shadow-custom lg:flex">
+              <div className="hidden flex-col gap-2 rounded-lg bg-white p-4 shadow-custom lg:flex">
                 <p className="text-base font-semibold md:text-lg">
                   Informasi Rekaman
                 </p>
@@ -391,7 +405,7 @@ const SingleResult: NextPageWithLayout = () => {
                   </span>
                 </div>
               </div>
-              <div className="col-span-4 flex flex-col rounded-md bg-white p-4 shadow-custom lg:col-span-3">
+              <div className="col-span-4 flex flex-col rounded-lg bg-white p-4 shadow-custom lg:col-span-3">
                 <h2 className="text-base font-semibold md:text-lg">
                   {moderationData?.filename}
                 </h2>
@@ -432,7 +446,11 @@ const SingleResult: NextPageWithLayout = () => {
                     <span className="flex flex-col justify-center">
                       <p className="text-sm">Stasiun</p>
                       <p className="font-semibold">
-                        {moderationData?.station_name}
+                        {typeof moderationData?.station_name === "object" &&
+                        !Array.isArray(moderationData?.station_name) &&
+                        moderationData?.station_name !== null
+                          ? moderationData?.station_name.name
+                          : moderationData?.station_name}
                       </p>
                     </span>
                   </div>
@@ -517,7 +535,7 @@ const SingleResult: NextPageWithLayout = () => {
                 </div>
               </div>
             </section>
-            <section className="mt-8 rounded-md bg-white shadow-custom">
+            <section className="mt-8 rounded-lg bg-white shadow-custom">
               <Collapse defaultActiveKey="1" ghost>
                 <Collapse.Panel
                   header="Potongan Frame Video"
@@ -532,7 +550,7 @@ const SingleResult: NextPageWithLayout = () => {
                             key={index}
                             className="bg-cover pt-[56.25%]"
                             style={{
-                              backgroundImage: `url(https://kpid-jatim.storage.googleapis.com/${encodeURI(
+                              backgroundImage: `url(https://${process.env.NEXT_PUBLIC_BUCKET_NAME}.storage.googleapis.com/${encodeURI(
                                 frame_data.frame_url
                               )})`,
                             }}
@@ -554,7 +572,7 @@ const SingleResult: NextPageWithLayout = () => {
 
             {moderationData?.status !== undefined &&
               moderationData?.status.includes("REJECTED") && (
-                <section className="mt-8 rounded-md bg-white shadow-custom">
+                <section className="mt-8 rounded-lg bg-white shadow-custom">
                   <Collapse defaultActiveKey="1" ghost activeKey={1}>
                     <Collapse.Panel
                       header="Hasil Moderasi"
@@ -563,7 +581,7 @@ const SingleResult: NextPageWithLayout = () => {
                     >
                       {moderationData?.result !== undefined &&
                         moderationData?.result.length > 0 && (
-                          <Collapse className="custom-panel rounded-b-md">
+                          <Collapse className="custom-panel rounded-b-lg font-normal">
                             {moderationData.result.map(
                               (item: ModerationResult, index: number) => (
                                 <Collapse.Panel
@@ -600,7 +618,7 @@ const SingleResult: NextPageWithLayout = () => {
                                             className="h-full w-full"
                                             controls
                                             controlsList="nodownload"
-                                            src={`https://kpid-jatim.storage.googleapis.com/${encodeURI(
+                                            src={`https://${process.env.NEXT_PUBLIC_BUCKET_NAME}.storage.googleapis.com/${encodeURI(
                                               item.clip_url
                                             )}`}
                                           ></video>
@@ -615,6 +633,7 @@ const SingleResult: NextPageWithLayout = () => {
                                       </div>
                                       <Tabs
                                         type="card"
+                                        className="mb-2"
                                         items={RenderViolationTabs(item)}
                                       />
 
@@ -699,6 +718,6 @@ const SingleResult: NextPageWithLayout = () => {
 
 export default SingleResult;
 
-SingleResult.getLayout = function getLayout(page: ReactElement) {
+SingleResult.getLayout = function getLayout(page: React.ReactElement) {
   return <Layout>{page}</Layout>;
 };

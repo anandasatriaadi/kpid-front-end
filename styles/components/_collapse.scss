@@ -5,7 +5,7 @@
 
   &-item {
     &.panel-disabled {
-      .ant-collapse-header {
+      > .ant-collapse-header {
         @apply cursor-default;
       }
     }
@@ -16,7 +16,7 @@
 
     .ant-collapse {
       &-item {
-        @apply border-[1px] border-slate-200 mb-2 rounded-md;
+        @apply border-[1px] border-slate-200 mb-2 rounded-lg;
 
         &:last-child {
           @apply mb-0;

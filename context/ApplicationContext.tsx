@@ -1,24 +1,24 @@
 import debounce from "@/utils/Debounce";
-import { createContext, FC, ReactNode, useEffect, useState } from "react";
+import * as React from "react";
 
 export interface ApplicationContextInterface {
   isMobile: boolean;
 }
 
 type ApplicationProviderProps = {
-  children: ReactNode;
+  children: React.ReactNode;
 };
 
 export const ApplicationContext =
-  createContext<ApplicationContextInterface | null>(null);
+  React.createContext<ApplicationContextInterface | null>(null);
 
-export const ApplicationProvider: FC<ApplicationProviderProps> = ({
+export const ApplicationProvider: React.FC<ApplicationProviderProps> = ({
   children,
 }) => {
   // Initial States
-  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [isMobile, setIsMobile] = React.useState<boolean>(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     setIsMobile(window.innerWidth <= 768);
 
     const handleResize = debounce((e: any) => {

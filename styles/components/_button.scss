@@ -1,11 +1,11 @@
 .ant-btn {
-  @apply h-min px-3 py-1 rounded-md;
+  @apply h-min px-3 py-1 rounded-lg hover:text-sky-600 hover:border-sky-600;
 
   &-primary {
-    @apply border-sky-500 bg-sky-500 text-white hover:border-sky-400 hover:bg-sky-400 rounded-md;
+    @apply border-sky-600 bg-sky-600 text-white hover:text-white hover:border-sky-500 hover:bg-sky-500 rounded-lg;
 
     &:focus {
-      @apply border-sky-400 bg-sky-400;
+      @apply border-sky-500 bg-sky-500;
     }
 
     &.button {

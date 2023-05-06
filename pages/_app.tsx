@@ -4,10 +4,10 @@ import type { AppProps } from "next/app";
 import { ApplicationProvider } from "@/context/ApplicationContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { NextPage } from "next";
-import { ReactElement, ReactNode } from "react";
+import * as React from "react";
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
-  getLayout?: (page: ReactElement) => ReactNode;
+  getLayout?: (page: React.ReactElement) => React.ReactNode;
 };
 
 type AppPropsWithLayout = AppProps & {

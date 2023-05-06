@@ -2,7 +2,8 @@ import { authService } from "@/common/AuthService";
 import httpRequest from "@/common/HttpRequest";
 import { message } from "antd";
 import { useRouter } from "next/router";
-import { createContext, FC, ReactNode, useEffect, useState } from "react";
+import * as React from "react";
+import { UrlObject } from "url";
 
 export interface UserData {
   [key: string]: any;
@@ -18,18 +19,20 @@ export interface AuthContextInterface {
 }
 
 type AuthProviderProps = {
-  children: ReactNode;
+  children: React.ReactNode;
 };
 
-export const AuthContext = createContext<AuthContextInterface | null>(null);
+export const AuthContext = React.createContext<AuthContextInterface | null>(
+  null
+);
 
-export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(true);
-  const [userData, setUserData] = useState<UserData>({});
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+  const [isVerifying, setIsVerifying] = React.useState(true);
+  const [userData, setUserData] = React.useState<UserData>({});
   const router = useRouter();
 
-  useEffect(() => {
+  React.useEffect(() => {
     checkToken();
     authService.subscribe(logout);
 
@@ -81,9 +84,13 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         setIsLoggedIn(true);
         setUserData(data.user_data);
         message.success("Login Success");
-        setTimeout(() => {
+
+        const { redirect } = router.query;
+        if (redirect) {
+          router.push(redirect.toString());
+        } else {
           router.push("/");
-        }, 200);
+        }
       } else {
         message.error(data.message);
       }
@@ -100,9 +107,16 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     }
 
     try {
-      const response = await httpRequest.post("/signup", form).catch((err) => {
-        throw err;
-      });
+      const response = await httpRequest
+        .post("/signup", form)
+        .catch((error) => {
+          console.log(error);
+          if (error?.response !== undefined || error.response !== null) {
+            return error.response;
+          } else {
+            throw error;
+          }
+        });
       const { status, data } = response.data;
 
       if (status === 201) {
@@ -128,7 +142,21 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem("token");
     setIsLoggedIn(false);
     setUserData({});
-    router.push("/login");
+
+    // Check whether the user is on the login page or not
+    console.log(router.asPath);
+    if (router.pathname !== "/login") {
+      let url: UrlObject = {
+        pathname: "/login",
+      };
+
+      console.log(router.asPath);
+      if (router.asPath !== "/") {
+        url.query = { redirect: router.asPath };
+      }
+
+      router.push(url);
+    }
   };
 
   return (

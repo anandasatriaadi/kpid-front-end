@@ -1,13 +1,14 @@
 import FrameResult from "@/types/FrameResult";
 import ModerationResult from "@/types/ModerationResult";
 import ModerationStatus from "@/types/ModerationStatus";
+import Station from "./Station";
 
 type ModerationResponse = {
   _id: string;
   user_id: string;
   filename: string;
   program_name: string;
-  station_name: string;
+  station_name: Station | string;
   start_time: string;
   end_time: string;
   fps: number;

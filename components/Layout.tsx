@@ -7,17 +7,14 @@ import {
 } from "@/context/ApplicationContext";
 import { AuthContext, AuthContextInterface } from "@/context/AuthContext";
 import {
-  CloudUploadOutlined,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  QuestionCircleOutlined,
-  UserOutlined,
-  VideoCameraOutlined,
-} from "@ant-design/icons";
-import {
   faAngleLeft,
   faAngleRight,
+  faBars,
+  faCircleQuestion,
+  faCloudArrowUp,
   faFileUpload,
+  faUser,
+  faVideo,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -28,44 +25,56 @@ import {
   Menu,
   Spin,
 } from "antd";
+import { ItemType } from "antd/lib/menu/hooks/useItems";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { MenuProps } from "rc-menu";
-import React, { useContext, useEffect, useState } from "react";
+import * as React from "react";
+import { UrlObject } from "url";
 
 type LayoutProps = {
   children: React.ReactNode;
 };
 
 const Layout = ({ children }: LayoutProps) => {
-  const { isVerifying, isLoggedIn, userData } = useContext(
+  const { isVerifying, isLoggedIn, userData } = React.useContext(
     AuthContext
   ) as AuthContextInterface;
-  const { isMobile } = useContext(
+  const { isMobile } = React.useContext(
     ApplicationContext
   ) as ApplicationContextInterface;
-  const [collapsed, setCollapsed] = useState(false);
-  const [showUpload, setShowUpload] = useState(true);
-  const [uploadModalOpen, setUploadModalOpen] = useState(false);
-  const [drawerMenuOpen, setDrawerMenuOpen] = useState(false);
+  const [collapsed, setCollapsed] = React.useState(false);
+  const [showUpload, setShowUpload] = React.useState(true);
+  const [uploadModalOpen, setUploadModalOpen] = React.useState(false);
+  const [drawerMenuOpen, setDrawerMenuOpen] = React.useState(false);
   const router = useRouter();
 
-  useEffect(() => {
+  React.useEffect(() => {
     const shouldRedirect = !isVerifying && !isLoggedIn;
 
-    if (shouldRedirect) {
-      router.push("/login");
+    // Redirect to login page if not logged in
+    if (shouldRedirect && router.pathname !== "/login") {
+      let url: UrlObject = {
+        pathname: "/login",
+      };
+
+      console.log(router.asPath);
+      if (router.asPath !== "/") {
+        url.query = { redirect: router.asPath };
+      }
+
+      router.push(url);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoggedIn, isVerifying]);
+  }, [router]);
 
   const getSelectedMenuKey = (): string => {
     const paths = ["/", "/result", "/help"];
-    let index = 0;
+    let index = -1;
     paths.forEach((path, i) => {
-      if (router.pathname.includes(path)) {
+      if (router.pathname.match(path)) {
         index = i + 1;
       }
     });
@@ -112,15 +121,20 @@ const Layout = ({ children }: LayoutProps) => {
     ],
   };
 
-  const sidebarMenus = [
+  const sidebarMenus: ItemType[] = [
     {
       key: "1",
-      icon: <UserOutlined />,
+      icon: (
+        <div className="flex w-[1.5rem] justify-center">
+          <FontAwesomeIcon height={18} icon={faUser} />
+        </div>
+      ),
       label: (
         <Link href="/">
           <span>Moderasi</span>
         </Link>
       ),
+      className: "flex items-center",
       onClick: () => {
         setDrawerMenuOpen(false);
         router.push("/");
@@ -128,12 +142,17 @@ const Layout = ({ children }: LayoutProps) => {
     },
     {
       key: "2",
-      icon: <VideoCameraOutlined />,
+      icon: (
+        <div className="flex w-[1.5rem] justify-center">
+          <FontAwesomeIcon height={18} icon={faVideo} />
+        </div>
+      ),
       label: (
         <Link href="/result">
           <span>Daftar Video</span>
         </Link>
       ),
+      className: "flex items-center",
       onClick: () => {
         setDrawerMenuOpen(false);
         router.push("/result");
@@ -141,12 +160,17 @@ const Layout = ({ children }: LayoutProps) => {
     },
     {
       key: "3",
-      icon: <QuestionCircleOutlined />,
+      icon: (
+        <div className="flex w-[1.5rem] justify-center">
+          <FontAwesomeIcon height={18} icon={faCircleQuestion} />
+        </div>
+      ),
       label: (
         <Link href="/help">
           <span>Panduan</span>
         </Link>
       ),
+      className: "flex items-center",
       onClick: () => {
         setDrawerMenuOpen(false);
         router.push("/help");
@@ -157,7 +181,11 @@ const Layout = ({ children }: LayoutProps) => {
   if (isMobile) {
     sidebarMenus.push({
       key: "4",
-      icon: <CloudUploadOutlined />,
+      icon: (
+        <div className="flex w-[1.5rem] justify-center">
+          <FontAwesomeIcon height={18} icon={faCloudArrowUp} />
+        </div>
+      ),
       label: <>Unggah Video</>,
       onClick: () => {
         setUploadModalOpen(!uploadModalOpen);
@@ -179,17 +207,19 @@ const Layout = ({ children }: LayoutProps) => {
         <>
           <AntLayout className="custom-layout site-layout max-h-screen min-h-screen bg-white">
             <AntLayout.Header className="flex bg-white p-4">
-              {collapsed ? (
-                <MenuUnfoldOutlined
-                  className="trigger"
-                  onClick={() => setDrawerMenuOpen(!drawerMenuOpen)}
+              <div
+                className="trigger flex flex-col justify-center"
+                onClick={() => setDrawerMenuOpen(!drawerMenuOpen)}
+              >
+                <FontAwesomeIcon
+                  height={18}
+                  icon={faBars}
+                  className={
+                    "transform duration-300" +
+                    (drawerMenuOpen && " -rotate-180")
+                  }
                 />
-              ) : (
-                <MenuFoldOutlined
-                  className="trigger"
-                  onClick={() => setDrawerMenuOpen(!drawerMenuOpen)}
-                />
-              )}
+              </div>
               <div className="flex flex-1 items-center justify-end gap-x-4 text-base">
                 <div className="flex items-center">
                   <Dropdown menu={accountMenu} placement="bottomRight">
@@ -205,7 +235,7 @@ const Layout = ({ children }: LayoutProps) => {
             </AntLayout.Header>
             <AntLayout.Content className="flex grow flex-col rounded-tl-lg bg-slate-100">
               {!isVerifying ? (
-                <div className="relative m-4 mr-2 flex h-full grow flex-col overflow-x-clip overflow-y-scroll rounded-lg scrollbar-thin scrollbar-track-slate-300 scrollbar-thumb-slate-500 scrollbar-track-rounded-full scrollbar-thumb-rounded-full">
+                <div className="relative flex h-full grow flex-col overflow-x-clip overflow-y-scroll rounded-lg p-4 scrollbar-thin scrollbar-track-slate-300 scrollbar-thumb-slate-400 scrollbar-track-rounded-full scrollbar-thumb-rounded-full">
                   {children}
                 </div>
               ) : (
@@ -214,44 +244,50 @@ const Layout = ({ children }: LayoutProps) => {
                 </div>
               )}
             </AntLayout.Content>
+            <Drawer
+              className="custom-drawer"
+              title={
+                <div className="flex items-center justify-center">
+                  <Link href="/">
+                    <a>
+                      <Image
+                        src={"/logo_kpid.png"}
+                        width={117}
+                        height={30}
+                        alt="Logo KPID Jawa Timur"
+                      />
+                    </a>
+                  </Link>
+                </div>
+              }
+              placement="left"
+              onClose={() => setDrawerMenuOpen(false)}
+              open={drawerMenuOpen}
+            >
+              <Menu
+                mode="inline"
+                defaultSelectedKeys={[getSelectedMenuKey()]}
+                items={sidebarMenus}
+              />
+              <div className="mt-auto">
+                <h2 className="mb-4 text-center text-sm ">Dikembangkan Oleh</h2>
+                <div className="flex justify-center gap-4">
+                  <Image
+                    src={"/its.png"}
+                    height="64"
+                    width="64"
+                    alt="Logo ITS"
+                  />
+                  <Image
+                    src={"/aihes.png"}
+                    height="64"
+                    width="96"
+                    alt="Logo AIHES"
+                  />
+                </div>
+              </div>
+            </Drawer>
           </AntLayout>
-          <Drawer
-            title={
-              <div className="flex items-center justify-center">
-                <Link href="/">
-                  <a>
-                    <Image
-                      src={"/logo_kpid.png"}
-                      width={117}
-                      height={30}
-                      alt="Logo KPID Jawa Timur"
-                    />
-                  </a>
-                </Link>
-              </div>
-            }
-            placement="left"
-            onClose={() => setDrawerMenuOpen(false)}
-            open={drawerMenuOpen}
-          >
-            <Menu
-              mode="inline"
-              defaultSelectedKeys={[getSelectedMenuKey()]}
-              items={sidebarMenus}
-            />
-            <div className="mt-auto">
-              <h2 className="mb-4 text-center text-sm ">Dikembangkan Oleh</h2>
-              <div className="flex justify-center gap-4">
-                <Image src={"/its.png"} height="64" width="64" alt="Logo ITS" />
-                <Image
-                  src={"/aihes.png"}
-                  height="64"
-                  width="96"
-                  alt="Logo AIHES"
-                />
-              </div>
-            </div>
-          </Drawer>
         </>
       ) : (
         // ========================================================================
@@ -345,24 +381,13 @@ const Layout = ({ children }: LayoutProps) => {
                 onClick={() => setCollapsed(!collapsed)}
               >
                 <FontAwesomeIcon
-                  height={24}
+                  height={18}
                   icon={faAngleLeft}
                   className={
                     "transform duration-300" + (collapsed && " -rotate-180")
                   }
                 />
               </div>
-              {/* {collapsed ? (
-                <MenuUnfoldOutlined
-                  className="trigger"
-                  onClick={() => setCollapsed(!collapsed)}
-                />
-              ) : (
-                <MenuFoldOutlined
-                  className="trigger"
-                  onClick={() => setCollapsed(!collapsed)}
-                />
-              )} */}
               <div className="flex flex-1 items-center justify-end gap-x-4 text-lg">
                 {!isLoggedIn ? (
                   <>
@@ -388,7 +413,7 @@ const Layout = ({ children }: LayoutProps) => {
               </div>
             </AntLayout.Header>
             <AntLayout.Content className="flex grow flex-col rounded-tl-lg bg-slate-100">
-              <div className="relative m-4 mr-2 flex h-full grow flex-col overflow-x-clip overflow-y-scroll rounded-lg scrollbar-thin scrollbar-track-slate-300 scrollbar-thumb-slate-500 scrollbar-track-rounded-full scrollbar-thumb-rounded-full">
+              <div className="relative flex h-full grow flex-col overflow-x-clip overflow-y-scroll rounded-lg p-4 scrollbar-thin scrollbar-track-slate-300 scrollbar-thumb-slate-400 scrollbar-track-rounded-full scrollbar-thumb-rounded-full">
                 {children}
               </div>
             </AntLayout.Content>

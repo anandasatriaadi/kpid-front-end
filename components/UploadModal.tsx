@@ -4,10 +4,13 @@ import {
   ApplicationContextInterface,
 } from "@/context/ApplicationContext";
 import { AuthContext, AuthContextInterface } from "@/context/AuthContext";
-import { isEmpty } from "@/utils/CommonUtil";
+import { isEmpty, isNil } from "@/utils/CommonUtil";
+import debounce from "@/utils/Debounce";
+import { tokenizeString } from "@/utils/StringUtil";
 import { faFileVideo } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  AutoComplete,
   Button,
   Checkbox,
   DatePicker,
@@ -27,22 +30,35 @@ import Dragger from "antd/lib/upload/Dragger";
 import { AxiosProgressEvent, AxiosRequestConfig } from "axios";
 import moment from "moment";
 import { useRouter } from "next/router";
-import { useContext, useState } from "react";
+import * as React from "react";
 
 type UploadModalProps = {
   modalOpen: boolean;
   setModalOpen: (modalOpen: boolean) => void;
 };
 
+type SelectOption = {
+  label: string;
+  value: string;
+};
+
 function UploadModal(props: UploadModalProps) {
-  const { modalOpen, setModalOpen } = props;
-  const { isLoggedIn } = useContext(AuthContext) as AuthContextInterface;
-  const { isMobile } = useContext(
+  // Contexts
+  const { isLoggedIn } = React.useContext(AuthContext) as AuthContextInterface;
+  const { isMobile } = React.useContext(
     ApplicationContext
   ) as ApplicationContextInterface;
-  const [currentStep, setCurrentStep] = useState(0);
-  const [uploadProgressPercent, setUploadProgressPercent] = useState<number>(0);
-  const [uploadFile, setUploadFile] = useState<UploadFile>();
+
+  // States
+  const { modalOpen, setModalOpen } = props;
+  const [currentStep, setCurrentStep] = React.useState(0);
+  const [uploadProgressPercent, setUploadProgressPercent] = React.useState<number>(0);
+  const [uploadFile, setUploadFile] = React.useState<UploadFile>();
+  const [autoValue, setAutoValue] = React.useState<string>('');
+  const [resSelectOptions, setResSelectOptions] = React.useState<SelectOption[]>([]);
+  const [modSelectOptions, setModSelectOptions] = React.useState<SelectOption[]>([]);
+
+  // Other Hooks
   const [form] = Form.useForm();
   const router = useRouter();
 
@@ -57,7 +73,11 @@ function UploadModal(props: UploadModalProps) {
   const onFinishHandler = (values: any) => {
     let form = new FormData();
     for (const key in values) {
-      form.append(key, values[key]);
+      if(key == "station_name") {
+        form.append(key, tokenizeString(values[key], true));
+      } else {
+        form.append(key, values[key]);
+      }
     }
 
     form.append("video_file", uploadFile as RcFile);
@@ -91,17 +111,26 @@ function UploadModal(props: UploadModalProps) {
     console.log("Failed: ", errorInfo);
   };
 
+  const handleAutoSearch = debounce((value: string) => {
+    setModSelectOptions(
+      resSelectOptions.filter((optVal) => {
+        return optVal.label.toLowerCase().includes(value.toLowerCase());
+      })
+    );
+  }, 250);
+
   const handleCloseModal = () => {
     setModalOpen(false);
     setCurrentStep(0);
     setUploadProgressPercent(0);
-    form.resetFields();
     setUploadFile(undefined);
+    form.resetFields();
   };
 
   const fileDropProps: UploadProps = {
     name: "file",
     maxCount: 1,
+    fileList: uploadFile ? [uploadFile] : [],
     beforeUpload: (file) => {
       if (isLoggedIn) {
         setUploadFile(file);
@@ -115,12 +144,36 @@ function UploadModal(props: UploadModalProps) {
       form.resetFields();
       setUploadFile(undefined);
     },
-    fileList: uploadFile ? [uploadFile] : [],
   };
 
   const disabledDate: RangePickerProps["disabledDate"] = (current) => {
     return current && current > moment().endOf("day");
   };
+
+  React.useEffect(() => {
+    httpRequest
+      .get("/stations")
+      .then((res) => {
+        if (res === undefined || res === null) return;
+        const result: any = res.data;
+      
+        const filteredData = result.data.map((station: any) => {
+          return {
+            "label": station.name,
+            "value": station.name
+          }
+        })
+
+        setResSelectOptions(filteredData);
+        setModSelectOptions(filteredData);
+      })
+      .catch((err) => {
+        console.error(err);
+        return null;
+      });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modalOpen]);
 
   return (
     <Modal
@@ -128,11 +181,12 @@ function UploadModal(props: UploadModalProps) {
       open={modalOpen}
       onCancel={() => handleCloseModal()}
       footer={null}
-      className={isMobile ? "" : "min-w-[1000px]"}
+      className={"w-full max-w-[1000px] px-4 "}
     >
       <div className="md:p-6">
         <Steps
           current={currentStep}
+          direction={isMobile ? "vertical" : "horizontal"}
           items={[
             {
               title: "Unggah Video",
@@ -152,7 +206,7 @@ function UploadModal(props: UploadModalProps) {
           <div
             className={
               (isLoggedIn ? "bg-white" : "bg-slate-100") +
-              " mt-6 flex-1 rounded-xl shadow-custom"
+              " mt-6 flex-1 rounded-xl shadow-custom transition-all hover:shadow-custom-lg"
             }
           >
             <Dragger
@@ -160,7 +214,7 @@ function UploadModal(props: UploadModalProps) {
               accept="video/*"
               disabled={!isLoggedIn}
               className={
-                "flex h-80 items-center justify-center rounded-md border-2 border-dashed border-gray-400 bg-transparent"
+                "flex h-80 items-center justify-center rounded-lg border-2 border-dashed border-gray-400 bg-transparent hover:border-sky-600"
               }
               onChange={(info) => {
                 if (!isEmpty(info.fileList)) {
@@ -174,7 +228,7 @@ function UploadModal(props: UploadModalProps) {
                     <FontAwesomeIcon
                       icon={faFileVideo}
                       width={"36px"}
-                      className={isLoggedIn ? "text-sky-500" : "text-gray-300"}
+                      className={isLoggedIn ? "text-sky-600" : "text-gray-300"}
                     />
                   </span>
                 </div>
@@ -205,6 +259,7 @@ function UploadModal(props: UploadModalProps) {
             autoComplete="off"
             layout="vertical"
             className="pt-4"
+            requiredMark={"optional"}
           >
             <div>
               <Upload {...fileDropProps} accept="video/*"></Upload>
@@ -221,8 +276,9 @@ function UploadModal(props: UploadModalProps) {
                 ]}
               >
                 <Input
-                  className="text-lg font-normal"
+                  className="text-base font-normal md:text-lg"
                   disabled={currentStep === 2}
+                  placeholder="Ketikkan Nama Program"
                 />
               </Form.Item>
               <Form.Item
@@ -237,9 +293,13 @@ function UploadModal(props: UploadModalProps) {
                   },
                 ]}
               >
-                <Input
-                  className="text-lg font-normal"
+                <AutoComplete
+                  className="min-w-[16ch] text-base font-normal md:text-lg"
+                  popupClassName="rounded-lg"
+                  placeholder="Ketikkan atau Pilih Stasiun Televisi"
+                  options={modSelectOptions}
                   disabled={currentStep === 2}
+                  onSearch={handleAutoSearch}
                 />
               </Form.Item>
               <Form.Item label="Deskripsi" name="description">
@@ -258,7 +318,7 @@ function UploadModal(props: UploadModalProps) {
                 ]}
               >
                 <DatePicker
-                  className="w-full text-lg font-normal"
+                  className="w-full text-base font-normal md:text-lg"
                   showTime={{
                     format: "HH:mm",
                     defaultValue: moment("00:00:00", "HH:mm:ss"),
@@ -266,6 +326,7 @@ function UploadModal(props: UploadModalProps) {
                   format="DD/MM/YYYY HH:mm"
                   disabledDate={disabledDate}
                   disabled={currentStep === 2}
+                  placeholder="Pilih tanggal dan waktu rekaman diambil"
                 ></DatePicker>
               </Form.Item>
               <Form.Item
@@ -273,7 +334,9 @@ function UploadModal(props: UploadModalProps) {
                 name="process_now"
                 valuePropName="checked"
               >
-                <Checkbox defaultChecked>Proses Sekarang</Checkbox>
+                <Checkbox className="text-sm md:text-base" defaultChecked>
+                  Proses Sekarang
+                </Checkbox>
               </Form.Item>
             </div>
 
@@ -296,10 +359,10 @@ function UploadModal(props: UploadModalProps) {
             </Button>
             {currentStep === 2 ? (
               <Button
-                className="text-lg"
+                className="text-base md:text-lg"
                 type="primary"
                 onClick={() => {
-                  form.validateFields().then((values) => {
+                  form.validateFields().then((_) => {
                     form.submit();
                   });
                 }}
@@ -308,11 +371,11 @@ function UploadModal(props: UploadModalProps) {
               </Button>
             ) : (
               <Button
-                className="text-lg"
+                className="text-base md:text-lg"
                 type="primary"
                 onClick={() => {
                   if (currentStep === 1)
-                    form.validateFields().then((values) => {
+                    form.validateFields().then((_) => {
                       setCurrentStep(currentStep + 1);
                     });
                   else setCurrentStep(currentStep + 1);

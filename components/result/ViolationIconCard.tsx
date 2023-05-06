@@ -1,5 +1,5 @@
 import { Tooltip } from "antd";
-import { useContext } from "react";
+import * as React from "react";
 import {
   ApplicationContext,
   ApplicationContextInterface,
@@ -37,7 +37,7 @@ function ViolationIconCard(props: IconProps) {
     darkStyle = false,
   } = props;
 
-  const { isMobile } = useContext(
+  const { isMobile } = React.useContext(
     ApplicationContext
   ) as ApplicationContextInterface;
 
@@ -51,12 +51,12 @@ function ViolationIconCard(props: IconProps) {
   };
   const getIconClassName = (count: number) => {
     return (
-      "absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full text-sm text-black font-semibold " +
+      "absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full text-sm font-semibold " +
       (count > 0
         ? count > 2
           ? "bg-red-600 text-white"
-          : "bg-amber-400"
-        : "bg-lime-500")
+          : "bg-amber-400 text-black"
+        : "bg-lime-500 text-black")
     );
   };
 

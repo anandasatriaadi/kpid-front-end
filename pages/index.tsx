@@ -8,7 +8,7 @@ import {
   faArrowTrendDown,
   faArrowTrendUp,
   faEquals,
-  faNotEqual
+  faNotEqual,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import moment from "moment-timezone";
@@ -18,9 +18,8 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useState
+  useState,
 } from "react";
-import { chart1 } from "./statistic";
 import { NextPageWithLayout } from "./_app";
 
 type StatisticResult = {
@@ -42,14 +41,16 @@ const Home: NextPageWithLayout = () => {
     title: "Statistik Moderasi Sebulan Terakhir",
     key1: "Total Video",
     key2: "Video Melanggar",
+    labels: [],
+    datasets: {},
   });
 
-  function getDates(): string[] {
+  function getDates(): moment.Moment[] {
     let dateArray = [];
     let stopDate = moment.tz("Asia/Jakarta");
     let currentDate = moment.tz("Asia/Jakarta").add(-30, "days");
     while (currentDate <= stopDate) {
-      dateArray.push(moment(currentDate).format("D MMMM YYYY"));
+      dateArray.push(moment(currentDate));
       currentDate = moment(currentDate).add(1, "days");
     }
     return dateArray;
@@ -61,8 +62,8 @@ const Home: NextPageWithLayout = () => {
     let result: any[] = getDates();
     let result_object: any = {};
     result.forEach((item) => {
-      result_object[item] = {
-        name: item,
+      result_object[item.format("D MMMM YYYY")] = {
+        name: item.format("D MMMM YYYY"),
         "Total Video": 0,
         "Video Melanggar": 0,
       };
@@ -87,8 +88,68 @@ const Home: NextPageWithLayout = () => {
       });
     }
 
-
     return Object.values(result_object);
+  };
+
+  const filterChartData2 = (data: StatisticResult) => {
+    let labels: any[] = [];
+    let all_dates = getDates();
+    let all_data: any[] = [];
+    let detected_data: any[] = [];
+
+    let formatted_date;
+    if (!isNilOrEmpty(data?.all) && !isNilOrEmpty(data?.detected)) {
+      data.all.forEach((item: any) => {
+        item.date = moment(item._id, "YYYY-MM-DD");
+      });
+      data.detected.forEach((item: any) => {
+        item.date = moment(item._id, "YYYY-MM-DD");
+      });
+
+      all_dates.forEach((date: moment.Moment) => {
+        let found = false;
+        data.all.forEach((item: any) => {
+          if (date.isSame(item.date, "day")) {
+            found = true;
+            all_data.push(item.count);
+          }
+        });
+        if (!found) {
+          all_data.push(0);
+        }
+
+        found = false;
+        data.detected.forEach((item: any) => {
+          if (date.isSame(item.date, "day")) {
+            found = true;
+            detected_data.push(item.count);
+          }
+        });
+        if (!found) {
+          detected_data.push(0);
+        }
+        formatted_date = date.format("D MMMM YYYY");
+        labels.push(formatted_date);
+      });
+
+      console.log(labels, all_data, detected_data);
+    }
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: "Video Melanggar",
+          data: detected_data,
+          backgroundColor: "#075985",
+        },
+        {
+          label: "Total Video",
+          data: all_data,
+          backgroundColor: "#0285c7",
+        },
+      ],
+    };
   };
 
   const recalculatePercentage = (currVideoData: any) => {
@@ -100,7 +161,9 @@ const Home: NextPageWithLayout = () => {
     ) {
       if (currVideoData.lastTotalVideo != 0) {
         let totalVideoPercentage = Math.round(
-          ((currVideoData.totalVideo - currVideoData.lastTotalVideo) / currVideoData.lastTotalVideo) * 100
+          ((currVideoData.totalVideo - currVideoData.lastTotalVideo) /
+            currVideoData.lastTotalVideo) *
+            100
         );
         currVideoData = { ...currVideoData, totalVideoPercentage };
       } else {
@@ -109,7 +172,9 @@ const Home: NextPageWithLayout = () => {
 
       if (currVideoData.lastTotalDetected != 0) {
         let totalDetectedPercentage = Math.round(
-          ((currVideoData.totalDetected - currVideoData.lastTotalDetected) / currVideoData.lastTotalDetected) * 100
+          ((currVideoData.totalDetected - currVideoData.lastTotalDetected) /
+            currVideoData.lastTotalDetected) *
+            100
         );
         currVideoData = { ...currVideoData, totalDetectedPercentage };
       } else {
@@ -161,7 +226,7 @@ const Home: NextPageWithLayout = () => {
 
       setChartData({
         ...chartData,
-        data: filterChartData(thisMonthData),
+        ...filterChartData2(thisMonthData),
       });
 
       let totalVideo: number = 0;
@@ -214,12 +279,12 @@ const Home: NextPageWithLayout = () => {
       </Head>
 
       <div className="flex h-full flex-col gap-4">
-        <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="hidden rounded-md bg-white p-6 shadow-custom md:block">
+        <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div className="hidden rounded-lg bg-white p-6 shadow-custom md:block">
             <h2 className="text-2xl font-semibold capitalize">
               Hai {userData.name}!
             </h2>
-            <p className="mb-4 text-lg">
+            <p className="mb-4 font-semibold">
               Selamat Datang di Sistem Rekomendasi KPID Jawa Timur!
             </p>
             <p className="mb-4">
@@ -238,7 +303,7 @@ const Home: NextPageWithLayout = () => {
             </p>
           </div>
           <div className="grid gap-4">
-            <div className="gap-4 rounded-md bg-white p-6 shadow-custom">
+            <div className="gap-4 rounded-lg bg-white p-6 shadow-custom">
               <div className="flex">
                 <div className="flex-1">
                   <h3 className="">Video Terunggah</h3>
@@ -286,7 +351,7 @@ const Home: NextPageWithLayout = () => {
                 dari bulan lalu.
               </div>
             </div>
-            <div className="gap-4 rounded-md bg-white p-6 shadow-custom">
+            <div className="gap-4 rounded-lg bg-white p-6 shadow-custom">
               <div className="flex">
                 <div className="flex-1">
                   <h3 className="">Video Terdeteksi Melanggar</h3>
@@ -338,16 +403,14 @@ const Home: NextPageWithLayout = () => {
             </div>
           </div>
         </section>
-        <section className="flex min-h-[20rem] flex-1 grow flex-col rounded-lg bg-white">
-          <>
-            {chartData?.data?.length != undefined &&
-              chartData?.data?.length > 0 && (
-                <ChartCard
-                  chartData={chartData}
-                  title={chart1.title}
-                ></ChartCard>
-              )}
-          </>
+        <section className="flex min-h-[20rem] flex-1 flex-col rounded-lg bg-white">
+          {chartData?.datasets?.length != undefined &&
+            chartData?.datasets?.length > 0 && (
+              <ChartCard
+                chartData={chartData}
+                title="Statistik Moderasi Sebulan Terakhir"
+              ></ChartCard>
+            )}
         </section>
       </div>
     </>

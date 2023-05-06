@@ -1,0 +1,33 @@
+.ant-steps {
+    $steps: &;
+
+    &-item {
+        $item: &;
+
+        // &-icon {
+        //     @apply flex justify-center items-center;
+        // }
+        
+        &-process {
+            & #{$item}-container #{$item}-icon {
+                @apply bg-sky-600;
+            }
+        }
+        &-finish {
+            & #{$item}-container #{$item}-icon {
+                @apply border-sky-600;
+
+                & > #{$steps}-icon {
+                    @apply text-sky-600;
+                }
+            }
+        }
+
+        &-icon {
+            #{$steps}-icon {
+                @apply my-auto w-full h-full flex justify-center items-center;
+            }
+        }
+    }
+
+}
