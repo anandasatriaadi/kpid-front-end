@@ -110,6 +110,7 @@ const timelineItem = [
 ];
 
 const SingleResult: NextPageWithLayout = () => {
+  //#region ::: Variable Initialisations
   const [categorySummary, setCategorySummary] = React.useState<any | undefined>(
     undefined
   );
@@ -122,23 +123,11 @@ const SingleResult: NextPageWithLayout = () => {
   const pathname = router.asPath;
   const moderationID = pathname.split("/").slice(-1)[0];
   const fetchURL = `/moderation/${moderationID}`;
+  //#endregion ::: Variable Initialisations
 
-  const checkIfAllModerated = () => {
-    let isAllModerated = true;
-    if (moderationData?.result !== undefined) {
-      if (moderationData?.result.length === 0) {
-        isAllModerated = false;
-      } else {
-        moderationData.result.forEach((timeline: ModerationResult) => {
-          if (timeline.decision.toString() === "PENDING") {
-            isAllModerated = false;
-          }
-        });
-      }
-    }
-    setIsModerated(isAllModerated);
-  };
+  //
 
+  //#region ::: Handlers
   const handlePasalValidation = (
     timelineKey: number,
     decision: ModerationDecision
@@ -195,73 +184,26 @@ const SingleResult: NextPageWithLayout = () => {
       });
     message.success("Laporan berhasil di-generate");
   };
+  //#endregion ::: Handlers
 
-  React.useEffect(() => {
-    (async () => {
-      const response = await httpRequest.get(fetchURL).catch((err) => {
-        console.error(err);
-        return null;
-      });
+  //
 
-      if (response === null) return;
-
-      const result: ModerationResponse = response.data.data;
-      setModerationData(result);
-
-      let temp: any[] = [];
-      if (result?.result !== undefined) {
-          if (result?.result.length === 0) {
-            setIsModerated(false);
-          } else {
-            result.result.forEach((item: ModerationResult) => {
-              if (item.decision.toUpperCase() === "PENDING") {
-                setIsModerated(false);
-              }
-              temp = [...temp, ...item.category];
-            });
+  //#region ::: Other Methods
+  const checkIfAllModerated = () => {
+    let isAllModerated = true;
+    if (moderationData?.result !== undefined) {
+      if (moderationData?.result.length === 0) {
+        isAllModerated = false;
+      } else {
+        moderationData.result.forEach((timeline: ModerationResult) => {
+          if (timeline.decision.toString() === "PENDING") {
+            isAllModerated = false;
           }
+        });
       }
-
-      const summary = temp.reduce((res, val) => {
-        let key = String(val).toLowerCase();
-        if (res[key]) {
-          res[key]++;
-        } else {
-          res[key] = 1;
-        }
-        return res;
-      }, {});
-
-      setCategorySummary(summary);
-
-      let tempFrames: FrameResult[] = [];
-      if (result?.frames !== undefined && result?.frames !== null) {
-        if (result.frames.length > 20) {
-          tempFrames = result.frames.reduce(
-            (acc: FrameResult[], curr, index) => {
-              let step =
-                moderationData?.frames !== undefined
-                  ? Math.floor(moderationData.frames.length / 20)
-                  : 0;
-              if (acc.length === 20) {
-                return acc;
-              }
-              if (index % step === 0) {
-                acc.push(curr);
-              }
-              return acc;
-            },
-            []
-          );
-        } else {
-          tempFrames = result.frames;
-        }
-      }
-      setFramesToShow(tempFrames);
-    })();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router]);
+    }
+    setIsModerated(isAllModerated);
+  };
 
   const RenderViolationTabs = (result: any) => {
     let responses = result.category.map((item: any, index: any) => {
@@ -322,6 +264,78 @@ const SingleResult: NextPageWithLayout = () => {
         };
     }
   };
+  //#endregion ::: Other Methods
+
+  //
+
+  //#region ::: UseEffect
+  React.useEffect(() => {
+    (async () => {
+      const response = await httpRequest.get(fetchURL).catch((err) => {
+        console.error(err);
+        return null;
+      });
+
+      if (response === null) return;
+
+      const result: ModerationResponse = response.data.data;
+      setModerationData(result);
+
+      let temp: any[] = [];
+      if (result?.result !== undefined) {
+        if (result?.result.length === 0) {
+          setIsModerated(false);
+        } else {
+          result.result.forEach((item: ModerationResult) => {
+            if (item.decision.toUpperCase() === "PENDING") {
+              setIsModerated(false);
+            }
+            temp = [...temp, ...item.category];
+          });
+        }
+      }
+
+      const summary = temp.reduce((res, val) => {
+        let key = String(val).toLowerCase();
+        if (res[key]) {
+          res[key]++;
+        } else {
+          res[key] = 1;
+        }
+        return res;
+      }, {});
+
+      setCategorySummary(summary);
+
+      let tempFrames: FrameResult[] = [];
+      if (result?.frames !== undefined && result?.frames !== null) {
+        if (result.frames.length > 20) {
+          tempFrames = result.frames.reduce(
+            (acc: FrameResult[], curr, index) => {
+              let step =
+                moderationData?.frames !== undefined
+                  ? Math.floor(moderationData.frames.length / 20)
+                  : 0;
+              if (acc.length === 20) {
+                return acc;
+              }
+              if (index % step === 0) {
+                acc.push(curr);
+              }
+              return acc;
+            },
+            []
+          );
+        } else {
+          tempFrames = result.frames;
+        }
+      }
+      setFramesToShow(tempFrames);
+    })();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router]);
+  //#endregion ::: UseEffect
 
   return (
     <div>
@@ -550,7 +564,9 @@ const SingleResult: NextPageWithLayout = () => {
                             key={index}
                             className="bg-cover pt-[56.25%]"
                             style={{
-                              backgroundImage: `url(https://${process.env.NEXT_PUBLIC_BUCKET_NAME}.storage.googleapis.com/${encodeURI(
+                              backgroundImage: `url(https://${
+                                process.env.NEXT_PUBLIC_BUCKET_NAME
+                              }.storage.googleapis.com/${encodeURI(
                                 frame_data.frame_url
                               )})`,
                             }}
@@ -618,7 +634,10 @@ const SingleResult: NextPageWithLayout = () => {
                                             className="h-full w-full"
                                             controls
                                             controlsList="nodownload"
-                                            src={`https://${process.env.NEXT_PUBLIC_BUCKET_NAME}.storage.googleapis.com/${encodeURI(
+                                            src={`https://${
+                                              process.env
+                                                .NEXT_PUBLIC_BUCKET_NAME
+                                            }.storage.googleapis.com/${encodeURI(
                                               item.clip_url
                                             )}`}
                                           ></video>

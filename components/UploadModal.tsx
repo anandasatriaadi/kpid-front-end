@@ -43,6 +43,7 @@ type SelectOption = {
 };
 
 function UploadModal(props: UploadModalProps) {
+  //#region ::: Variable Initialisations
   // Contexts
   const { isLoggedIn } = React.useContext(AuthContext) as AuthContextInterface;
   const { isMobile } = React.useContext(
@@ -52,17 +53,50 @@ function UploadModal(props: UploadModalProps) {
   // States
   const { modalOpen, setModalOpen } = props;
   const [currentStep, setCurrentStep] = React.useState(0);
-  const [uploadProgressPercent, setUploadProgressPercent] = React.useState<number>(0);
+  const [uploadProgressPercent, setUploadProgressPercent] =
+    React.useState<number>(0);
   const [uploadFile, setUploadFile] = React.useState<UploadFile>();
-  const [autoValue, setAutoValue] = React.useState<string>('');
-  const [resSelectOptions, setResSelectOptions] = React.useState<SelectOption[]>([]);
-  const [modSelectOptions, setModSelectOptions] = React.useState<SelectOption[]>([]);
+  const [autoValue, setAutoValue] = React.useState<string>("");
+  const [resSelectOptions, setResSelectOptions] = React.useState<
+    SelectOption[]
+  >([]);
+  const [modSelectOptions, setModSelectOptions] = React.useState<
+    SelectOption[]
+  >([]);
 
-  // Other Hooks
+  // Others
   const [form] = Form.useForm();
   const router = useRouter();
 
-  const uploadProgressHandler = (progress: AxiosProgressEvent) => {
+  const disabledDate: RangePickerProps["disabledDate"] = (current) => {
+    return current && current > moment().endOf("day");
+  };
+
+  // File Upload Props
+  const fileDropProps: UploadProps = {
+    name: "file",
+    maxCount: 1,
+    fileList: uploadFile ? [uploadFile] : [],
+    beforeUpload: (file) => {
+      if (isLoggedIn) {
+        setUploadFile(file);
+        return false;
+      } else {
+        message.error("Anda harus login terlebih dahulu");
+        return false;
+      }
+    },
+    onRemove: () => {
+      form.resetFields();
+      setUploadFile(undefined);
+    },
+  };
+  //#endregion ::: Variable Initialisations
+
+  //
+
+  //#region ::: Handlers
+  const handleUploadProgress = (progress: AxiosProgressEvent) => {
     const { loaded, total } = progress;
 
     if (total !== undefined) {
@@ -70,10 +104,10 @@ function UploadModal(props: UploadModalProps) {
     }
   };
 
-  const onFinishHandler = (values: any) => {
+  const handleForm = (values: any) => {
     let form = new FormData();
     for (const key in values) {
-      if(key == "station_name") {
+      if (key == "station_name") {
         form.append(key, tokenizeString(values[key], true));
       } else {
         form.append(key, values[key]);
@@ -83,7 +117,7 @@ function UploadModal(props: UploadModalProps) {
     form.append("video_file", uploadFile as RcFile);
 
     let formPostConfig: AxiosRequestConfig = {
-      onUploadProgress: uploadProgressHandler,
+      onUploadProgress: handleUploadProgress,
     };
 
     httpRequest
@@ -107,7 +141,7 @@ function UploadModal(props: UploadModalProps) {
       });
   };
 
-  const onFormFailedHandler = (errorInfo: any) => {
+  const handleFormFailed = (errorInfo: any) => {
     console.log("Failed: ", errorInfo);
   };
 
@@ -126,43 +160,29 @@ function UploadModal(props: UploadModalProps) {
     setUploadFile(undefined);
     form.resetFields();
   };
+  //#endregion ::: Handlers
 
-  const fileDropProps: UploadProps = {
-    name: "file",
-    maxCount: 1,
-    fileList: uploadFile ? [uploadFile] : [],
-    beforeUpload: (file) => {
-      if (isLoggedIn) {
-        setUploadFile(file);
-        return false;
-      } else {
-        message.error("Anda harus login terlebih dahulu");
-        return false;
-      }
-    },
-    onRemove: () => {
-      form.resetFields();
-      setUploadFile(undefined);
-    },
-  };
+  //
 
-  const disabledDate: RangePickerProps["disabledDate"] = (current) => {
-    return current && current > moment().endOf("day");
-  };
+  //#region ::: Other Methods
+  //#endregion ::: Other Methods
 
+  //
+
+  //#region ::: UseEffect
   React.useEffect(() => {
     httpRequest
       .get("/stations")
       .then((res) => {
         if (res === undefined || res === null) return;
         const result: any = res.data;
-      
+
         const filteredData = result.data.map((station: any) => {
           return {
-            "label": station.name,
-            "value": station.name
-          }
-        })
+            label: station.name,
+            value: station.name,
+          };
+        });
 
         setResSelectOptions(filteredData);
         setModSelectOptions(filteredData);
@@ -174,6 +194,7 @@ function UploadModal(props: UploadModalProps) {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modalOpen]);
+  //#endregion ::: UseEffect
 
   return (
     <Modal
@@ -254,8 +275,8 @@ function UploadModal(props: UploadModalProps) {
           <Form
             form={form}
             name="moderation_form"
-            onFinish={onFinishHandler}
-            onFinishFailed={onFormFailedHandler}
+            onFinish={handleForm}
+            onFinishFailed={handleFormFailed}
             autoComplete="off"
             layout="vertical"
             className="pt-4"

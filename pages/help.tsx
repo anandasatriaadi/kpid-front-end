@@ -7,6 +7,7 @@ import Lightbox, { SlideImage } from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 
 const HelpPage: NextPageWithLayout = () => {
+  //#region ::: Variable Initialisations
   const [lightboxOpen, setLightboxOpen] = React.useState<boolean>(false);
   const [lightboxIndex, setLightboxIndex] = React.useState<number>(0);
 
@@ -166,9 +167,22 @@ const HelpPage: NextPageWithLayout = () => {
   ];
 
   const UPLOAD_VIDEO_IMAGES = UPLOAD_VIDEO_STEPS.map((step) => {
-    let image: SlideImage = {src: step.image};
-    return image
-    });
+    let image: SlideImage = { src: step.image };
+    return image;
+  });
+  //#endregion ::: Variable Initialisations
+
+  //#region ::: Handlers
+
+  //#endregion ::: Handlers
+
+  //#region ::: Other Methods
+
+  //#endregion ::: Other Methods
+
+  //#region ::: UseEffect
+
+  //#endregion ::: UseEffect
 
   return (
     <div>
@@ -196,12 +210,12 @@ const HelpPage: NextPageWithLayout = () => {
           >
             <section>
               <ol className="grid list-inside list-decimal gap-6 lg:grid-cols-2">
-              <Lightbox
-                open={lightboxOpen}
-                index={lightboxIndex}
-                close={() => setLightboxOpen(false)}
-                slides={UPLOAD_VIDEO_IMAGES}
-              />
+                <Lightbox
+                  open={lightboxOpen}
+                  index={lightboxIndex}
+                  close={() => setLightboxOpen(false)}
+                  slides={UPLOAD_VIDEO_IMAGES}
+                />
                 {UPLOAD_VIDEO_STEPS.map((val, index) => {
                   return (
                     <li className="font-semibold" key={index}>

@@ -1,12 +1,6 @@
 import AuthLayout from "@/components/AuthLayout";
-import Sadis from "@/components/icons/Sadis";
-import Sara from "@/components/icons/Sara";
-import Saru from "@/components/icons/Saru";
-import SiaranPartisan from "@/components/icons/SiaranPartisan";
-import Sihir from "@/components/icons/Sihir";
 import { AuthContext, AuthContextInterface } from "@/context/AuthContext";
 import { Button, Divider, Form, Input, message } from "antd";
-import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,11 +9,34 @@ import * as React from "react";
 import { NextPageWithLayout } from "./_app";
 
 const Register: NextPageWithLayout = () => {
-  let router = useRouter();
+  //#region ::: Variable Initialisations
+  const router = useRouter();
   const { isLoggedIn, register } = React.useContext(
     AuthContext
   ) as AuthContextInterface;
+  //#endregion ::: Variable Initialisations
 
+  //
+
+  //#region ::: Handlers
+  const handleForm = (values: any) => {
+    register(values);
+  };
+
+  const handleFormFailed = (errorInfo: any) => {
+    console.log("Failed:", errorInfo);
+  };
+  //#endregion ::: Handlers
+
+  //
+
+  //#region ::: Other Methods
+
+  //#endregion ::: Other Methods
+
+  //
+
+  //#region ::: UseEffect
   React.useEffect(() => {
     if (isLoggedIn) {
       message.loading("Redirecting...");
@@ -27,14 +44,7 @@ const Register: NextPageWithLayout = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn]);
-
-  const onFinish = (values: any) => {
-    register(values);
-  };
-
-  const onFinishFailed = (errorInfo: any) => {
-    console.log("Failed:", errorInfo);
-  };
+  //#endregion ::: UseEffect
 
   return (
     <>
@@ -63,8 +73,8 @@ const Register: NextPageWithLayout = () => {
             <Divider className="my-4" />
             <Form
               name="register_form"
-              onFinish={onFinish}
-              onFinishFailed={onFinishFailed}
+              onFinish={handleForm}
+              onFinishFailed={handleFormFailed}
               autoComplete="off"
               layout="vertical"
               requiredMark={"optional"}
@@ -119,10 +129,6 @@ const Register: NextPageWithLayout = () => {
     </>
   );
 };
-
-const IconWrapperClass = "h-full flex flex-col items-center my-2";
-const IconCardClass = "rounded-lg p-2 bg-slate-900 bg-opacity-30 shadow-custom";
-const IconSubtitleClass = "mt-2 text-lg text-center";
 
 export default Register;
 

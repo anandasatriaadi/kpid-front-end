@@ -73,9 +73,19 @@ type Props = {
 };
 
 function ResultCard(props: Props) {
+  //#region ::: Variable Initialisations
   const [moderationData, _] = React.useState<ModerationResponse>(props.data);
+  //#endregion ::: Variable Initialisations
 
-  const getStatusStyling = ((status: string) => {
+  //
+
+  //#region ::: Handlers
+  //#endregion ::: Handlers
+
+  //
+
+  //#region ::: Other Methods
+  const getStatusStyling = (status: string) => {
     switch (status.toLowerCase()) {
       case "initialized":
         return {
@@ -108,7 +118,7 @@ function ResultCard(props: Props) {
           text: "Status Tidak Diketahui",
         };
     }
-  })(moderationData?.status !== undefined ? moderationData?.status : "");
+  };
 
   const summarizeCategories = () => {
     let temp: string[] = [];
@@ -131,7 +141,19 @@ function ResultCard(props: Props) {
 
     return stringCounts;
   };
+  //#endregion ::: Other Methods
+
+  //
+
+  //#region ::: UseEffect
+  //#endregion ::: UseEffect
+
+  //#region ::: After Method Initialisations
+  const statusStyle = getStatusStyling(
+    moderationData?.status !== undefined ? moderationData?.status : ""
+  );
   const categories = summarizeCategories();
+  //#endregion ::: After Method Initialisations
 
   return (
     <Link href={"/result/" + moderationData._id}>
@@ -159,10 +181,10 @@ function ResultCard(props: Props) {
           <div
             className={
               "absolute top-0 right-0 rounded-tr-lg rounded-bl-lg py-2 px-4 text-sm font-semibold tracking-wide " +
-              getStatusStyling.className
+              statusStyle.className
             }
           >
-            {getStatusStyling.text}
+            {statusStyle.text}
           </div>
           <div className="absolute bottom-2 right-2 flex flex-wrap justify-end gap-1">
             {!isNilOrEmpty(categories) && (

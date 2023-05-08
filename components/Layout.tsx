@@ -38,50 +38,25 @@ type LayoutProps = {
 };
 
 const Layout = ({ children }: LayoutProps) => {
+  //#region ::: Variable Initialisations
   const { isVerifying, isLoggedIn, userData } = React.useContext(
     AuthContext
   ) as AuthContextInterface;
   const { isMobile } = React.useContext(
     ApplicationContext
   ) as ApplicationContextInterface;
+
   const [collapsed, setCollapsed] = React.useState(false);
   const [showUpload, setShowUpload] = React.useState(true);
   const [uploadModalOpen, setUploadModalOpen] = React.useState(false);
   const [drawerMenuOpen, setDrawerMenuOpen] = React.useState(false);
+  
   const router = useRouter();
+  //#endregion ::: Variable Initialisations
 
-  React.useEffect(() => {
-    const shouldRedirect = !isVerifying && !isLoggedIn;
+  //
 
-    // Redirect to login page if not logged in
-    if (shouldRedirect && router.pathname !== "/login") {
-      let url: UrlObject = {
-        pathname: "/login",
-      };
-
-      console.log(router.asPath);
-      if (router.asPath !== "/") {
-        url.query = { redirect: router.asPath };
-      }
-
-      router.push(url);
-    }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router]);
-
-  const getSelectedMenuKey = (): string => {
-    const paths = ["/", "/result", "/help"];
-    let index = -1;
-    paths.forEach((path, i) => {
-      if (router.pathname.match(path)) {
-        index = i + 1;
-      }
-    });
-
-    return index.toString();
-  };
-
+  //#region ::: Menu Logic
   const accountMenu: MenuProps = {
     items: [
       {
@@ -193,6 +168,52 @@ const Layout = ({ children }: LayoutProps) => {
       },
     });
   }
+  //#endregion ::: Menu Logic
+
+  //
+
+  //#region ::: Handlers
+  //#endregion ::: Handlers
+
+  //
+
+  //#region ::: Other Methods
+  const getSelectedMenuKey = (): string => {
+    const paths = ["/", "/result", "/help"];
+    let index = -1;
+    paths.forEach((path, i) => {
+      if (router.pathname.match(path)) {
+        index = i + 1;
+      }
+    });
+
+    return index.toString();
+  };
+  //#endregion ::: Other Methods
+
+  //
+
+  //#region ::: UseEffect
+  React.useEffect(() => {
+    const shouldRedirect = !isVerifying && !isLoggedIn;
+
+    // Redirect to login page if not logged in
+    if (shouldRedirect && router.pathname !== "/login") {
+      let url: UrlObject = {
+        pathname: "/login",
+      };
+
+      console.log(router.asPath);
+      if (router.asPath !== "/") {
+        url.query = { redirect: router.asPath };
+      }
+
+      router.push(url);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router]);
+  //#endregion ::: UseEffect
 
   return (
     <>
@@ -402,7 +423,11 @@ const Layout = ({ children }: LayoutProps) => {
                   </>
                 ) : (
                   <div className="flex items-center">
-                    <span className="mr-2 rounded-full bg-gray-400 p-4"></span>
+                    <span className="mr-2 rounded-full relative p-4">
+                      <Image src={"/user.png"} alt="User Profile Image" layout="fill">
+
+                      </Image>
+                    </span>
                     <Dropdown menu={accountMenu} placement="bottomRight">
                       <a onClick={(e) => e.preventDefault()}>
                         <p className="capitalize">{userData.name}</p>

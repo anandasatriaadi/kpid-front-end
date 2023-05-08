@@ -9,11 +9,28 @@ import * as React from "react";
 import { NextPageWithLayout } from "./_app";
 
 const Login: NextPageWithLayout = () => {
+  //#region ::: Variable Initialisations
   const router = useRouter();
   const { isLoggedIn, login } = React.useContext(
     AuthContext
   ) as AuthContextInterface;
+  //#endregion ::: Variable Initialisations
 
+  //#region ::: Handlers
+  const handleForm = (values: any) => {
+    login(values);
+  };
+
+  const handleFormFailed = (errorInfo: any) => {
+    console.error("Failed:", errorInfo);
+  };
+  //#endregion ::: Handlers
+
+  //#region ::: Other Methods
+
+  //#endregion ::: Other Methods
+
+  //#region ::: UseEffect
   React.useEffect(() => {
     if (isLoggedIn) {
       message.loading("Redirecting...");
@@ -21,14 +38,7 @@ const Login: NextPageWithLayout = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn]);
-
-  const onFinish = (values: any) => {
-    login(values);
-  };
-
-  const onFinishFailed = (errorInfo: any) => {
-    console.error("Failed:", errorInfo);
-  };
+  //#endregion ::: UseEffect
 
   return (
     <>
@@ -59,8 +69,8 @@ const Login: NextPageWithLayout = () => {
             <Divider className="my-4" />
             <Form
               name="login_form"
-              onFinish={onFinish}
-              onFinishFailed={onFinishFailed}
+              onFinish={handleForm}
+              onFinishFailed={handleFormFailed}
               autoComplete="off"
               layout="vertical"
               requiredMark={"optional"}

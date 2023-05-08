@@ -24,6 +24,7 @@ type IconProps = {
 };
 
 function ViolationIconCard(props: IconProps) {
+  //#region ::: Variable Initialisations
   const {
     className = "",
     height,
@@ -45,10 +46,22 @@ function ViolationIconCard(props: IconProps) {
     "relative flex flex-col justify-center bg-opacity-75 " +
     (cardStyle ? "rounded-lg py-2 md:py-3 px-3 md:px-4 " : "") +
     (darkStyle ? "bg-slate-600 text-slate-50" : "bg-slate-200 text-slate-600");
+
   const iconStyle = {
     height: isMobile ? `${height + 16}px` : `${height + 24}px`,
     width: isMobile ? `${height + 24}px` : `${height + 32}px`,
   };
+
+  //#endregion ::: Variable Initialisations
+
+  //
+
+  //#region ::: Handlers
+  //#endregion ::: Handlers
+
+  //
+
+  //#region ::: Other Methods
   const getIconClassName = (count: number) => {
     return (
       "absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full text-sm font-semibold " +
@@ -59,6 +72,12 @@ function ViolationIconCard(props: IconProps) {
         : "bg-lime-500 text-black")
     );
   };
+  //#endregion ::: Other Methods
+
+  //
+
+  //#region ::: UseEffect
+  //#endregion ::: UseEffect
 
   return (
     <div className={"flex flex-wrap gap-4 " + className}>

@@ -13,6 +13,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import moment from "moment-timezone";
 import Head from "next/head";
+import Image from "next/image";
 import {
   ReactElement,
   useCallback,
@@ -28,6 +29,7 @@ type StatisticResult = {
 };
 
 const Home: NextPageWithLayout = () => {
+  //#region ::: Variable Initialisations
   const { userData } = useContext(AuthContext) as AuthContextInterface;
   const [videoData, setVideoData] = useState<any>({
     totalVideo: 0,
@@ -44,7 +46,16 @@ const Home: NextPageWithLayout = () => {
     labels: [],
     datasets: {},
   });
+  //#endregion ::: Variable Initialisations
 
+  //
+
+  //#region ::: Handlers
+  //#endregion ::: Handlers
+
+  //
+
+  //#region ::: Other Methods
   function getDates(): moment.Moment[] {
     let dateArray = [];
     let stopDate = moment.tz("Asia/Jakarta");
@@ -57,41 +68,6 @@ const Home: NextPageWithLayout = () => {
   }
 
   const filterChartData = (data: StatisticResult) => {
-    let totalVideo = 0;
-    let totalDetected = 0;
-    let result: any[] = getDates();
-    let result_object: any = {};
-    result.forEach((item) => {
-      result_object[item.format("D MMMM YYYY")] = {
-        name: item.format("D MMMM YYYY"),
-        "Total Video": 0,
-        "Video Melanggar": 0,
-      };
-    });
-
-    let formatted_date;
-    if (!isNilOrEmpty(data?.all) && !isNilOrEmpty(data?.detected)) {
-      data.all.forEach((item: any) => {
-        formatted_date = moment(item._id, "YYYY-MM-DD").format("D MMMM YYYY");
-        if (result_object[formatted_date]) {
-          result_object[formatted_date]["Total Video"] = item.count;
-        }
-        totalVideo += item.count;
-      });
-
-      data.detected.forEach((item: any) => {
-        formatted_date = moment(item._id, "YYYY-MM-DD").format("D MMMM YYYY");
-        if (result_object[formatted_date]) {
-          result_object[formatted_date]["Video Melanggar"] = item.count;
-        }
-        totalDetected += item.count;
-      });
-    }
-
-    return Object.values(result_object);
-  };
-
-  const filterChartData2 = (data: StatisticResult) => {
     let labels: any[] = [];
     let all_dates = getDates();
     let all_data: any[] = [];
@@ -226,7 +202,7 @@ const Home: NextPageWithLayout = () => {
 
       setChartData({
         ...chartData,
-        ...filterChartData2(thisMonthData),
+        ...filterChartData(thisMonthData),
       });
 
       let totalVideo: number = 0;
@@ -263,12 +239,17 @@ const Home: NextPageWithLayout = () => {
     }, 200),
     []
   );
+  //#endregion ::: Other Methods
 
+  //
+
+  //#region ::: UseEffect
   useEffect(() => {
     getStatisticData();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  //#endregion ::: UseEffect
 
   return (
     <>

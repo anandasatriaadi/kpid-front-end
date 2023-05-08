@@ -29,11 +29,16 @@ interface Props {
 }
 
 function ChartCard(props: Props) {
+  //#region ::: Variable Initialisations
+  // Props
+  const { chartData, title } = props;
+
+  // Context
   const { isMobile } = React.useContext(
     ApplicationContext
   ) as ApplicationContextInterface;
-  const { chartData, title } = props;
-  ChartJS.defaults.font.size = isMobile ? 14 : 16;
+
+  // Chart Options
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -64,6 +69,23 @@ function ChartCard(props: Props) {
       },
     },
   };
+  //#endregion ::: Variable Initialisations
+
+  //
+
+  //#region ::: Handlers
+  //#endregion ::: Handlers
+
+  //
+
+  //#region ::: Other Methods
+  ChartJS.defaults.font.size = isMobile ? 14 : 16;
+  //#endregion ::: Other Methods
+
+  //
+
+  //#region ::: UseEffect
+  //#endregion ::: UseEffect
 
   return (
     <div className="flex h-full w-full flex-1 flex-col">

@@ -20,7 +20,6 @@ import {
   Spin,
 } from "antd";
 import { RangePickerProps } from "antd/lib/date-picker";
-import { SegmentedLabeledOption } from "antd/lib/segmented";
 import moment from "moment";
 import Head from "next/head";
 import * as React from "react";
@@ -52,6 +51,7 @@ const sortOptions: any[] = [
 ];
 
 const Result: NextPageWithLayout = () => {
+  //#region ::: Variable Initialisations
   const { isMobile } = React.useContext(
     ApplicationContext
   ) as ApplicationContextInterface;
@@ -70,24 +70,17 @@ const Result: NextPageWithLayout = () => {
   const queryParams = {
     params: { ...pageFilter },
   };
+  //#endregion ::: Variable Initialisations
 
-  React.useEffect(() => {
-    httpRequest
-      .get(`/moderation-list`, queryParams)
-      .then((response) => {
-        const result = response.data;
-        setIsReloading(false);
-        setModerationData(result.data);
-        setMetadata(result.metadata);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+  //
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageFilter]);
+  //#region ::: Handlers
+  //#endregion ::: Handlers
 
-  const renderFilterBody = (): React.ReactElement => {
+  //
+
+  //#region ::: Other Methods
+  const RenderFilterBody = (): React.ReactElement => {
     const disabledDate: RangePickerProps["disabledDate"] = (current) => {
       return current && current > moment().endOf("day");
     };
@@ -184,6 +177,27 @@ const Result: NextPageWithLayout = () => {
       </div>
     );
   };
+  //#endregion ::: Other Methods
+
+  //
+
+  //#region ::: UseEffect
+  React.useEffect(() => {
+    httpRequest
+      .get(`/moderation-list`, queryParams)
+      .then((response) => {
+        const result = response.data;
+        setIsReloading(false);
+        setModerationData(result.data);
+        setMetadata(result.metadata);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageFilter]);
+  //#endregion ::: UseEffect
 
   return (
     <div className="flex flex-1 flex-col">
@@ -221,10 +235,10 @@ const Result: NextPageWithLayout = () => {
             open={filterDrawerOpen}
             onClose={() => setFilterDrawerOpen(false)}
           >
-            {renderFilterBody()}
+            {RenderFilterBody()}
           </Drawer>
         ) : (
-          renderFilterBody()
+          RenderFilterBody()
         )}
       </section>
       {!isNil(moderationData) ? (
