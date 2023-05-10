@@ -168,7 +168,7 @@ const Home: NextPageWithLayout = () => {
       let twoMonths = moment.tz("Asia/Jakarta").add(-60, "days");
 
       let thisMonthResult = await httpRequest
-        .get("/moderation/statistics", {
+        .get("/moderations/statistics", {
           params: {
             start_date: lastMonth.format("YYYY-MM-DD"),
             end_date: currentDate.format("YYYY-MM-DD"),
@@ -183,7 +183,7 @@ const Home: NextPageWithLayout = () => {
         });
 
       let lastMonthResult = await httpRequest
-        .get("/moderation/statistics", {
+        .get("/moderations/statistics", {
           params: {
             start_date: twoMonths.format("YYYY-MM-DD"),
             end_date: lastMonth.format("YYYY-MM-DD"),
@@ -261,27 +261,42 @@ const Home: NextPageWithLayout = () => {
 
       <div className="flex h-full flex-col gap-4">
         <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <div className="hidden rounded-lg bg-white p-6 shadow-custom md:block">
-            <h2 className="text-2xl font-semibold capitalize">
-              Hai {userData.name}!
-            </h2>
-            <p className="mb-4 font-semibold">
-              Selamat Datang di Sistem Rekomendasi KPID Jawa Timur!
-            </p>
-            <p className="mb-4">
-              Sistem rekomendasi ini dirancang untuk membantu KPID Jawa Timur
-              dalam melakukan moderasi siaran televisi. Sistem ini memudahkan
-              dalam konten siaran televisi yang layak tayang sesuai dengan
-              standar penyiaran yang berlaku.
-            </p>
-            <p className="mb-4">
-              Sistem dapat memberikan rekomendasi konten yang layak tayang
-              dengan lebih akurat dan efisien. Kami berharap sistem rekomendasi
-              ini dapat menjadi solusi yang efektif dalam mendukung tugas KPID
-              Jawa Timur dalam memastikan bahwa konten siaran televisi yang
-              disajikan untuk masyarakat selalu berkualitas dan sesuai dengan
-              standar penyiaran yang berlaku.
-            </p>
+          <div className="hidden rounded-lg bg-white shadow-custom md:block">
+            <div className="rounded-t-lg bg-sky-100 px-6 pt-6 pb-4">
+              <div className="flex items-center">
+                <span className="relative mr-2 h-16 w-16 rounded-full">
+                  <Image
+                    src={"/user.png"}
+                    alt="User Profile Image"
+                    layout="fill"
+                  ></Image>
+                </span>
+                <span className="flex-1">
+                  <h2 className="text-2xl font-semibold capitalize text-sky-700">
+                    Hai {userData.name}!
+                  </h2>
+                  <p className="font-semibold text-sky-700">
+                    Selamat Datang di Sistem Rekomendasi KPID Jawa Timur!
+                  </p>
+                </span>
+              </div>
+            </div>
+            <div className="px-6 pb-6 pt-4">
+              <p className="mb-4">
+                Sistem rekomendasi ini dirancang untuk membantu KPID Jawa Timur
+                dalam melakukan moderasi siaran televisi. Sistem ini memudahkan
+                dalam konten siaran televisi yang layak tayang sesuai dengan
+                standar penyiaran yang berlaku.
+              </p>
+              <p className="mb-4">
+                Sistem dapat memberikan rekomendasi konten yang layak tayang
+                dengan lebih akurat dan efisien. Kami berharap sistem
+                rekomendasi ini dapat menjadi solusi yang efektif dalam
+                mendukung tugas KPID Jawa Timur dalam memastikan bahwa konten
+                siaran televisi yang disajikan untuk masyarakat selalu
+                berkualitas dan sesuai dengan standar penyiaran yang berlaku.
+              </p>
+            </div>
           </div>
           <div className="grid gap-4">
             <div className="gap-4 rounded-lg bg-white p-6 shadow-custom">

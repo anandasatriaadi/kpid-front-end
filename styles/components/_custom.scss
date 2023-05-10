@@ -1,0 +1,31 @@
+.kpid-pasal-list {
+  ol {
+    @apply ml-4 list-outside text-justify leading-4;
+
+    &.alpha {
+      @apply list-alpha;
+    }
+    &.disc {
+      @apply list-disc;
+    }
+    &.decimal {
+      @apply list-decimal;
+      &.ayat {
+        counter-reset: ayat-count;
+
+        & > li {
+          counter-increment: ayat-count;
+          &::marker {
+            content: "(" counter(ayat-count) ") ";
+          }
+        }
+      }
+    }
+
+    & > li {
+      &:not(:last-child) {
+        @apply mb-1;
+      }
+    }
+  }
+}

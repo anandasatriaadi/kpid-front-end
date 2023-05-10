@@ -1,4 +1,6 @@
 .ant-tabs {
+  $tabs: &;
+
   &.custom-tabs {
     .ant-tabs {
       &-nav {
@@ -25,6 +27,21 @@
 
       &-content-holder {
         @apply rounded-b-lg rounded-tr-lg bg-sky-50 p-8 shadow-custom;
+      }
+    }
+  }
+
+  &-card {
+    #{$tabs}-nav {
+      #{$tabs}-tab {
+        &:hover {
+          @apply text-sky-600;
+        }
+      }
+      #{$tabs}-tab-active {
+        #{$tabs}-tab-btn {
+          @apply text-sky-600;
+        }
       }
     }
   }

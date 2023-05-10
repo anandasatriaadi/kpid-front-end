@@ -184,7 +184,7 @@ const Result: NextPageWithLayout = () => {
   //#region ::: UseEffect
   React.useEffect(() => {
     httpRequest
-      .get(`/moderation-list`, queryParams)
+      .get(`/moderations/user`, queryParams)
       .then((response) => {
         const result = response.data;
         setIsReloading(false);

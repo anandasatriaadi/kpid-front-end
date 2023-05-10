@@ -7,6 +7,8 @@ import ModerationDecision from "@/types/ModerationDecision";
 import ModerationResponse from "@/types/ModerationResponse";
 import ModerationResult from "@/types/ModerationResult";
 import { isNil, isNilOrEmpty } from "@/utils/CommonUtil";
+import parse from "html-react-parser";
+import DOMPurify from "dompurify";
 import {
   faClock,
   faFileDownload,
@@ -33,36 +35,26 @@ const timelineItem = [
     violations: [
       {
         pasal: "P3SPS Pasal 18 BAB XII Tahun 2012",
-        deskripsi: `Program siaran yang memuat adegan seksual dilarang.<br\>
-        a. menayangkan ketelanjangan dan/atau penampakan alat kelamin;<br\>
-        b. menampilkan adegan yang menggambarkan aktivitas seks dan/atau
-        persenggamaan;<br\>
-        c. menayangkan kekerasan seksual;<br\>
-        d. menampilkan suara yang menggambarkan berlangsungnya aktivitas seks
-        dan/atau persenggamaan;<br\>
-        e. menampilkan percakapan tentang rangkaian aktivitas seks dan/atau
-        persenggamaan;<br\>
-        f. menayangkan adegan dan/atau suara yang menggambarkan hubungan
-        seks antarbinatang secara vulgar;<br\>
-        g. menampilkan adegan ciuman bibir;<br\>
-        h. mengeksploitasi dan/atau menampilkan bagian-bagian tubuh tertentu,
-        seperti: paha, bokong, payudara, secara close up dan/atau medium shot;<br\>
-        i. menampilkan gerakan tubuh dan/atau tarian erotis;<br\>
-        j. mengesankan ketelanjangan;<br\>
-        k. mengesankan ciuman bibir; dan/atau<br\>
-        l. menampilkan kata-kata cabul.<br\>`,
+        deskripsi: `<p>Program siaran yang memuat adegan seksual dilarang.
+        <ol class="alpha">
+          <li>Menayangkan ketelanjangan dan/atau penampakan alat kelamin;</li>
+          <li>Menampilkan adegan yang menggambarkan aktivitas seks dan/atau persenggamaan;</li>
+          <li>Menayangkan kekerasan seksual;</li>
+          <li>Menampilkan suara yang menggambarkan berlangsungnya aktivitas seks dan/atau persenggamaan;</li>
+          <li>Menampilkan percakapan tentang rangkaian aktivitas seks dan/atau persenggamaan;</li>
+          <li>Menayangkan adegan dan/atau suara yang menggambarkan hubungan seks antarbinatang secara vulgar;</li>
+          <li>Menampilkan adegan ciuman bibir;</li>
+          <li>Mengeksploitasi dan/atau menampilkan bagian-bagian tubuh tertentu, seperti: paha, bokong, payudara, secara close up dan/atau medium shot;</li>
+          <li>Menampilkan gerakan tubuh dan/atau tarian erotis;</li>
+          <li>Mengesankan ketelanjangan;</li>
+          <li>Mengesankan ciuman bibir; dan/atau</li>
+          <li>Menampilkan kata-kata cabul.</li>
+        </ol>
+      </p>`,
       },
       {
         pasal: "P3SPS Pasal 24 BAB XIII Tahun 2012",
-        deskripsi: `
-          (1) Program siaran dilarang menampilkan ungkapan kasar dan makian, baik
-          secara verbal maupun nonverbal, yang mempunyai kecenderungan
-          menghina atau merendahkan martabat manusia, memiliki makna jorok/
-          mesum/cabul/vulgar, dan/atau menghina agama dan Tuhan.<br\><br\>
-          (2) Kata-kata kasar dan makian sebagaimana yang dimaksud pada ayat (1) di
-          atas mencakup kata-kata dalam bahasa Indonesia, bahasa daerah, dan
-          bahasa asing.
-          `,
+        deskripsi: `<p><ol class=\"decimal ayat\"><li>Program siaran dilarang menampilkan muatan yang melecehkan orang dan/atau kelompok masyarakat tertentu.</li><li>Orang dan/atau kelompok masyarakat tertentu sebagaimana yang dimaksud pada ayat (1) antara lain, tetapi tidak terbatas: <ol class=\"alpha\"><li>pekerja tertentu, seperti: pekerja rumah tangga, hansip, pesuruh kantor, pedagang kaki lima, satpam;</li><li>orang dengan orientasi seks dan identitas gender tertentu;</li><li>lanjut usia, janda, duda;</li><li>orang dengan kondisi fisik tertentu, seperti: gemuk, ceking, cebol, bibir sumbing, hidung pesek, memiliki gigi tonggos, mata juling;</li><li>tunanetra, tunarungu, tunawicara, tunadaksa, tunagrahita, autis;</li><li>pengidap penyakit tertentu, seperti: HIV/AIDS, kusta, epilepsi, alzheimer, latah; dan/atau</li><li>orang dengan masalah kejiwaan.</li></ol></li></ol></p>`,
       },
     ],
   },
@@ -95,15 +87,7 @@ const timelineItem = [
       },
       {
         pasal: "P3SPS Pasal 24 BAB XIII Tahun 2012",
-        deskripsi: `
-          (1) Program siaran dilarang menampilkan ungkapan kasar dan makian, baik
-          secara verbal maupun nonverbal, yang mempunyai kecenderungan
-          menghina atau merendahkan martabat manusia, memiliki makna jorok/
-          mesum/cabul/vulgar, dan/atau menghina agama dan Tuhan.<br\><br\>
-          (2) Kata-kata kasar dan makian sebagaimana yang dimaksud pada ayat (1) di
-          atas mencakup kata-kata dalam bahasa Indonesia, bahasa daerah, dan
-          bahasa asing.
-          `,
+        deskripsi: `<p><ol class=\"decimal ayat\"><li>Program siaran dilarang menampilkan muatan yang melecehkan orangdan/atau kelompok masyarakat tertentu.</li><li>Orang dan/atau kelompok masyarakat tertentu sebagaimana yangdimaksud pada ayat (1) antara lain, tetapi tidak terbatas: <ol class=\"alpha\"><li>pekerja tertentu, seperti: pekerja rumah tangga, hansip, pesuruh kantor, pedagang kaki lima, satpam;</li><li>orang dengan orientasi seks dan identitas gender tertentu;</li><li>lanjut usia, janda, duda;</li><li>orang dengan kondisi fisik tertentu, seperti: gemuk, ceking, cebol, bibir sumbing, hidung pesek, memiliki gigi tonggos, mata juling;</li><li>tunanetra, tunarungu, tunawicara, tunadaksa, tunagrahita, autis;</li><li>pengidap penyakit tertentu, seperti: HIV/AIDS, kusta, epilepsi, alzheimer, latah; dan/atau</li><li>orang dengan masalah kejiwaan.</li></ol></li></ol></p>`,
       },
     ],
   },
@@ -111,6 +95,7 @@ const timelineItem = [
 
 const SingleResult: NextPageWithLayout = () => {
   //#region ::: Variable Initialisations
+  // States
   const [categorySummary, setCategorySummary] = React.useState<any | undefined>(
     undefined
   );
@@ -119,10 +104,36 @@ const SingleResult: NextPageWithLayout = () => {
     React.useState<ModerationResponse>();
   const [framesToShow, setFramesToShow] = React.useState<FrameResult[]>([]);
 
+  // Refs
   const router = useRouter();
   const pathname = router.asPath;
   const moderationID = pathname.split("/").slice(-1)[0];
-  const fetchURL = `/moderation/${moderationID}`;
+  const fetchURL = `/moderations/${moderationID}`;
+
+  // Constants
+  const RecordInformations = [
+    {
+      title: "Jam Mulai",
+      value: `${moderationData?.start_time}`,
+      icon: faClock,
+    },
+    {
+      title: "Jam Selesai",
+      value: `${moderationData?.end_time}`,
+      icon: faClock,
+    },
+    {
+      title: "Durasi",
+      value: `${moderationData?.duration} detik`,
+      icon: faStopwatch,
+    },
+    { title: "FPS", value: `${moderationData?.fps}`, icon: faGaugeHigh },
+    {
+      title: "Konten Terdeteksi",
+      value: `${moderationData?.result?.length}`,
+      icon: faXmarkCircle,
+    },
+  ];
   //#endregion ::: Variable Initialisations
 
   //
@@ -137,13 +148,13 @@ const SingleResult: NextPageWithLayout = () => {
     data.set("index", timelineKey.toString());
     data.set("decision", decision.toUpperCase());
     httpRequest
-      .put(`/moderation/validate`, data)
+      .put(`/moderations/${moderationID}/validate`, data)
       .then((_) => {})
       .catch((err) => {
         console.error(err);
       });
     if (moderationData === undefined) return;
-    let temp: ModerationResponse = moderationData;
+    let temp: ModerationResponse = { ...moderationData };
 
     if (temp?.result === undefined) return;
     temp.result[timelineKey].decision = decision;
@@ -155,7 +166,7 @@ const SingleResult: NextPageWithLayout = () => {
     const data = new FormData();
     data.set("id", moderationID);
     httpRequest
-      .put(`/moderation/start`, data)
+      .put(`/moderations/${moderationID}/start`, data)
       .then((_) => {})
       .catch((err) => {
         console.error(err);
@@ -166,7 +177,7 @@ const SingleResult: NextPageWithLayout = () => {
 
   const handleGenerateLaporan = () => {
     httpRequest
-      .get(`/moderation/report/${moderationID}`, { responseType: "blob" })
+      .get(`/moderations/${moderationID}/report`, { responseType: "blob" })
       .then((response) => {
         if (moderationData === undefined) return;
         const type = response.headers["content-type"];
@@ -210,7 +221,11 @@ const SingleResult: NextPageWithLayout = () => {
       let idx: string = index.toString();
       let response: Tab = {
         key: idx,
-        label: <span className="flex items-center">{item}</span>,
+        label: (
+          <span className="flex items-center">
+            {String(item).replace("_", " ")}
+          </span>
+        ),
         children: (
           <Collapse className="custom-panel">
             {timelineItem[0].violations.map((violation, vIndex) => {
@@ -219,11 +234,9 @@ const SingleResult: NextPageWithLayout = () => {
                   header={vIndex + 1 + ". " + violation.pasal}
                   key={vIndex}
                 >
-                  <p
-                    dangerouslySetInnerHTML={{
-                      __html: violation.deskripsi,
-                    }}
-                  ></p>
+                  <div className="kpid-pasal-list">
+                    {parse(DOMPurify.sanitize(violation.deskripsi))}
+                  </div>
                 </Collapse.Panel>
               );
             })}
@@ -367,57 +380,19 @@ const SingleResult: NextPageWithLayout = () => {
                 <p className="text-base font-semibold md:text-lg">
                   Informasi Rekaman
                 </p>
-                <div className="flex items-center gap-4">
-                  <span className="flex min-w-[2.825rem] justify-center rounded-lg bg-slate-200 p-2 text-slate-600">
-                    <FontAwesomeIcon icon={faClock} height="24px" />
-                  </span>
-                  <span>
-                    <p className="text-sm">Jam Mulai</p>
-                    <p className="font-semibold">
-                      {moderationData?.start_time}
-                    </p>
-                  </span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="flex min-w-[2.825rem] justify-center rounded-lg bg-slate-200 p-2 text-slate-600">
-                    <FontAwesomeIcon icon={faClock} height="24px" />
-                  </span>
-                  <span>
-                    <p className="text-sm">Jam Selesai</p>
-                    <p className="font-semibold">{moderationData?.end_time}</p>
-                  </span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="flex min-w-[2.825rem] justify-center rounded-lg bg-slate-200 p-2 text-slate-600">
-                    <FontAwesomeIcon icon={faStopwatch} height="24px" />
-                  </span>
-                  <span>
-                    <p className="text-sm">Durasi</p>
-                    <p className="font-semibold">
-                      {moderationData?.duration} detik
-                    </p>
-                  </span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="flex min-w-[2.825rem] justify-center rounded-lg bg-slate-200 p-2 text-slate-600">
-                    <FontAwesomeIcon icon={faGaugeHigh} height="24px" />
-                  </span>
-                  <span>
-                    <p className="text-sm">FPS</p>
-                    <p className="font-semibold">{moderationData?.fps}</p>
-                  </span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="flex min-w-[2.825rem] justify-center rounded-lg bg-slate-200 p-2 text-slate-600">
-                    <FontAwesomeIcon icon={faXmarkCircle} height="24px" />
-                  </span>
-                  <span>
-                    <p className="text-sm">Konten Terdeteksi</p>
-                    <p className="font-semibold">
-                      {moderationData?.result?.length}
-                    </p>
-                  </span>
-                </div>
+                {RecordInformations.map((item, index) => {
+                  return (
+                    <div key={index} className="flex items-center gap-4">
+                      <span className="flex min-w-[2.825rem] justify-center rounded-lg bg-sky-200 p-2 text-sky-700">
+                        <FontAwesomeIcon icon={item.icon} height="24px" />
+                      </span>
+                      <span>
+                        <p className="text-sm">{item.title}</p>
+                        <p className="font-semibold">{item.value}</p>
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
               <div className="col-span-4 flex flex-col rounded-lg bg-white p-4 shadow-custom lg:col-span-3">
                 <h2 className="text-base font-semibold md:text-lg">
@@ -450,11 +425,15 @@ const SingleResult: NextPageWithLayout = () => {
                 )}
                 <div className="mt-4 flex-1">
                   <p className="font-semibold">Deskripsi</p>
-                  <p className="">{moderationData?.description}</p>
+                  <p className="">
+                    {moderationData?.description !== undefined
+                      ? moderationData?.description
+                      : ""}
+                  </p>
                 </div>
                 <div className="mt-4 grid grid-cols-1 gap-y-2 md:grid-cols-2 xl:grid-cols-3">
                   <div className="flex gap-2">
-                    <span className="flex min-w-[2.825rem] items-center justify-center rounded-lg bg-slate-200 p-2 text-slate-600 ">
+                    <span className="flex min-w-[2.825rem] items-center justify-center rounded-lg bg-sky-200 p-2 text-sky-700 ">
                       <FontAwesomeIcon icon={faTelevision} height="24px" />
                     </span>
                     <span className="flex flex-col justify-center">
@@ -469,7 +448,7 @@ const SingleResult: NextPageWithLayout = () => {
                     </span>
                   </div>
                   <div className="flex gap-2">
-                    <span className="flex min-w-[2.825rem] items-center justify-center rounded-lg bg-slate-200 p-2 text-slate-600 ">
+                    <span className="flex min-w-[2.825rem] items-center justify-center rounded-lg bg-sky-200 p-2 text-sky-700 ">
                       <FontAwesomeIcon icon={faPenToSquare} height="24px" />
                     </span>
                     <span>
@@ -480,7 +459,7 @@ const SingleResult: NextPageWithLayout = () => {
                     </span>
                   </div>
                   <div className="flex gap-2">
-                    <span className="flex min-w-[2.825rem] items-center justify-center rounded-lg bg-slate-200 p-2 text-slate-600 ">
+                    <span className="flex min-w-[2.825rem] items-center justify-center rounded-lg bg-sky-200 p-2 text-sky-700 ">
                       <FontAwesomeIcon icon={faClock} height="24px" />
                     </span>
                     <span>
@@ -493,59 +472,19 @@ const SingleResult: NextPageWithLayout = () => {
                     </span>
                   </div>
                   {/* Video Informations --- Hidden on desktop */}
-                  <div className="flex gap-2 lg:hidden">
-                    <span className="flex min-w-[2.825rem] justify-center rounded-lg bg-slate-200 p-2 text-slate-600">
-                      <FontAwesomeIcon icon={faClock} height="24px" />
-                    </span>
-                    <span>
-                      <p className="text-sm">Jam Mulai</p>
-                      <p className="font-semibold">
-                        {moderationData?.start_time}
-                      </p>
-                    </span>
-                  </div>
-                  <div className="flex gap-2 lg:hidden">
-                    <span className="flex min-w-[2.825rem] justify-center rounded-lg bg-slate-200 p-2 text-slate-600">
-                      <FontAwesomeIcon icon={faClock} height="24px" />
-                    </span>
-                    <span>
-                      <p className="text-sm">Jam Selesai</p>
-                      <p className="font-semibold">
-                        {moderationData?.end_time}
-                      </p>
-                    </span>
-                  </div>
-                  <div className="flex gap-2 lg:hidden">
-                    <span className="flex min-w-[2.825rem] justify-center rounded-lg bg-slate-200 p-2 text-slate-600">
-                      <FontAwesomeIcon icon={faStopwatch} height="24px" />
-                    </span>
-                    <span>
-                      <p className="text-sm">Durasi</p>
-                      <p className="font-semibold">
-                        {moderationData?.duration} detik
-                      </p>
-                    </span>
-                  </div>
-                  <div className="flex gap-2 lg:hidden">
-                    <span className="flex min-w-[2.825rem] justify-center rounded-lg bg-slate-200 p-2 text-slate-600">
-                      <FontAwesomeIcon icon={faGaugeHigh} height="24px" />
-                    </span>
-                    <span>
-                      <p className="text-sm">FPS</p>
-                      <p className="font-semibold">{moderationData?.fps}</p>
-                    </span>
-                  </div>
-                  <div className="flex gap-2 lg:hidden">
-                    <span className="flex min-w-[2.825rem] justify-center rounded-lg bg-slate-200 p-2 text-slate-600">
-                      <FontAwesomeIcon icon={faXmarkCircle} height="24px" />
-                    </span>
-                    <span>
-                      <p className="text-sm">Konten Terdeteksi</p>
-                      <p className="font-semibold">
-                        {moderationData?.result?.length}
-                      </p>
-                    </span>
-                  </div>
+                  {RecordInformations.map((item, index) => {
+                    return (
+                      <div key={index} className="flex gap-2 lg:hidden">
+                        <span className="flex min-w-[2.825rem] justify-center rounded-lg bg-sky-200 p-2 text-sky-700">
+                          <FontAwesomeIcon icon={item.icon} height="24px" />
+                        </span>
+                        <span>
+                          <p className="text-sm">{item.title}</p>
+                          <p className="font-semibold">{item.value}</p>
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </section>
@@ -576,6 +515,7 @@ const SingleResult: NextPageWithLayout = () => {
                     )}
                   </div>
                   {moderationData?.frames !== undefined &&
+                    moderationData?.frames !== null &&
                     moderationData?.frames.length > 20 && (
                       <p className="mt-4 text-right text-base font-normal opacity-70">
                         dan {moderationData?.frames.length - 20} potongan frame
@@ -609,16 +549,16 @@ const SingleResult: NextPageWithLayout = () => {
                                       "PENDING" ? (
                                         item.decision?.toUpperCase() ==
                                         "VALID" ? (
-                                          <div className="ml-2 border-2 border-dashed border-green-500 px-2 py-0.5 text-sm">
+                                          <div className="ml-2 rounded-lg border-2 border-dashed border-lime-600 px-2 py-0.5 text-sm">
                                             Valid
                                           </div>
                                         ) : (
-                                          <div className="ml-2 border-2 border-dashed border-red-500 px-2 py-0.5 text-sm">
+                                          <div className="ml-2 rounded-lg border-2 border-dashed border-red-600 px-2 py-0.5 text-sm">
                                             Invalid
                                           </div>
                                         )
                                       ) : (
-                                        <div className="ml-2 border-2 border-dashed border-amber-400 px-2 py-0.5 text-sm">
+                                        <div className="ml-2 rounded-lg border-2 border-dashed border-amber-500 px-2 py-0.5 text-sm">
                                           Belum Diverifikasi
                                         </div>
                                       )}

@@ -45,7 +45,7 @@ function ViolationIconCard(props: IconProps) {
   const tooltipClassName =
     "relative flex flex-col justify-center bg-opacity-75 " +
     (cardStyle ? "rounded-lg py-2 md:py-3 px-3 md:px-4 " : "") +
-    (darkStyle ? "bg-slate-600 text-slate-50" : "bg-slate-200 text-slate-600");
+    (darkStyle ? "bg-sky-700 text-sky-50" : "bg-sky-200 text-sky-700");
 
   const iconStyle = {
     height: isMobile ? `${height + 16}px` : `${height + 24}px`,

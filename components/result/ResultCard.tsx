@@ -2,10 +2,8 @@ import ViolationIconCard from "@/components/result/ViolationIconCard";
 import ModerationResponse from "@/types/ModerationResponse";
 import ModerationResult from "@/types/ModerationResult";
 import { isNilOrEmpty } from "@/utils/CommonUtil";
-import { faClock, faPenToSquare } from "@fortawesome/free-regular-svg-icons";
-import {
-  faTelevision
-} from "@fortawesome/free-solid-svg-icons";
+import { faClock } from "@fortawesome/free-regular-svg-icons";
+import { faPenToSquare, faTelevision } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Divider, Skeleton } from "antd";
 import moment from "moment";
@@ -220,10 +218,10 @@ function ResultCard(props: Props) {
           <div>
             <div className="grid grid-cols-1 gap-y-2 md:grid-cols-2 ">
               <div className="flex gap-2">
-                <span className="flex min-w-[1.825rem] items-center justify-center rounded-lg p-1 text-slate-600 ">
+                <span className="my-auto flex h-[1.825rem] w-[1.825rem] items-center justify-center rounded-lg bg-sky-200 p-1 text-sky-700 ">
                   <FontAwesomeIcon icon={faTelevision} height="12px" />
                 </span>
-                <span className="flex flex-col justify-center">
+                <span>
                   <p className="hidden md:block">Stasiun</p>
                   <p className="font-semibold">
                     {typeof moderationData?.station_name === "object" &&
@@ -235,7 +233,7 @@ function ResultCard(props: Props) {
                 </span>
               </div>
               <div className="flex gap-2">
-                <span className="flex min-w-[1.825rem] items-center justify-center rounded-lg p-1 text-slate-600 ">
+                <span className="my-auto flex h-[1.825rem] w-[1.825rem] items-center justify-center rounded-lg bg-sky-200 p-1 text-sky-700 ">
                   <FontAwesomeIcon icon={faPenToSquare} height="12px" />
                 </span>
                 <span>
@@ -246,11 +244,12 @@ function ResultCard(props: Props) {
                 </span>
               </div>
               <div className="flex gap-2">
-                <span className="flex min-w-[1.825rem] items-center justify-center rounded-lg p-1 text-slate-600 ">
+                <span className="my-auto flex h-[1.825rem] w-[1.825rem] items-center justify-center rounded-lg bg-sky-200 p-1 text-sky-700 ">
                   <FontAwesomeIcon icon={faClock} height="12px" />
                 </span>
-                <span>
-                  <p className="hidden md:block">Tanggal Rekaman</p>
+                <span className="flex gap-1 md:inline-block">
+                  <p className="block md:hidden">Rekaman</p>
+                  <p className="hidden  md:block">Tanggal Rekaman</p>
                   <p className="font-semibold">
                     {moment(moderationData?.recording_date).format(
                       "DD MMMM YYYY"
@@ -259,11 +258,12 @@ function ResultCard(props: Props) {
                 </span>
               </div>
               <div className="flex gap-2">
-                <span className="flex min-w-[1.825rem] items-center justify-center rounded-lg p-1 text-slate-600 ">
+                <span className="my-auto flex h-[1.825rem] w-[1.825rem] items-center justify-center rounded-lg bg-sky-200 p-1 text-sky-700 ">
                   <FontAwesomeIcon icon={faClock} height="12px" />
                 </span>
-                <span>
-                  <p className="hidden md:block">Tanggal Unggah</p>
+                <span className="flex gap-1 md:inline-block">
+                  <p className="block md:hidden">Unggahan</p>
+                  <p className="hidden  md:block">Tanggal Unggah</p>
                   <p className="font-semibold">
                     {moment(moderationData?.created_at).format("DD MMMM YYYY")}
                   </p>

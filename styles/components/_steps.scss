@@ -10,7 +10,7 @@
         
         &-process {
             & #{$item}-container #{$item}-icon {
-                @apply bg-sky-600;
+                @apply bg-sky-600 border-sky-600;
             }
         }
         &-finish {
@@ -30,4 +30,9 @@
         }
     }
 
+    &#{$steps}-vertical#{$steps}-small {
+        #{$steps}-item-content {
+            min-height: 2.25rem;
+        }
+    }
 }

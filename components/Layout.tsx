@@ -137,6 +137,19 @@ const Layout = ({ children }: LayoutProps) => {
       key: "3",
       icon: (
         <div className="flex w-[1.5rem] justify-center">
+          <FontAwesomeIcon height={18} icon={faCloudArrowUp} />
+        </div>
+      ),
+      label: <>Unggah Video</>,
+      onClick: () => {
+        setUploadModalOpen(!uploadModalOpen);
+        setDrawerMenuOpen(false);
+      },
+    },
+    {
+      key: "4",
+      icon: (
+        <div className="flex w-[1.5rem] justify-center">
           <FontAwesomeIcon height={18} icon={faCircleQuestion} />
         </div>
       ),
@@ -152,22 +165,6 @@ const Layout = ({ children }: LayoutProps) => {
       },
     },
   ];
-
-  if (isMobile) {
-    sidebarMenus.push({
-      key: "4",
-      icon: (
-        <div className="flex w-[1.5rem] justify-center">
-          <FontAwesomeIcon height={18} icon={faCloudArrowUp} />
-        </div>
-      ),
-      label: <>Unggah Video</>,
-      onClick: () => {
-        setUploadModalOpen(!uploadModalOpen);
-        setDrawerMenuOpen(false);
-      },
-    });
-  }
   //#endregion ::: Menu Logic
 
   //
@@ -423,10 +420,16 @@ const Layout = ({ children }: LayoutProps) => {
                   </>
                 ) : (
                   <div className="flex items-center">
-                    <span className="mr-2 rounded-full relative p-4">
-                      <Image src={"/user.png"} alt="User Profile Image" layout="fill">
-
-                      </Image>
+                    <span className="relative mr-2 rounded-full p-4">
+                      <Image
+                        className="z-10"
+                        src={"/user.png"}
+                        alt="User Profile Image"
+                        layout="fill"
+                      />
+                      <span className="absolute bottom-0 left-0 right-0 top-0 z-0 flex flex-col items-center justify-end">
+                        <span className="rounded-full bg-sky-200 p-3.5"></span>
+                      </span>
                     </span>
                     <Dropdown menu={accountMenu} placement="bottomRight">
                       <a onClick={(e) => e.preventDefault()}>
@@ -443,7 +446,7 @@ const Layout = ({ children }: LayoutProps) => {
               </div>
             </AntLayout.Content>
           </AntLayout>
-          <div
+          {/* <div
             className={
               "absolute bottom-6 flex transition-all duration-500" +
               (showUpload ? " right-6" : " right-0")
@@ -479,7 +482,7 @@ const Layout = ({ children }: LayoutProps) => {
                 </div>
               </Button>
             </div>
-          </div>
+          </div> */}
         </AntLayout>
       )}
     </>

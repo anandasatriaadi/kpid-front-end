@@ -107,11 +107,7 @@ function UploadModal(props: UploadModalProps) {
   const handleForm = (values: any) => {
     let form = new FormData();
     for (const key in values) {
-      if (key == "station_name") {
-        form.append(key, tokenizeString(values[key], true));
-      } else {
-        form.append(key, values[key]);
-      }
+      form.append(key, values[key]);
     }
 
     form.append("video_file", uploadFile as RcFile);
@@ -121,7 +117,7 @@ function UploadModal(props: UploadModalProps) {
     };
 
     httpRequest
-      .post("/moderation-form", form, formPostConfig)
+      .post("/moderations", form, formPostConfig)
       .then((response) => {
         const result = response.data;
         if (result.status == 200) {
