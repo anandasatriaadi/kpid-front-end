@@ -273,7 +273,7 @@ const Home: NextPageWithLayout = () => {
                 </span>
                 <span className="flex-1">
                   <h2 className="text-2xl font-semibold capitalize text-sky-700">
-                    Hai {userData.name}!
+                    Hai {userData !== undefined && userData.name}!
                   </h2>
                   <p className="font-semibold text-sky-700">
                     Selamat Datang di Sistem Rekomendasi KPID Jawa Timur!

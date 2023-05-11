@@ -25,73 +25,8 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { Tab } from "rc-tabs/lib/interface";
 import * as React from "react";
-
-const timelineItem = [
-  {
-    second: 6,
-    time: "18:25:06",
-    image: "/result.png",
-    decision: null,
-    violations: [
-      {
-        pasal: "P3SPS Pasal 18 BAB XII Tahun 2012",
-        deskripsi: `<p>Program siaran yang memuat adegan seksual dilarang.
-        <ol class="alpha">
-          <li>Menayangkan ketelanjangan dan/atau penampakan alat kelamin;</li>
-          <li>Menampilkan adegan yang menggambarkan aktivitas seks dan/atau persenggamaan;</li>
-          <li>Menayangkan kekerasan seksual;</li>
-          <li>Menampilkan suara yang menggambarkan berlangsungnya aktivitas seks dan/atau persenggamaan;</li>
-          <li>Menampilkan percakapan tentang rangkaian aktivitas seks dan/atau persenggamaan;</li>
-          <li>Menayangkan adegan dan/atau suara yang menggambarkan hubungan seks antarbinatang secara vulgar;</li>
-          <li>Menampilkan adegan ciuman bibir;</li>
-          <li>Mengeksploitasi dan/atau menampilkan bagian-bagian tubuh tertentu, seperti: paha, bokong, payudara, secara close up dan/atau medium shot;</li>
-          <li>Menampilkan gerakan tubuh dan/atau tarian erotis;</li>
-          <li>Mengesankan ketelanjangan;</li>
-          <li>Mengesankan ciuman bibir; dan/atau</li>
-          <li>Menampilkan kata-kata cabul.</li>
-        </ol>
-      </p>`,
-      },
-      {
-        pasal: "P3SPS Pasal 24 BAB XIII Tahun 2012",
-        deskripsi: `<p><ol class=\"decimal ayat\"><li>Program siaran dilarang menampilkan muatan yang melecehkan orang dan/atau kelompok masyarakat tertentu.</li><li>Orang dan/atau kelompok masyarakat tertentu sebagaimana yang dimaksud pada ayat (1) antara lain, tetapi tidak terbatas: <ol class=\"alpha\"><li>pekerja tertentu, seperti: pekerja rumah tangga, hansip, pesuruh kantor, pedagang kaki lima, satpam;</li><li>orang dengan orientasi seks dan identitas gender tertentu;</li><li>lanjut usia, janda, duda;</li><li>orang dengan kondisi fisik tertentu, seperti: gemuk, ceking, cebol, bibir sumbing, hidung pesek, memiliki gigi tonggos, mata juling;</li><li>tunanetra, tunarungu, tunawicara, tunadaksa, tunagrahita, autis;</li><li>pengidap penyakit tertentu, seperti: HIV/AIDS, kusta, epilepsi, alzheimer, latah; dan/atau</li><li>orang dengan masalah kejiwaan.</li></ol></li></ol></p>`,
-      },
-    ],
-  },
-  {
-    second: 1256,
-    time: "18:45:56",
-    image: "/result.png",
-    decision: null,
-    violations: [
-      {
-        pasal: "P3SPS Pasal 18 BAB XII Tahun 2012",
-        deskripsi: `Program siaran yang memuat adegan seksual dilarang.<br\>
-        a. menayangkan ketelanjangan dan/atau penampakan alat kelamin;<br\>
-        b. menampilkan adegan yang menggambarkan aktivitas seks dan/atau
-        persenggamaan;<br\>
-        c. menayangkan kekerasan seksual;<br\>
-        d. menampilkan suara yang menggambarkan berlangsungnya aktivitas seks
-        dan/atau persenggamaan;<br\>
-        e. menampilkan percakapan tentang rangkaian aktivitas seks dan/atau
-        persenggamaan;<br\>
-        f. menayangkan adegan dan/atau suara yang menggambarkan hubungan
-        seks antarbinatang secara vulgar;<br\>
-        g. menampilkan adegan ciuman bibir;<br\>
-        h. mengeksploitasi dan/atau menampilkan bagian-bagian tubuh tertentu,
-        seperti: paha, bokong, payudara, secara close up dan/atau medium shot;<br\>
-        i. menampilkan gerakan tubuh dan/atau tarian erotis;<br\>
-        j. mengesankan ketelanjangan;<br\>
-        k. mengesankan ciuman bibir; dan/atau<br\>
-        l. menampilkan kata-kata cabul.<br\>`,
-      },
-      {
-        pasal: "P3SPS Pasal 24 BAB XIII Tahun 2012",
-        deskripsi: `<p><ol class=\"decimal ayat\"><li>Program siaran dilarang menampilkan muatan yang melecehkan orangdan/atau kelompok masyarakat tertentu.</li><li>Orang dan/atau kelompok masyarakat tertentu sebagaimana yangdimaksud pada ayat (1) antara lain, tetapi tidak terbatas: <ol class=\"alpha\"><li>pekerja tertentu, seperti: pekerja rumah tangga, hansip, pesuruh kantor, pedagang kaki lima, satpam;</li><li>orang dengan orientasi seks dan identitas gender tertentu;</li><li>lanjut usia, janda, duda;</li><li>orang dengan kondisi fisik tertentu, seperti: gemuk, ceking, cebol, bibir sumbing, hidung pesek, memiliki gigi tonggos, mata juling;</li><li>tunanetra, tunarungu, tunawicara, tunadaksa, tunagrahita, autis;</li><li>pengidap penyakit tertentu, seperti: HIV/AIDS, kusta, epilepsi, alzheimer, latah; dan/atau</li><li>orang dengan masalah kejiwaan.</li></ol></li></ol></p>`,
-      },
-    ],
-  },
-];
+import PasalResponse from "@/types/PasalResponse";
+import debounce from "@/utils/Debounce";
 
 const SingleResult: NextPageWithLayout = () => {
   //#region ::: Variable Initialisations
@@ -99,10 +34,13 @@ const SingleResult: NextPageWithLayout = () => {
   const [categorySummary, setCategorySummary] = React.useState<any | undefined>(
     undefined
   );
+  const [framesToShow, setFramesToShow] = React.useState<FrameResult[]>([]);
   const [isModerated, setIsModerated] = React.useState<boolean>(true);
   const [moderationData, setModerationData] =
     React.useState<ModerationResponse>();
-  const [framesToShow, setFramesToShow] = React.useState<FrameResult[]>([]);
+  const [categorisedPasal, setCategorisedPasal] = React.useState<{
+    [key: string]: PasalResponse[];
+  }>({});
 
   // Refs
   const router = useRouter();
@@ -200,6 +138,12 @@ const SingleResult: NextPageWithLayout = () => {
   //
 
   //#region ::: Other Methods
+  // Debounce message method
+  const debounceMessage = debounce((msg: string) => {
+    message.error(msg);
+  }, 500);
+
+  // Check if all results has been verified
   const checkIfAllModerated = () => {
     let isAllModerated = true;
     if (moderationData?.result !== undefined) {
@@ -216,8 +160,9 @@ const SingleResult: NextPageWithLayout = () => {
     setIsModerated(isAllModerated);
   };
 
-  const RenderViolationTabs = (result: any) => {
-    let responses = result.category.map((item: any, index: any) => {
+  // Render the Violations Tabs (Daftar Pelanggaran)
+  const RenderViolationTabs = (result: ModerationResult) => {
+    let responses = result.category.map((item: string, index: any) => {
       let idx: string = index.toString();
       let response: Tab = {
         key: idx,
@@ -228,7 +173,24 @@ const SingleResult: NextPageWithLayout = () => {
         ),
         children: (
           <Collapse className="custom-panel">
-            {timelineItem[0].violations.map((violation, vIndex) => {
+            <>
+              {categorisedPasal[item.toLowerCase()] !== undefined &&
+                categorisedPasal[item.toLowerCase()].map((pasal, pIndex) => {
+                  return (
+                    <Collapse.Panel
+                      header={`${pIndex + 1}. Pasal ${pasal.pasal} BAB ${
+                        pasal.chapter
+                      } Tahun 2012`}
+                      key={pIndex}
+                    >
+                      <div className="kpid-pasal-list">
+                        {parse(DOMPurify.sanitize(pasal.description))}
+                      </div>
+                    </Collapse.Panel>
+                  );
+                })}
+            </>
+            {/* {timelineItem[0].violations.map((violation, vIndex) => {
               return (
                 <Collapse.Panel
                   header={vIndex + 1 + ". " + violation.pasal}
@@ -239,7 +201,7 @@ const SingleResult: NextPageWithLayout = () => {
                   </div>
                 </Collapse.Panel>
               );
-            })}
+            })} */}
           </Collapse>
         ),
       };
@@ -248,6 +210,7 @@ const SingleResult: NextPageWithLayout = () => {
     return responses;
   };
 
+  // Conditionally Get The Status Styling
   const getStatusStyling = (status: string) => {
     switch (status.toLowerCase()) {
       case "uploaded":
@@ -277,75 +240,111 @@ const SingleResult: NextPageWithLayout = () => {
         };
     }
   };
+
+  // Categorize result
+  const categorizeResult = (data: ModerationResponse) => {
+    let temp: any[] = [];
+    if (data?.result !== undefined) {
+      if (data?.result.length === 0) {
+        setIsModerated(false);
+      } else {
+        data.result.forEach((item: ModerationResult) => {
+          if (item.decision.toUpperCase() === "PENDING") {
+            setIsModerated(false);
+          }
+          temp = [...temp, ...item.category];
+        });
+      }
+    }
+
+    const summary = temp.reduce((res, val) => {
+      let key = String(val).toLowerCase();
+      if (res[key]) {
+        res[key]++;
+      } else {
+        res[key] = 1;
+      }
+      return res;
+    }, {});
+
+    setCategorySummary(summary);
+  };
+
+  // Set the frames to show, equally thoughout the video
+  const divideAndSetFrames = (data: ModerationResponse) => {
+    let tempFrames: FrameResult[] = [];
+    if (data?.frames !== undefined && data?.frames !== null) {
+      if (data.frames.length > 20) {
+        let step =
+          data?.frames !== undefined ? Math.floor(data.frames.length / 20) : 0;
+        tempFrames = data.frames.reduce((acc: FrameResult[], curr, index) => {
+          if (acc.length === 20) {
+            return acc;
+          }
+          if (index % step === 0) {
+            console.log(curr);
+            acc.push(curr);
+          }
+          return acc;
+        }, []);
+      } else {
+        tempFrames = data.frames;
+      }
+    }
+    setFramesToShow(tempFrames);
+  };
+
+  // Sort the pasal into its categories
+  const sortPasal = (data: PasalResponse[]) => {
+    let tempCategory: { [key: string]: PasalResponse[] } = {};
+    data.map((item) => {
+      let key = String(item.category).toLowerCase();
+      if (tempCategory[key]) {
+        tempCategory[key].push(item);
+      } else {
+        tempCategory[key] = [item];
+      }
+    });
+    setCategorisedPasal(tempCategory);
+  };
   //#endregion ::: Other Methods
 
   //
 
   //#region ::: UseEffect
   React.useEffect(() => {
-    (async () => {
+    // Fetch moderation data
+    const fetchModerationData = async () => {
       const response = await httpRequest.get(fetchURL).catch((err) => {
         console.error(err);
+        debounceMessage("Terjadi kesalahan dalam mengambil data moderasi");
         return null;
       });
 
       if (response === null) return;
-
       const result: ModerationResponse = response.data.data;
+
       setModerationData(result);
+      categorizeResult(result);
+      divideAndSetFrames(result);
+    };
 
-      let temp: any[] = [];
-      if (result?.result !== undefined) {
-        if (result?.result.length === 0) {
-          setIsModerated(false);
-        } else {
-          result.result.forEach((item: ModerationResult) => {
-            if (item.decision.toUpperCase() === "PENDING") {
-              setIsModerated(false);
-            }
-            temp = [...temp, ...item.category];
-          });
-        }
-      }
+    // Fetch pasal data
+    const fetchPasalData = async () => {
+      const response = await httpRequest.get("/pasals").catch((err) => {
+        console.error(err);
+        debounceMessage("Terjadi kesalahan dalam mengambil data pasal");
+        return null;
+      });
 
-      const summary = temp.reduce((res, val) => {
-        let key = String(val).toLowerCase();
-        if (res[key]) {
-          res[key]++;
-        } else {
-          res[key] = 1;
-        }
-        return res;
-      }, {});
+      if (response === null) return;
+      const result: PasalResponse[] = response.data.data;
 
-      setCategorySummary(summary);
+      sortPasal(result);
+    };
 
-      let tempFrames: FrameResult[] = [];
-      if (result?.frames !== undefined && result?.frames !== null) {
-        if (result.frames.length > 20) {
-          tempFrames = result.frames.reduce(
-            (acc: FrameResult[], curr, index) => {
-              let step =
-                moderationData?.frames !== undefined
-                  ? Math.floor(moderationData.frames.length / 20)
-                  : 0;
-              if (acc.length === 20) {
-                return acc;
-              }
-              if (index % step === 0) {
-                acc.push(curr);
-              }
-              return acc;
-            },
-            []
-          );
-        } else {
-          tempFrames = result.frames;
-        }
-      }
-      setFramesToShow(tempFrames);
-    })();
-
+    fetchModerationData();
+    fetchPasalData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
   //#endregion ::: UseEffect
@@ -358,6 +357,7 @@ const SingleResult: NextPageWithLayout = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
+      {/* #region ::: Header */}
       <div className="mb-2 flex items-center gap-4">
         <h1 className="text-xl font-semibold md:text-2xl">Detail Video</h1>
         <div
@@ -371,11 +371,12 @@ const SingleResult: NextPageWithLayout = () => {
             getStatusStyling(moderationData?.status).text}
         </div>
       </div>
+      {/* #endregion ::: Header */}
       <div className="relative">
         {!isNilOrEmpty(moderationData) ? (
           <>
             <section className="grid grid-cols-4 gap-x-4 ">
-              {/* Video Informations --- Hidden on Mobile */}
+              {/* #region ::: Video Informations --- Hidden on Mobile */}
               <div className="hidden flex-col gap-2 rounded-lg bg-white p-4 shadow-custom lg:flex">
                 <p className="text-base font-semibold md:text-lg">
                   Informasi Rekaman
@@ -394,6 +395,7 @@ const SingleResult: NextPageWithLayout = () => {
                   );
                 })}
               </div>
+              {/* #endregion ::: Video Informations --- Hidden on Mobile */}
               <div className="col-span-4 flex flex-col rounded-lg bg-white p-4 shadow-custom lg:col-span-3">
                 <h2 className="text-base font-semibold md:text-lg">
                   {moderationData?.filename}
@@ -471,7 +473,7 @@ const SingleResult: NextPageWithLayout = () => {
                       </p>
                     </span>
                   </div>
-                  {/* Video Informations --- Hidden on desktop */}
+                  {/* #region ::: Video Informations --- Hidden on desktop */}
                   {RecordInformations.map((item, index) => {
                     return (
                       <div key={index} className="flex gap-2 lg:hidden">
@@ -485,9 +487,11 @@ const SingleResult: NextPageWithLayout = () => {
                       </div>
                     );
                   })}
+                  {/* #endregion ::: Video Informations --- Hidden on desktop */}
                 </div>
               </div>
             </section>
+            {/* #region ::: Video Frames Section */}
             <section className="mt-8 rounded-lg bg-white shadow-custom">
               <Collapse defaultActiveKey="1" ghost>
                 <Collapse.Panel
@@ -525,6 +529,7 @@ const SingleResult: NextPageWithLayout = () => {
                 </Collapse.Panel>
               </Collapse>
             </section>
+            {/* #endregion ::: Video Frames Section */}
 
             {moderationData?.status !== undefined &&
               moderationData?.status.includes("REJECTED") && (
@@ -592,27 +597,15 @@ const SingleResult: NextPageWithLayout = () => {
                                       </div>
                                       <Tabs
                                         type="card"
-                                        className="mb-2"
+                                        className="mb-4"
                                         items={RenderViolationTabs(item)}
                                       />
 
                                       {item.decision.toUpperCase() ===
                                         "PENDING" && (
-                                        <div className="flex justify-end">
+                                        <div className="flex justify-end gap-4">
                                           <Button
-                                            type="primary"
-                                            className="mr-4"
-                                            onClick={(e) => {
-                                              handlePasalValidation(
-                                                index,
-                                                ModerationDecision.VALID
-                                              );
-                                            }}
-                                          >
-                                            Valid
-                                          </Button>
-                                          <Button
-                                            type="dashed"
+                                            type="default"
                                             onClick={(e) => {
                                               handlePasalValidation(
                                                 index,
@@ -621,6 +614,17 @@ const SingleResult: NextPageWithLayout = () => {
                                             }}
                                           >
                                             Invalid
+                                          </Button>
+                                          <Button
+                                            type="primary"
+                                            onClick={(e) => {
+                                              handlePasalValidation(
+                                                index,
+                                                ModerationDecision.VALID
+                                              );
+                                            }}
+                                          >
+                                            Valid
                                           </Button>
                                         </div>
                                       )}

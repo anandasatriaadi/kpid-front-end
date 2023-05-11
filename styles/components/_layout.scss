@@ -38,5 +38,35 @@
         }
       }
     }
+
+    &-submenu {
+      @apply mt-0 rounded-r-lg;
+
+      &:hover {
+        @apply text-sky-600;
+        &>.ant-menu-submenu-title>.ant-menu-submenu-arrow {
+          @apply text-sky-600;
+        }
+      }
+      
+      &-title:hover {
+        @apply text-sky-600;
+      }
+
+      &-active {
+        @apply text-sky-600;
+        &:hover {
+          @apply text-sky-600;
+        }
+      }
+
+      &-selected {
+        @apply text-sky-600;
+
+        &::after {
+          @apply scale-y-0;
+        }
+      }
+    }
   }
 }

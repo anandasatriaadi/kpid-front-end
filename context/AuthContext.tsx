@@ -1,18 +1,15 @@
 import { authService } from "@/common/AuthService";
 import httpRequest from "@/common/HttpRequest";
+import UserData from "@/types/UserData";
 import { message } from "antd";
 import { useRouter } from "next/router";
 import * as React from "react";
 import { UrlObject } from "url";
 
-export interface UserData {
-  [key: string]: any;
-}
-
 export interface AuthContextInterface {
   isVerifying: boolean;
   isLoggedIn: boolean;
-  userData: UserData;
+  userData?: UserData;
   register: (values: UserData) => void;
   login: (values: UserData) => void;
   logout: () => void;
@@ -29,15 +26,17 @@ export const AuthContext = React.createContext<AuthContextInterface | null>(
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
   const [isVerifying, setIsVerifying] = React.useState(true);
-  const [userData, setUserData] = React.useState<UserData>({});
+  const [userData, setUserData] = React.useState<UserData>();
   const router = useRouter();
 
   React.useEffect(() => {
     checkToken();
-    authService.subscribe(logout);
+    authService.sub_logout(logout);
+    authService.sub_unauthorized(unauthorized);
 
     return () => {
-      authService.unsubscribe(logout);
+      authService.unsub_logout(logout);
+      authService.unsub_unauthorized(unauthorized);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
@@ -55,19 +54,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (status === 200) {
           setIsLoggedIn(true);
           setUserData(data);
-        } else {
-          logout();
         }
       } catch (error) {
         console.error(error);
-        logout();
       }
     }
 
     setIsVerifying(false);
   };
 
-  const login = async (values: UserData) => {
+  const login = async (values: { [key: string]: any }) => {
     const form = new FormData();
     for (const key in values) {
       form.append(key, values[key]);
@@ -96,11 +92,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     } catch (error) {
       console.error(error);
-      message.error("Something went wrong while logging in");
+      message.error("Terjadi kesalahan dalam login");
     }
   };
 
-  const register = async (values: UserData) => {
+  const register = async (values: { [key: string]: any }) => {
     const form = new FormData();
     for (const key in values) {
       form.append(key, values[key]);
@@ -129,19 +125,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     } catch (error) {
       console.error(error);
-      message.error("Something went wrong while registering");
+      message.error("Terjadi kesalahan dalam mendaftarkan akun");
     }
   };
 
   const logout = () => {
     message.loading("Logging Out", 0.5);
-    logoutUser();
-  };
-
-  const logoutUser = () => {
+    
     localStorage.removeItem("token");
     setIsLoggedIn(false);
-    setUserData({});
+    setUserData(undefined);
 
     // Check whether the user is on the login page or not
     console.log(router.asPath);
@@ -157,6 +150,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       router.push(url);
     }
+  };
+
+  const unauthorized = () => {
+    router.push("/");
   };
 
   return (

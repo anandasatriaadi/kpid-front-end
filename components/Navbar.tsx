@@ -144,7 +144,7 @@ function Navbar() {
                 <span className="mr-2 rounded-full bg-gray-400 p-4"></span>
                 <Dropdown overlay={accountMenu} placement="bottomRight">
                   <a onClick={(e) => e.preventDefault()}>
-                    <p>Hai! {userData.name}</p>
+                    <p>Hai! {userData !== undefined && userData.name}</p>
                   </a>
                 </Dropdown>
               </div>
@@ -193,7 +193,7 @@ function Navbar() {
                 type="primary"
               >
                 <span className="mr-2 rounded-full bg-sky-200 p-4"></span>
-                Hai! {userData.name}
+                Hai! {userData !== undefined && userData.name}
               </Button>
             )}
           </Drawer>

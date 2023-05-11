@@ -113,7 +113,7 @@ const HelpPage: NextPageWithLayout = () => {
   const MODERATE_VIDEO_STEPS = [
     {
       title: 'Pilih menu "Unggah Video"',
-      image: "/login_image.png",
+      image: "/help_upload_1.png",
       description: (
         <ol className="ml-5 grid list-outside list-disc gap-2">
           <li>
@@ -129,7 +129,7 @@ const HelpPage: NextPageWithLayout = () => {
     },
     {
       title: "Unggah Video",
-      image: "",
+      image: "/help_upload_2.png",
       description: (
         <ol className="ml-5 grid list-outside list-disc gap-2">
           <li>
@@ -142,34 +142,76 @@ const HelpPage: NextPageWithLayout = () => {
     },
     {
       title: "Isi Formulir Informasi Video",
-      image: "",
+      image: "/help_upload_3.png",
       description: (
         <ol className="ml-5 grid list-outside list-disc gap-2">
-          <li></li>
+          <li>
+            Isikan formulir informasi video sesuai dengan video yang sedang anda
+            unggah. Isian terdiri atas:
+            <ol className="list-outsude ml-4 list-decimal font-semibold">
+              <li>Nama Program</li>
+              <li>Stasiun Televisi</li>
+              <li>Deskripsi (Opsional)</li>
+              <li>Tanggal dan Waktu Rekaman</li>
+              <li>Proses Sekarang</li>
+            </ol>
+          </li>
+          <li>
+            Anda dapat memilih opsi{" "}
+            <span className="font-semibold">Proses Sekarang</span> agar video
+            langsung diproses dan moderasi oleh sistem ketika berhasil
+            terunggah.
+          </li>
+          <li>
+            Jika anda tidak memilih opsi tersebut, anda dapat memproses moderasi
+            video yang telah terunggah dari laman detail video.
+          </li>
         </ol>
       ),
     },
     {
       title: "Verifikasi Isian Formulir",
-      image: "",
+      image: "/help_upload_4.png",
       description: (
         <ol className="ml-5 grid list-outside list-disc gap-2">
-          <li></li>
+          <li>
+            Verifikasi isian yang sudah anda masukkan pada tahap sebelumnya.
+          </li>
+          <li>
+            Pada tahap ini anda hanya dapat mengganti opsi{" "}
+            <span className="font-semibold">Proses Sekarang</span>.
+          </li>
         </ol>
       ),
     },
     {
       title: "Unggah Formulir",
-      image: "",
+      image: "/help_upload_5.png",
       description: (
         <ol className="ml-5 grid list-outside list-disc gap-2">
-          <li></li>
+          <li>
+            Untuk mengunggah video serta formulir yang anda isi, pilih menu
+            unggah.
+          </li>
+          <li>
+            Setelah berhasil terunggah, akan muncul pesan berupa ID dari
+            moderasi yang sedang dilakukan.
+          </li>
+          <li className="font-semibold">
+            Perhatian: Diharap untuk tidak menutup halaman sampai video selesai
+            terunggah.
+          </li>
         </ol>
       ),
     },
   ];
 
   const UPLOAD_VIDEO_IMAGES = UPLOAD_VIDEO_STEPS.map((step) => {
+    let image: SlideImage = { src: step.image };
+    return image;
+  });
+
+  const MODERATE_VIDEO_IMAGES = MODERATE_VIDEO_STEPS.map((step) => {
     let image: SlideImage = { src: step.image };
     return image;
   });
@@ -273,15 +315,25 @@ const HelpPage: NextPageWithLayout = () => {
             key={2}
           >
             <section>
-              <ol className="list-inside list-decimal">
+              <ol className="grid list-inside list-decimal gap-6 lg:grid-cols-2">
+                <Lightbox
+                  open={lightboxOpen}
+                  index={lightboxIndex}
+                  close={() => setLightboxOpen(false)}
+                  slides={MODERATE_VIDEO_IMAGES}
+                />
                 {MODERATE_VIDEO_STEPS.map((val, index) => {
                   return (
                     <li className="font-semibold" key={index}>
                       <p className="mb-2 inline-block">{val.title}</p>
                       <div className="gap-4">
                         <div
-                          className="mb-2 bg-slate-300 bg-cover bg-no-repeat pt-[56%]"
+                          className="mb-2 bg-slate-300 bg-cover bg-no-repeat pt-[56%] hover:cursor-pointer"
                           style={{ backgroundImage: `url(${val.image})` }}
+                          onClick={() => {
+                            setLightboxIndex(index);
+                            setLightboxOpen(true);
+                          }}
                         ></div>
                         <div className="text-justify font-normal">
                           {val.description}

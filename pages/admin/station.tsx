@@ -1,0 +1,313 @@
+import httpRequest from "@/common/HttpRequest";
+import Layout from "@/components/Layout";
+import {
+  ApplicationContext,
+  ApplicationContextInterface,
+} from "@/context/ApplicationContext";
+import { NextPageWithLayout } from "@/pages/_app";
+import Station from "@/types/Station";
+import debounce from "@/utils/Debounce";
+import { tokenizeString } from "@/utils/StringUtil";
+import { faFilter, faPen, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  Button,
+  Divider,
+  Drawer,
+  Form,
+  Input,
+  message,
+  Modal,
+  Pagination,
+  Popconfirm,
+  Spin,
+  Table,
+} from "antd";
+import type { ColumnsType } from "antd/es/table";
+import Head from "next/head";
+import * as React from "react";
+
+type PageFilterType = {
+  page: number;
+  limit: number;
+  sort?: string;
+  status?: string;
+};
+
+const ManageStation: NextPageWithLayout = () => {
+  //#region ::: Variable Initialisations
+  const { isMobile } = React.useContext(
+    ApplicationContext
+  ) as ApplicationContextInterface;
+
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] =
+    React.useState<boolean>(false);
+  const [isEditModalOpen, setIsEditModalOpen] = React.useState<boolean>(false);
+  const [isReloading, setIsReloading] = React.useState<boolean>(true);
+
+  const [stationsData, setStationsData] = React.useState<Station[]>([]);
+  const [metadata, setMetadata] = React.useState<any>({});
+  const [editInputName, setEditInputName] = React.useState("");
+  const [modalIndex, setModalIndex] = React.useState(0);
+
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [pageFilter, setPageFilter] = React.useState<PageFilterType>({
+    page: 0,
+    limit: 20,
+    sort: "key,ASC",
+  });
+  const queryParams = {
+    params: { ...pageFilter },
+  };
+
+  const [form] = Form.useForm();
+
+  const columns: ColumnsType<Station> = [
+    { title: "Key", dataIndex: "key", key: "key" },
+    { title: "Nama", dataIndex: "name", key: "name" },
+    { title: "Dibuat", dataIndex: "created_at", key: "created_at" },
+    {
+      title: "Aksi",
+      dataIndex: "",
+      key: "x",
+      render: (val, record, index) => (
+        <div className="flex flex-wrap gap-1">
+          <span
+            className="rounded-lg bg-sky-100 p-2 text-slate-700 transition-all duration-300 hover:cursor-pointer hover:bg-sky-300"
+            onClick={() => {
+              setIsEditModalOpen(!isEditModalOpen);
+              setEditInputName(record.name);
+              setModalIndex(index);
+            }}
+          >
+            <FontAwesomeIcon height={16} icon={faPen} />
+          </span>
+          <Popconfirm
+            title="Yakin hapus stasiun ini?"
+            onConfirm={handleDeleteStation}
+            okText="Yes"
+            cancelText="No"
+          >
+            <span className="rounded-lg bg-orange-100 p-2 text-slate-700 transition-all duration-300 hover:cursor-pointer hover:bg-orange-300">
+              <FontAwesomeIcon height={16} icon={faTrash} />
+            </span>
+          </Popconfirm>
+        </div>
+      ),
+    },
+  ];
+  //#endregion ::: Variable Initialisations
+
+  //
+
+  //#region ::: Handlers
+  const handleEditStation = (
+    e: React.MouseEvent<HTMLElement, MouseEvent> | undefined
+  ) => {
+    form.validateFields().then((values) => {
+      httpRequest
+        .put(`/stations`, {
+          old_key: stationsData[modalIndex].key,
+          station_name: values["station_name"],
+        })
+        .then((response) => {
+          message.success("Berhasil mengubah stasiun");
+          setPageFilter({ ...pageFilter });
+          setIsEditModalOpen(false);
+          setIsReloading(true);
+          form.resetFields();
+        });
+    });
+  };
+
+  const handleDeleteStation = (
+    e: React.MouseEvent<HTMLElement, MouseEvent> | undefined
+  ) => {
+    console.log(e);
+  };
+  //#endregion ::: Handlers
+
+  //
+
+  //#region ::: Other Methods
+  const RenderFilterBody = (): React.ReactElement => {
+    return (
+      <div className="flex flex-col flex-wrap md:flex-row md:justify-between">
+        <div className="grid flex-wrap gap-4 md:flex">
+          <div className="flex flex-col gap-1 text-sm">
+            <p>Status</p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+  //#endregion ::: Other Methods
+
+  //
+
+  //#region ::: UseEffect
+  React.useEffect(() => {
+    httpRequest
+      .get(`/stations`, queryParams)
+      .then((response) => {
+        const result: Station[] = response.data.data;
+        const metadata: any = response.data.metadata;
+
+        setStationsData(result);
+        setMetadata(metadata);
+        setIsReloading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageFilter]);
+  //#endregion ::: UseEffect
+  return (
+    <div className="flex flex-1 flex-col">
+      <Head>
+        <title>Manajemen Stasiun | KPID Jawa Timur</title>
+        <meta name="description" content="Generated by create next app" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+
+      <h1 className="mb-4 text-xl font-semibold md:text-2xl">Daftar Stasiun</h1>
+      <section className="mb-4 rounded-lg bg-white py-2 px-4 shadow-custom md:p-4">
+        {isMobile ? (
+          <div className="flex">
+            <span
+              className="flex cursor-pointer items-center gap-2 rounded-lg bg-sky-100 px-2 py-1 text-sky-600 hover:shadow-custom"
+              onClick={() => {
+                setIsFilterDrawerOpen(!isFilterDrawerOpen);
+              }}
+            >
+              <FontAwesomeIcon height={16} icon={faFilter} />
+              <p className="text-base">Filter</p>
+            </span>
+          </div>
+        ) : (
+          <>
+            <p className="text-base font-semibold md:text-lg">Filter</p>
+            <Divider className="my-2" />
+          </>
+        )}
+        {isMobile ? (
+          <Drawer
+            title="Filter"
+            open={isFilterDrawerOpen}
+            onClose={() => setIsFilterDrawerOpen(false)}
+          >
+            {RenderFilterBody()}
+          </Drawer>
+        ) : (
+          RenderFilterBody()
+        )}
+      </section>
+      <section className="mb-4 rounded-lg bg-white py-2 px-4 shadow-custom md:p-4">
+        <Spin spinning={isReloading}>
+          <Table
+            columns={columns}
+            dataSource={stationsData}
+            pagination={false}
+          />
+          <Pagination
+            className="mt-4 flex justify-center rounded-lg border-[1px] border-slate-100 py-2"
+            total={
+              metadata?.total_elements === undefined
+                ? 0
+                : metadata?.total_elements
+            }
+            pageSizeOptions={[20, 40, 80]}
+            defaultPageSize={20}
+            current={currentPage}
+            showSizeChanger
+            showTotal={(total, range) => {
+              console.log(total, range);
+              return `${range[0]}-${range[1]} of ${total} items`;
+            }}
+            onChange={(page, pageSize) => {
+              setCurrentPage(page);
+              setIsReloading(true);
+              setPageFilter({
+                ...pageFilter,
+                page: page - 1,
+                limit: pageSize,
+              });
+            }}
+          />
+        </Spin>
+      </section>
+
+      <Modal
+        title="Edit Data Stasiun"
+        open={isEditModalOpen}
+        onCancel={() => {
+          setIsEditModalOpen(false);
+          setEditInputName("");
+          setModalIndex(-1);
+          form.resetFields();
+        }}
+        footer={null}
+      >
+        <Form
+          name="login_form"
+          form={form}
+          autoComplete="off"
+          layout="vertical"
+          requiredMark={"optional"}
+        >
+          <Form.Item label="Key" name="key">
+            <Input
+              disabled
+              placeholder={tokenizeString(editInputName, true)}
+              className="bg-slate-50"
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Nama Stasiun"
+            name="station_name"
+            rules={[
+              { required: true, message: "Silakan masukkan nama stasiun" },
+            ]}
+          >
+            <Input
+              onInput={debounce((e: React.ChangeEvent<HTMLInputElement>) => {
+                if (e?.target?.value !== undefined) {
+                  setEditInputName(e.target.value);
+                }
+              }, 200)}
+              placeholder={editInputName}
+            />
+          </Form.Item>
+
+          <Form.Item>
+            <div className="flex justify-end gap-4">
+              <Button
+                onClick={() => {
+                  setIsEditModalOpen(false);
+                }}
+              >
+                Batal
+              </Button>
+              <Popconfirm
+                title="Yakin ubah stasiun ini?"
+                onConfirm={handleEditStation}
+                okText="Ya"
+                cancelText="Tidak"
+              >
+                <Button type="primary">Ubah Data</Button>
+              </Popconfirm>
+            </div>
+          </Form.Item>
+        </Form>
+      </Modal>
+    </div>
+  );
+};
+
+export default ManageStation;
+
+ManageStation.getLayout = function getLayout(page: React.ReactElement) {
+  return <Layout>{page}</Layout>;
+};

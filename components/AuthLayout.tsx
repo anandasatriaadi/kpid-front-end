@@ -77,7 +77,9 @@ const AuthLayout = ({ children }: LayoutProps) => {
             </div>
           </div>
         </section>
-        {children}
+        <section className="flex max-h-screen min-h-screen flex-col overflow-y-scroll bg-slate-100 py-8 px-8 scrollbar-thin scrollbar-track-slate-300 scrollbar-thumb-slate-400 scrollbar-track-rounded-full scrollbar-thumb-rounded-full md:py-16 md:px-16">
+          {children}
+        </section>
       </div>
     </div>
   );

@@ -14,6 +14,9 @@ const Register: NextPageWithLayout = () => {
   const { isLoggedIn, register } = React.useContext(
     AuthContext
   ) as AuthContextInterface;
+
+  // Other Hooks
+  const [form] = Form.useForm();
   //#endregion ::: Variable Initialisations
 
   //
@@ -46,6 +49,33 @@ const Register: NextPageWithLayout = () => {
   }, [isLoggedIn]);
   //#endregion ::: UseEffect
 
+  const [confirmDirty, setConfirmDirty] = React.useState(false);
+
+  const validatePassword = (_: any, value: any, callback: any) => {
+    const { validateFields } = form;
+
+    if (value && confirmDirty) {
+      validateFields(["confirmPassword"]);
+    }
+    callback();
+  };
+
+  const compareToFirstPassword = (_: any, value: any, callback: any) => {
+    const { getFieldValue } = form;
+
+    console.log(value, getFieldValue("password"));
+    if (value && value !== getFieldValue("password")) {
+      callback("Kata sandi tidak cocok!");
+    } else {
+      callback();
+    }
+  };
+
+  const handleConfirmBlur = (e: any) => {
+    const { value } = e.target;
+    setConfirmDirty(confirmDirty || !!value);
+  };
+
   return (
     <>
       <Head>
@@ -54,7 +84,7 @@ const Register: NextPageWithLayout = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <section className="flex min-h-screen flex-col bg-slate-100 px-8 md:px-16">
+      <>
         <div className="my-auto mx-auto max-w-[600px]">
           <div className="mx-auto mb-6 w-1/2 mix-blend-multiply md:w-2/5">
             <Link href={"/"}>
@@ -72,6 +102,7 @@ const Register: NextPageWithLayout = () => {
             </h2>
             <Divider className="my-4" />
             <Form
+              form={form}
               name="register_form"
               onFinish={handleForm}
               onFinishFailed={handleFormFailed}
@@ -82,7 +113,9 @@ const Register: NextPageWithLayout = () => {
               <Form.Item
                 label="Nama"
                 name="name"
-                rules={[{ required: true, message: "Please input your name!" }]}
+                rules={[
+                  { required: true, message: "Silakan masukkan nama Anda" },
+                ]}
               >
                 <Input />
               </Form.Item>
@@ -90,7 +123,8 @@ const Register: NextPageWithLayout = () => {
                 label="Email"
                 name="email"
                 rules={[
-                  { required: true, message: "Please input your email!" },
+                  { required: true, message: "Silakan masukkan email Anda" },
+                  { type: "email", message: "Alamat email tidak valid!" },
                 ]}
               >
                 <Input />
@@ -100,10 +134,34 @@ const Register: NextPageWithLayout = () => {
                 label="Password"
                 name="password"
                 rules={[
-                  { required: true, message: "Please input your password!" },
+                  {
+                    required: true,
+                    message: "Silakan masukkan kata sandi Anda",
+                  },
+                  { validator: validatePassword },
+                  {
+                    pattern: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/,
+                    message:
+                      "Kata sandi harus terdiri dari minimal 8 karakter dan mengandung kombinasi huruf dan angka.",
+                  },
                 ]}
               >
                 <Input.Password />
+              </Form.Item>
+
+              <Form.Item
+                label="Konfirmasi Password"
+                name="confirm_password"
+                dependencies={["password"]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Silakan konfirmasi kata sandi Anda",
+                  },
+                  { validator: compareToFirstPassword },
+                ]}
+              >
+                <Input.Password onBlur={handleConfirmBlur} />
               </Form.Item>
 
               <Form.Item>
@@ -121,11 +179,11 @@ const Register: NextPageWithLayout = () => {
           <div className="mt-8 rounded-lg bg-slate-200 p-4 text-center text-sm shadow-custom md:text-base">
             Sudah memiliki akun?
             <Link href={"/login"}>
-              <a className="text-blue-500"> Masuk</a>
+              <a className="text-sky-600 hover:text-sky-400"> Masuk</a>
             </Link>
           </div>
         </div>
-      </section>
+      </>
     </>
   );
 };

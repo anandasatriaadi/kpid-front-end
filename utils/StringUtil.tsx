@@ -8,6 +8,9 @@ export function tokenizeString(input: string, lower: boolean = false): string {
   // Replace non-alphanumeric characters with hyphens in the name
   let tokenizedName = nameWithUnderscores.replace(/[^a-zA-Z0-9]/g, "-");
 
+  // Merge consecutive hyphens into a single hyphen
+  tokenizedName = tokenizedName.replace(/-+/g, "-");
+
   // Convert to lowercase if specified
   if (lower) {
     tokenizedName = tokenizedName.toLowerCase();

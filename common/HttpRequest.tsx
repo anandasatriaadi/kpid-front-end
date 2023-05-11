@@ -17,11 +17,19 @@ class HttpRequest {
       authService.logout();
     }, 500);
 
+    const unauthorized = debounce(() => {
+      message.error("You are not authorized to access this page");
+      authService.unauthorized();
+    }, 500);
+
     this.axiosInstance.interceptors.response.use(
       (response) => response,
       (error: AxiosError) => {
         if (error.response?.status === 401) {
           logout();
+        }
+        if (error.response?.status === 403) {
+          unauthorized();
         }
 
         return Promise.reject(error);

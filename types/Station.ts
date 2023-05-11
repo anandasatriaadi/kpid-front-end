@@ -1,7 +1,8 @@
 type Station = {
-    _id: string;
-    label: number;
-    name: string;
-}
+  _id: string;
+  key: string;
+  name: string;
+  created_at: Date;
+};
 
 export default Station;

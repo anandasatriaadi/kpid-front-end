@@ -48,7 +48,7 @@ const Login: NextPageWithLayout = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <section className="flex min-h-screen flex-col bg-slate-100 px-8 md:px-16">
+      <>
         <div className="my-auto mx-auto max-w-[600px]">
           <div className="mx-auto mb-6 w-1/2 mix-blend-multiply md:w-2/5">
             <Link href={"/"}>
@@ -73,6 +73,7 @@ const Login: NextPageWithLayout = () => {
               onFinishFailed={handleFormFailed}
               autoComplete="off"
               layout="vertical"
+              className="custom-form"
               requiredMark={"optional"}
             >
               <Form.Item
@@ -113,11 +114,11 @@ const Login: NextPageWithLayout = () => {
           <div className="mt-8 rounded-lg bg-slate-200 p-4 text-center text-sm shadow-custom md:text-base">
             Belum memiliki akun?
             <Link href={"/register"}>
-              <a className="text-sky-600 hover:text-sky-500"> Daftar</a>
+              <a className="text-sky-600 hover:text-sky-400"> Daftar</a>
             </Link>
           </div>
         </div>
-      </section>
+      </>
     </>
   );
 };

@@ -8,34 +8,32 @@ import {
 import { AuthContext, AuthContextInterface } from "@/context/AuthContext";
 import {
   faAngleLeft,
-  faAngleRight,
   faBars,
   faCircleQuestion,
   faCloudArrowUp,
-  faFileUpload,
-  faUser,
+  faHouse,
+  faUserShield,
   faVideo,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  Button,
-  Drawer,
-  Dropdown,
-  Layout as AntLayout,
-  Menu,
-  Spin,
-} from "antd";
-import { ItemType } from "antd/lib/menu/hooks/useItems";
+import type { MenuProps } from "antd";
+import { Drawer, Dropdown, Layout as AntLayout, Menu, Spin } from "antd";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { MenuProps } from "rc-menu";
 import * as React from "react";
 import { UrlObject } from "url";
 
 type LayoutProps = {
   children: React.ReactNode;
 };
+
+interface MenuInfo {
+  key: string;
+  keyPath: string[];
+}
+
+type MenuItem = Required<MenuProps>["items"][number];
 
 const Layout = ({ children }: LayoutProps) => {
   //#region ::: Variable Initialisations
@@ -50,7 +48,7 @@ const Layout = ({ children }: LayoutProps) => {
   const [showUpload, setShowUpload] = React.useState(true);
   const [uploadModalOpen, setUploadModalOpen] = React.useState(false);
   const [drawerMenuOpen, setDrawerMenuOpen] = React.useState(false);
-  
+
   const router = useRouter();
   //#endregion ::: Variable Initialisations
 
@@ -96,75 +94,71 @@ const Layout = ({ children }: LayoutProps) => {
     ],
   };
 
-  const sidebarMenus: ItemType[] = [
+  const sidebarMenus: MenuItem[] = [
     {
-      key: "1",
+      key: "/",
       icon: (
         <div className="flex w-[1.5rem] justify-center">
-          <FontAwesomeIcon height={18} icon={faUser} />
+          <FontAwesomeIcon height={18} icon={faHouse} />
         </div>
       ),
-      label: (
-        <Link href="/">
-          <span>Moderasi</span>
-        </Link>
-      ),
+      label: "Dasbor",
       className: "flex items-center",
-      onClick: () => {
-        setDrawerMenuOpen(false);
-        router.push("/");
-      },
     },
     {
-      key: "2",
+      key: "/result",
       icon: (
         <div className="flex w-[1.5rem] justify-center">
           <FontAwesomeIcon height={18} icon={faVideo} />
         </div>
       ),
-      label: (
-        <Link href="/result">
-          <span>Daftar Video</span>
-        </Link>
-      ),
+      label: "Daftar Video",
       className: "flex items-center",
-      onClick: () => {
-        setDrawerMenuOpen(false);
-        router.push("/result");
-      },
     },
     {
-      key: "3",
+      key: "upload-modal",
       icon: (
         <div className="flex w-[1.5rem] justify-center">
           <FontAwesomeIcon height={18} icon={faCloudArrowUp} />
         </div>
       ),
-      label: <>Unggah Video</>,
-      onClick: () => {
-        setUploadModalOpen(!uploadModalOpen);
-        setDrawerMenuOpen(false);
-      },
+      label: "Unggah Video",
+      className: "flex items-center",
     },
     {
-      key: "4",
+      key: "/help",
       icon: (
         <div className="flex w-[1.5rem] justify-center">
           <FontAwesomeIcon height={18} icon={faCircleQuestion} />
         </div>
       ),
-      label: (
-        <Link href="/help">
-          <span>Panduan</span>
-        </Link>
-      ),
+      label: "Panduan",
       className: "flex items-center",
-      onClick: () => {
-        setDrawerMenuOpen(false);
-        router.push("/help");
-      },
     },
   ];
+
+  if (userData !== undefined && userData?.role === "admin") {
+    sidebarMenus.push({
+      key: "submenu",
+      icon: (
+        <div className="flex w-[1.5rem] justify-center">
+          <FontAwesomeIcon height={18} icon={faUserShield} />
+        </div>
+      ),
+      label: "Admin",
+      className: collapsed ? "flex items-center" : "",
+      children: [
+        {
+          key: "/admin/user",
+          label: "Pengguna",
+        },
+        {
+          key: "/admin/station",
+          label: "Stasiun",
+        },
+      ],
+    });
+  }
   //#endregion ::: Menu Logic
 
   //
@@ -185,6 +179,15 @@ const Layout = ({ children }: LayoutProps) => {
     });
 
     return index.toString();
+  };
+
+  const handleMenuOnClick = ({ key, keyPath }: MenuInfo) => {
+    if (key.startsWith("/")) {
+      router.push(key);
+    } else if (key === "upload-modal") {
+      setUploadModalOpen(!uploadModalOpen);
+      setDrawerMenuOpen(false);
+    }
   };
   //#endregion ::: Other Methods
 
@@ -244,23 +247,24 @@ const Layout = ({ children }: LayoutProps) => {
                     <a onClick={(e) => e.preventDefault()}>
                       <span>Hai! </span>
                       <span className="font-bold capitalize">
-                        {userData.name}
+                        {userData !== undefined && userData.name}
                       </span>
                     </a>
                   </Dropdown>
                 </div>
               </div>
             </AntLayout.Header>
-            <AntLayout.Content className="flex grow flex-col rounded-tl-lg bg-slate-100">
-              {!isVerifying ? (
-                <div className="relative flex h-full grow flex-col overflow-x-clip overflow-y-scroll rounded-lg p-4 scrollbar-thin scrollbar-track-slate-300 scrollbar-thumb-slate-400 scrollbar-track-rounded-full scrollbar-thumb-rounded-full">
-                  {children}
-                </div>
-              ) : (
-                <div className="flex flex-grow items-center justify-center">
-                  <Spin />
-                </div>
-              )}
+            <AntLayout.Content className="flex grow flex-col rounded-tl-lg bg-slate-50">
+              <div className="relative flex h-full grow flex-col overflow-x-clip overflow-y-scroll rounded-lg p-4 scrollbar-thin scrollbar-track-slate-300 scrollbar-thumb-slate-400 scrollbar-track-rounded-full scrollbar-thumb-rounded-full">
+                {isVerifying || !isLoggedIn ? (
+                  <Spin
+                    className="flex h-full w-full flex-col items-center justify-center"
+                    size="large"
+                  ></Spin>
+                ) : (
+                  children
+                )}
+              </div>
             </AntLayout.Content>
             <Drawer
               className="custom-drawer"
@@ -286,6 +290,7 @@ const Layout = ({ children }: LayoutProps) => {
                 mode="inline"
                 defaultSelectedKeys={[getSelectedMenuKey()]}
                 items={sidebarMenus}
+                onClick={handleMenuOnClick}
               />
               <div className="mt-auto">
                 <h2 className="mb-4 text-center text-sm ">Dikembangkan Oleh</h2>
@@ -337,12 +342,13 @@ const Layout = ({ children }: LayoutProps) => {
                 mode="inline"
                 defaultSelectedKeys={[getSelectedMenuKey()]}
                 items={sidebarMenus}
+                onClick={handleMenuOnClick}
               />
               <div className="mt-auto px-6 pb-6">
                 <div
                   className={
-                    "max-h-screen transition-all ease-[cubic-bezier(0.645,0.045,0.355,1)] " +
-                    (collapsed && "max-h-0 opacity-0")
+                    "transition-all ease-[cubic-bezier(0.645,0.045,0.355,1)] " +
+                    (collapsed ? "max-h-0 opacity-0" : "max-h-screen")
                   }
                 >
                   <h2
@@ -371,8 +377,8 @@ const Layout = ({ children }: LayoutProps) => {
                 <div>
                   <div
                     className={
-                      "flex max-h-screen flex-col gap-4 transition-all ease-[cubic-bezier(0.645,0.045,0.355,1)] " +
-                      (!collapsed && "max-h-0 opacity-0")
+                      "flex flex-col gap-4 transition-all ease-[cubic-bezier(0.645,0.045,0.355,1)] " +
+                      (!collapsed ? "max-h-0 opacity-0" : "max-h-screen")
                     }
                   >
                     <Image
@@ -428,21 +434,30 @@ const Layout = ({ children }: LayoutProps) => {
                         layout="fill"
                       />
                       <span className="absolute bottom-0 left-0 right-0 top-0 z-0 flex flex-col items-center justify-end">
-                        <span className="rounded-full bg-sky-200 p-3.5"></span>
+                        <span className="rounded-full bg-slate-200 p-3.5"></span>
                       </span>
                     </span>
                     <Dropdown menu={accountMenu} placement="bottomRight">
                       <a onClick={(e) => e.preventDefault()}>
-                        <p className="capitalize">{userData.name}</p>
+                        <p className="capitalize">
+                          {userData !== undefined && userData.name}
+                        </p>
                       </a>
                     </Dropdown>
                   </div>
                 )}
               </div>
             </AntLayout.Header>
-            <AntLayout.Content className="flex grow flex-col rounded-tl-lg bg-slate-100">
+            <AntLayout.Content className="flex grow flex-col rounded-tl-lg bg-slate-50">
               <div className="relative flex h-full grow flex-col overflow-x-clip overflow-y-scroll rounded-lg p-4 scrollbar-thin scrollbar-track-slate-300 scrollbar-thumb-slate-400 scrollbar-track-rounded-full scrollbar-thumb-rounded-full">
-                {children}
+                {isVerifying || !isLoggedIn ? (
+                  <Spin
+                    className="flex h-full w-full flex-col items-center justify-center"
+                    size="large"
+                  ></Spin>
+                ) : (
+                  children
+                )}
               </div>
             </AntLayout.Content>
           </AntLayout>
