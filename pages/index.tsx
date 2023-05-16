@@ -11,6 +11,7 @@ import {
   faNotEqual,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { message } from "antd";
 import moment from "moment-timezone";
 import Head from "next/head";
 import Image from "next/image";
@@ -107,8 +108,6 @@ const Home: NextPageWithLayout = () => {
         formatted_date = date.format("D MMMM YYYY");
         labels.push(formatted_date);
       });
-
-      console.log(labels, all_data, detected_data);
     }
 
     return {
@@ -178,8 +177,11 @@ const Home: NextPageWithLayout = () => {
           return res.data;
         })
         .catch((err) => {
-          console.log(err);
-          return null;
+          if (err?.response?.data !== undefined && err.response !== null) {
+            message.error(err.response.data);
+            return null;
+          }
+          console.error(err);
         });
 
       let lastMonthResult = await httpRequest
@@ -193,8 +195,11 @@ const Home: NextPageWithLayout = () => {
           return res.data;
         })
         .catch((err) => {
-          console.log(err);
-          return null;
+          if (err?.response?.data !== undefined && err.response !== null) {
+            message.error(err.response.data);
+            return null;
+          }
+          console.error(err);
         });
 
       let thisMonthData: StatisticResult = thisMonthResult?.data;

@@ -13,6 +13,7 @@ import {
   Divider,
   Drawer,
   Empty,
+  message,
   Pagination,
   Segmented,
   Select,
@@ -86,8 +87,8 @@ const Result: NextPageWithLayout = () => {
     };
 
     return (
-      <div className="flex flex-col flex-wrap md:flex-row md:justify-between">
-        <div className="grid flex-wrap gap-4 md:flex">
+      <div className="grid grid-cols-1 flex-row flex-wrap justify-between gap-4 md:flex">
+        <div className="grid grid-cols-1 flex-wrap gap-4 md:flex">
           <div className="flex flex-col gap-1 text-sm">
             <p>Status</p>
             <Select
@@ -192,6 +193,9 @@ const Result: NextPageWithLayout = () => {
         setMetadata(result.metadata);
       })
       .catch((err) => {
+        if (err?.response?.data !== undefined && err.response !== null) {
+          message.error(err.response.data);
+        }
         console.error(err);
       });
 
@@ -263,7 +267,6 @@ const Result: NextPageWithLayout = () => {
               defaultCurrent={1}
               showSizeChanger
               showTotal={(total, range) => {
-                console.log(range);
                 return !isMobile
                   ? `${range[0]}-${range[1]} of ${total} items`
                   : ``;

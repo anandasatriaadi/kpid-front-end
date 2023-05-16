@@ -1,10 +1,10 @@
 .ant-message {
-    $message: &;
-    & &-notice-content {
-        @apply shadow-xl rounded-lg;
+  $message: &;
+  & &-notice-content {
+    @apply rounded-lg shadow-xl;
 
-        #{$message}-custom-content {
-            @apply flex items-center;
-        }
+    #{$message}-custom-content {
+      @apply flex items-center;
     }
+  }
 }

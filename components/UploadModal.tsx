@@ -133,6 +133,9 @@ function UploadModal(props: UploadModalProps) {
         }
       })
       .catch((err) => {
+        if (err?.response?.data !== undefined && err.response !== null) {
+          message.error(err.response.data);
+        }
         console.error(err);
       });
   };
@@ -184,8 +187,10 @@ function UploadModal(props: UploadModalProps) {
         setModSelectOptions(filteredData);
       })
       .catch((err) => {
+        if (err?.response?.data !== undefined && err.response !== null) {
+          message.error(err.response.data);
+        }
         console.error(err);
-        return null;
       });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps

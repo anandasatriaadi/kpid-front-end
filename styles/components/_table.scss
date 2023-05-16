@@ -1,0 +1,31 @@
+.ant-table {
+  & &-thead {
+    @apply rounded-lg shadow-sm;
+    & > tr > th.ant-table-cell {
+      @apply bg-sky-100 py-2 text-base font-semibold text-sky-700;
+
+      &:first-child {
+        @apply rounded-l-lg;
+      }
+      &:last-child {
+        @apply rounded-r-lg;
+      }
+    }
+  }
+
+  & &-tbody {
+    & > tr > td.ant-table-cell {
+      @apply py-2;
+
+      &-row-hover {
+        @apply bg-slate-50;
+      }
+      &:first-child {
+        @apply rounded-l-lg;
+      }
+      &:last-child {
+        @apply rounded-r-lg;
+      }
+    }
+  }
+}

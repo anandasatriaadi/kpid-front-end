@@ -43,12 +43,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const checkToken = async () => {
     const userToken = localStorage.getItem("token");
+    const userId = localStorage.getItem("user");
 
-    if (userToken) {
+    if (userToken && userId) {
       try {
-        const response = await httpRequest.get("/user").catch((err) => {
-          throw err;
-        });
+        const response = await httpRequest
+          .get(`/users/${userId}`)
+          .catch((error) => {
+            if (
+              error?.response?.data !== undefined &&
+              error.response !== null
+            ) {
+              return error.response;
+            } else {
+              throw error;
+            }
+          });
         const { status, data } = response?.data;
 
         if (status === 200) {
@@ -70,13 +80,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
 
     try {
-      const response = await httpRequest.post("/login", form).catch((err) => {
-        throw err;
-      });
+      const response = await httpRequest
+        .post("/users/login", form)
+        .catch((error) => {
+          if (error?.response?.data !== undefined && error.response !== null) {
+            return error.response;
+          } else {
+            throw error;
+          }
+        });
       const { status, data } = response.data;
 
       if (status === 200) {
         localStorage.setItem("token", data.token);
+        localStorage.setItem("user", data.user_data._id);
         setIsLoggedIn(true);
         setUserData(data.user_data);
         message.success("Login Success");
@@ -88,7 +105,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           router.push("/");
         }
       } else {
-        message.error(data.message);
+        message.error(data);
       }
     } catch (error) {
       console.error(error);
@@ -104,10 +121,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     try {
       const response = await httpRequest
-        .post("/signup", form)
+        .post("/users/signup", form)
         .catch((error) => {
-          console.log(error);
-          if (error?.response !== undefined || error.response !== null) {
+          if (error?.response?.data !== undefined && error.response !== null) {
             return error.response;
           } else {
             throw error;
@@ -131,7 +147,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = () => {
     message.loading("Logging Out", 0.5);
-    
+
     localStorage.removeItem("token");
     setIsLoggedIn(false);
     setUserData(undefined);

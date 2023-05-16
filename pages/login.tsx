@@ -34,10 +34,11 @@ const Login: NextPageWithLayout = () => {
   React.useEffect(() => {
     if (isLoggedIn) {
       message.loading("Redirecting...");
+
       router.push("/");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoggedIn]);
+  }, []);
   //#endregion ::: UseEffect
 
   return (

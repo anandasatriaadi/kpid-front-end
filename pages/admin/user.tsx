@@ -4,13 +4,20 @@ import {
   ApplicationContext,
   ApplicationContextInterface,
 } from "@/context/ApplicationContext";
+import { AuthContext, AuthContextInterface } from "@/context/AuthContext";
 import { NextPageWithLayout } from "@/pages/_app";
 import UserData from "@/types/UserData";
-import { faFilter, faPen, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { isEmpty } from "@/utils/CommonUtil";
+import debounce from "@/utils/Debounce";
+import {
+  faFilter,
+  faPen,
+  faShield,
+  faTrash,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   Button,
-  Divider,
   Drawer,
   Form,
   Input,
@@ -18,12 +25,13 @@ import {
   Modal,
   Pagination,
   Popconfirm,
+  Segmented,
   Spin,
   Table,
 } from "antd";
+import type { ColumnsType } from "antd/es/table";
 import Head from "next/head";
 import * as React from "react";
-import type { ColumnsType } from "antd/es/table";
 
 interface TableData extends UserData {
   key: React.Key;
@@ -41,11 +49,13 @@ const ManageUser: NextPageWithLayout = () => {
   const { isMobile } = React.useContext(
     ApplicationContext
   ) as ApplicationContextInterface;
+  const { userData } = React.useContext(AuthContext) as AuthContextInterface;
 
-  const [filterDrawerOpen, setFilterDrawerOpen] =
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] =
     React.useState<boolean>(false);
   const [isEditModalOpen, setIsEditModalOpen] = React.useState<boolean>(false);
   const [isReloading, setIsReloading] = React.useState<boolean>(true);
+  const [modalType, setModalType] = React.useState<"edit" | "admin">("edit");
 
   const [usersData, setUsersData] = React.useState<TableData[]>([]);
   const [metadata, setMetadata] = React.useState<any>({});
@@ -54,7 +64,7 @@ const ManageUser: NextPageWithLayout = () => {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [pageFilter, setPageFilter] = React.useState<PageFilterType>({
     page: 0,
-    limit: 20,
+    limit: 10,
     sort: "name,DESC",
   });
   const queryParams = {
@@ -63,6 +73,191 @@ const ManageUser: NextPageWithLayout = () => {
 
   const [form] = Form.useForm();
 
+  // Filters
+  const sortOptions: any[] = [
+    { value: "name,ASC", label: "Nama" },
+    { value: "email,ASC", label: "Email" },
+    { value: "role,ASC", label: "Role" },
+    { value: "last_login,DESC", label: "Login Terakhir" },
+  ];
+  //#endregion ::: Variable Initialisations
+
+  //
+
+  //#region ::: Handlers
+  const handleEditUser = (
+    e: React.MouseEvent<HTMLElement, MouseEvent> | undefined
+  ) => {
+    form.validateFields().then((values) => {
+      values = { ...values, user_id: userData?._id };
+      httpRequest.put(`/users`, values).then((response) => {
+        message.success("Berhasil mengubah pengguna");
+        setPageFilter({ ...pageFilter });
+        setIsEditModalOpen(false);
+        setIsReloading(true);
+        form.resetFields();
+      });
+    });
+  };
+
+  const handleDeleteUser = (data_index: number) => {
+    httpRequest
+      .delete(`/users/${usersData[data_index]._id}`)
+      .then((response) => {
+        message.success("Berhasil menonaktifkan pengguna");
+        setPageFilter({ ...pageFilter });
+        setIsEditModalOpen(false);
+        setIsReloading(true);
+        form.resetFields();
+      });
+  };
+
+  const handleUpdateUserRole = (role: string) => {
+    form.validateFields().then((values) => {
+      values = { user_id: usersData[modalIndex]._id, role: role };
+      httpRequest.put(`/users/role`, values).then((response) => {
+        message.success("Berhasil mengubah role pengguna");
+        setPageFilter({ ...pageFilter });
+        setIsEditModalOpen(false);
+        setIsReloading(true);
+        form.resetFields();
+      });
+    });
+  };
+  //#endregion ::: Handlers
+
+  //
+
+  //#region ::: Other Methods
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const fetchUsers = React.useCallback(
+    debounce(() => {
+      httpRequest
+        .get(`/users`, queryParams)
+        .then((response) => {
+          const temp: UserData[] = response.data.data;
+          const metadata: any = response.data.metadata;
+
+          const result: TableData[] = temp.map((item, index) => {
+            return { key: index, ...item };
+          });
+
+          setUsersData(result);
+          setMetadata(metadata);
+          setIsReloading(false);
+        })
+        .catch((err) => {
+          if (err?.response?.data !== undefined && err.response !== null) {
+            message.error(err.response.data);
+          }
+          console.error(err);
+        });
+    }, 200),
+    [pageFilter]
+  );
+
+  //#endregion ::: Other Methods
+
+  //
+
+  //#region ::: Renderers
+  const RenderFilterBody = (): React.ReactElement => {
+    return (
+      <div className="flex flex-col">
+        <p className="font-normal md:font-semibold">Urutkan</p>
+        <div>
+          <Segmented
+            className="rounded-lg border-[1px] border-slate-300 bg-transparent p-0"
+            options={sortOptions}
+            onChange={(value) => {
+              setIsReloading(true);
+              if (!isEmpty(value))
+                setPageFilter({
+                  ...pageFilter,
+                  sort: value.toString(),
+                });
+              else {
+                const { sort, ...rest } = pageFilter;
+                setPageFilter(rest);
+              }
+            }}
+          />
+        </div>
+      </div>
+    );
+  };
+
+  const RenderActionButtons = (value: any, record: any, index: number) => (
+    <div className="flex flex-wrap justify-center gap-2">
+      <span
+        className={
+          "rounded-lg p-2 transition-all duration-300" +
+          (record.role === "admin" && record._id !== userData?._id
+            ? " bg-slate-100 text-slate-700 hover:cursor-not-allowed"
+            : " bg-amber-100 text-yellow-700 hover:cursor-pointer hover:bg-amber-200")
+        }
+        onClick={() => {
+          if (record.role !== "admin" || record._id === userData?._id) {
+            setIsEditModalOpen(!isEditModalOpen);
+            setModalIndex(index);
+            setModalType("edit");
+            form.setFieldsValue({
+              name: record.name,
+              email: record.email,
+            });
+          }
+        }}
+      >
+        <FontAwesomeIcon height={16} icon={faPen} />
+      </span>
+      <span
+        className={
+          "rounded-lg p-2 transition-all duration-300" +
+          (record.role === "admin" && record._id !== userData?._id
+            ? " bg-slate-100 text-slate-700 hover:cursor-not-allowed"
+            : " bg-sky-100 text-sky-700 hover:cursor-pointer hover:bg-sky-200")
+        }
+        onClick={() => {
+          if (record.role !== "admin" || record._id === userData?._id) {
+            setIsEditModalOpen(!isEditModalOpen);
+            setModalIndex(index);
+            setModalType("admin");
+            form.setFieldsValue({
+              name: record.name,
+              email: record.email,
+            });
+          }
+        }}
+      >
+        <FontAwesomeIcon height={16} icon={faShield} />
+      </span>
+      <Popconfirm
+        title="Yakin hapus pengguna ini?"
+        onConfirm={() => {
+          handleDeleteUser(index);
+        }}
+        okText="Yes"
+        cancelText="No"
+        disabled={record.role === "admin" && record._id !== userData?._id}
+      >
+        <span
+          className={
+            "rounded-lg p-2 transition-all duration-300" +
+            (record.role === "admin" && record._id !== userData?._id
+              ? " bg-slate-100 text-slate-700 hover:cursor-not-allowed"
+              : " bg-red-100 text-red-700 hover:cursor-pointer hover:bg-red-200")
+          }
+        >
+          <FontAwesomeIcon height={16} icon={faTrash} />
+        </span>
+      </Popconfirm>
+    </div>
+  );
+  //#endregion ::: Renderers
+
+  //
+
+  //#region ::: Form columns
   const columns: ColumnsType<TableData> = [
     { title: "Nama", dataIndex: "name", key: "name" },
     { title: "Email", dataIndex: "email", key: "email" },
@@ -74,7 +269,7 @@ const ManageUser: NextPageWithLayout = () => {
         <span
           className={
             "rounded-lg py-1 px-2 " +
-            (value === "admin" ? "bg-sky-100 text-sky-600" : "bg-slate-100")
+            (value === "admin" ? "bg-sky-100 text-sky-700" : "bg-slate-100")
           }
         >
           {value}
@@ -86,102 +281,16 @@ const ManageUser: NextPageWithLayout = () => {
       title: "Aksi",
       dataIndex: "",
       key: "x",
-      render: (value, record, index) => (
-        <div className="flex flex-wrap gap-1">
-          <span
-            className="rounded-lg bg-sky-100 p-2 text-slate-700 transition-all duration-300 hover:cursor-pointer hover:bg-sky-300"
-            onClick={() => {
-              setIsEditModalOpen(!isEditModalOpen);
-              setModalIndex(index);
-            }}
-          >
-            <FontAwesomeIcon height={16} icon={faPen} />
-          </span>
-          <Popconfirm
-            title="Yakin hapus pengguna ini?"
-            onConfirm={handleDeleteUser}
-            okText="Yes"
-            cancelText="No"
-          >
-            <span className="rounded-lg bg-orange-100 p-2 text-slate-700 transition-all duration-300 hover:cursor-pointer hover:bg-orange-300">
-              <FontAwesomeIcon height={16} icon={faTrash} />
-            </span>
-          </Popconfirm>
-        </div>
-      ),
+      render: RenderActionButtons,
     },
   ];
-  //#endregion ::: Variable Initialisations
-
-  //
-
-  //#region ::: Handlers
-  const handleEditUser = (
-    e: React.MouseEvent<HTMLElement, MouseEvent> | undefined
-  ) => {
-    form.validateFields().then((values) => {
-      httpRequest.put(`/users`, values).then((response) => {
-        message.success("Berhasil mengubah pengguna");
-        setPageFilter({ ...pageFilter });
-        setIsEditModalOpen(false);
-        setIsReloading(true);
-        form.resetFields();
-      });
-    });
-  };
-  const handleDeleteUser = (
-    e: React.MouseEvent<HTMLElement, MouseEvent> | undefined
-  ) => {
-    console.log(e);
-    message.success("Click on Yes");
-  };
-
-  const handleForm = (values: any) => {
-    console.log(values);
-  };
-
-  const handleFormFailed = (errorInfo: any) => {
-    console.error("Failed:", errorInfo);
-  };
-  //#endregion ::: Handlers
-
-  //
-
-  //#region ::: Other Methods
-  const RenderFilterBody = (): React.ReactElement => {
-    return (
-      <div className="flex flex-col flex-wrap md:flex-row md:justify-between">
-        <div className="grid flex-wrap gap-4 md:flex">
-          <div className="flex flex-col gap-1 text-sm">
-            <p>Status</p>
-          </div>
-        </div>
-      </div>
-    );
-  };
-  //#endregion ::: Other Methods
+  //#endregion ::: Form Columns
 
   //
 
   //#region ::: UseEffect
   React.useEffect(() => {
-    httpRequest
-      .get(`/users`, queryParams)
-      .then((response) => {
-        const temp: UserData[] = response.data.data;
-        const metadata: any = response.data.metadata;
-
-        const result: TableData[] = temp.map((item, index) => {
-          return { key: index, ...item };
-        });
-
-        setUsersData(result);
-        setMetadata(metadata);
-        setIsReloading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    fetchUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageFilter]);
   //#endregion ::: UseEffect
@@ -198,36 +307,30 @@ const ManageUser: NextPageWithLayout = () => {
       </h1>
       <section className="mb-4 rounded-lg bg-white py-2 px-4 shadow-custom md:p-4">
         {isMobile ? (
-          <div className="flex">
-            <span
-              className="flex cursor-pointer items-center gap-2 rounded-lg bg-sky-100 px-2 py-1 text-sky-600 hover:shadow-custom"
-              onClick={() => {
-                setFilterDrawerOpen(!filterDrawerOpen);
-              }}
-            >
-              <FontAwesomeIcon height={16} icon={faFilter} />
-              <p className="text-base">Filter</p>
-            </span>
-          </div>
-        ) : (
           <>
-            <p className="text-base font-semibold md:text-lg">Filter</p>
-            <Divider className="my-2" />
+            <div className="mb-4 flex justify-between">
+              <span
+                className="flex cursor-pointer items-center gap-2 rounded-lg bg-sky-100 px-2 py-1 text-sky-600 hover:shadow-custom"
+                onClick={() => {
+                  setIsFilterDrawerOpen(!isFilterDrawerOpen);
+                }}
+              >
+                <FontAwesomeIcon height={16} icon={faFilter} />
+                <p className="text-base">Filter</p>
+              </span>
+            </div>
+            <Drawer
+              title="Filter"
+              open={isFilterDrawerOpen}
+              onClose={() => setIsFilterDrawerOpen(false)}
+            >
+              {RenderFilterBody()}
+            </Drawer>
           </>
-        )}
-        {isMobile ? (
-          <Drawer
-            title="Filter"
-            open={filterDrawerOpen}
-            onClose={() => setFilterDrawerOpen(false)}
-          >
-            {RenderFilterBody()}
-          </Drawer>
         ) : (
-          RenderFilterBody()
+          <div className="mb-2 flex justify-between">{RenderFilterBody()}</div>
         )}
-      </section>
-      <section className="mb-4 rounded-lg bg-white py-2 px-4 shadow-custom md:p-4">
+
         <Spin spinning={isReloading}>
           <Table columns={columns} dataSource={usersData} pagination={false} />
           <Pagination
@@ -237,12 +340,11 @@ const ManageUser: NextPageWithLayout = () => {
                 ? 0
                 : metadata?.total_elements
             }
-            pageSizeOptions={[20, 40, 80]}
-            defaultPageSize={20}
+            pageSizeOptions={[10, 20, 40]}
+            defaultPageSize={10}
             current={currentPage}
             showSizeChanger
             showTotal={(total, range) => {
-              console.log(total, range);
               return `${range[0]}-${range[1]} of ${total} items`;
             }}
             onChange={(page, pageSize) => {
@@ -259,11 +361,12 @@ const ManageUser: NextPageWithLayout = () => {
       </section>
 
       <Modal
-        title="Edit Data Pengguna"
+        title={
+          modalType === "admin" ? "Ubah Akses Admin" : "Edit Data Pengguna"
+        }
         open={isEditModalOpen}
         onCancel={() => {
           setIsEditModalOpen(false);
-          setModalIndex(-1);
           form.resetFields();
         }}
         footer={null}
@@ -280,7 +383,7 @@ const ManageUser: NextPageWithLayout = () => {
             name="name"
             rules={[{ required: true, message: "Silakan masukkan nama Anda" }]}
           >
-            <Input />
+            <Input disabled={modalType === "admin"} />
           </Form.Item>
 
           <Form.Item
@@ -291,7 +394,7 @@ const ManageUser: NextPageWithLayout = () => {
               { type: "email", message: "Alamat email tidak valid!" },
             ]}
           >
-            <Input />
+            <Input disabled={modalType === "admin"} />
           </Form.Item>
 
           <Form.Item>
@@ -303,14 +406,56 @@ const ManageUser: NextPageWithLayout = () => {
               >
                 Batal
               </Button>
-              <Popconfirm
-                title="Yakin ubah pengguna ini?"
-                onConfirm={handleEditUser}
-                okText="Ya"
-                cancelText="Tidak"
-              >
-                <Button type="primary">Ubah Data</Button>
-              </Popconfirm>
+              {modalType === "admin" ? (
+                <>
+                  {usersData[modalIndex]._id === userData?._id ? (
+                    <Popconfirm
+                      title={
+                        <div className="max-w-[48ch]">
+                          <div className="font-semibold capitalize">
+                            Yakin hapus akses admin anda?
+                          </div>
+                          Aksi ini tidak dapat diurungkan. Anda akan kehilangan
+                          akses halaman admin
+                        </div>
+                      }
+                      onConfirm={() => handleUpdateUserRole("user")}
+                      okText="Ya"
+                      cancelText="Tidak"
+                    >
+                      <Button type="primary" danger>
+                        Deaktivasi Admin
+                      </Button>
+                    </Popconfirm>
+                  ) : (
+                    <Popconfirm
+                      title={
+                        <div className="max-w-[48ch]">
+                          <div className="font-semibold capitalize">
+                            Yakin tambahkan pengguna sebagai admin?
+                          </div>
+                          Aksi ini tidak dapat diurungkan. Pengguna harus
+                          mendeaktivasi diri sendiri ketika sudah menjadi admin
+                        </div>
+                      }
+                      onConfirm={() => handleUpdateUserRole("admin")}
+                      okText="Ya"
+                      cancelText="Tidak"
+                    >
+                      <Button type="primary">Aktivasi Admin</Button>
+                    </Popconfirm>
+                  )}
+                </>
+              ) : (
+                <Popconfirm
+                  title="Yakin ubah pengguna ini?"
+                  onConfirm={handleEditUser}
+                  okText="Ya"
+                  cancelText="Tidak"
+                >
+                  <Button type="primary">Ubah Data</Button>
+                </Popconfirm>
+              )}
             </div>
           </Form.Item>
         </Form>

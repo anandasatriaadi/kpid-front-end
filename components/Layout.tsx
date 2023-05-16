@@ -8,15 +8,17 @@ import {
 import { AuthContext, AuthContextInterface } from "@/context/AuthContext";
 import {
   faAngleLeft,
+  faAngleRight,
   faBars,
   faCircleQuestion,
   faCloudArrowUp,
+  faFileUpload,
   faHouse,
   faUserShield,
   faVideo,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { MenuProps } from "antd";
+import { Button, MenuProps } from "antd";
 import { Drawer, Dropdown, Layout as AntLayout, Menu, Spin } from "antd";
 import Image from "next/image";
 import Link from "next/link";
@@ -170,15 +172,15 @@ const Layout = ({ children }: LayoutProps) => {
 
   //#region ::: Other Methods
   const getSelectedMenuKey = (): string => {
-    const paths = ["/", "/result", "/help"];
-    let index = -1;
+    const paths = ["/", "/result", "/help", "/admin/user", "/admin/station"];
+    let matched = "";
     paths.forEach((path, i) => {
       if (router.pathname.match(path)) {
-        index = i + 1;
+        matched = path;
       }
     });
 
-    return index.toString();
+    return matched;
   };
 
   const handleMenuOnClick = ({ key, keyPath }: MenuInfo) => {
@@ -226,8 +228,8 @@ const Layout = ({ children }: LayoutProps) => {
         //   MOBILE LAYOUT
         // ========================================================================
         <>
-          <AntLayout className="custom-layout site-layout max-h-screen min-h-screen bg-white">
-            <AntLayout.Header className="flex bg-white p-4">
+          <AntLayout className="custom-layout site-layout relative max-h-screen min-h-screen overflow-y-scroll bg-white scrollbar-thin scrollbar-track-slate-300 scrollbar-thumb-slate-400 scrollbar-track-rounded-full scrollbar-thumb-rounded-full">
+            <AntLayout.Header className="sticky top-0 left-0 right-0 z-50 flex bg-white p-4 shadow-custom">
               <div
                 className="trigger flex flex-col justify-center"
                 onClick={() => setDrawerMenuOpen(!drawerMenuOpen)}
@@ -255,7 +257,7 @@ const Layout = ({ children }: LayoutProps) => {
               </div>
             </AntLayout.Header>
             <AntLayout.Content className="flex grow flex-col rounded-tl-lg bg-slate-50">
-              <div className="relative flex h-full grow flex-col overflow-x-clip overflow-y-scroll rounded-lg p-4 scrollbar-thin scrollbar-track-slate-300 scrollbar-thumb-slate-400 scrollbar-track-rounded-full scrollbar-thumb-rounded-full">
+              <div className="relative flex h-full grow flex-col overflow-x-clip rounded-lg p-4">
                 {isVerifying || !isLoggedIn ? (
                   <Spin
                     className="flex h-full w-full flex-col items-center justify-center"
@@ -461,7 +463,7 @@ const Layout = ({ children }: LayoutProps) => {
               </div>
             </AntLayout.Content>
           </AntLayout>
-          {/* <div
+          <div
             className={
               "absolute bottom-6 flex transition-all duration-500" +
               (showUpload ? " right-6" : " right-0")
@@ -480,6 +482,7 @@ const Layout = ({ children }: LayoutProps) => {
                 {showUpload ? "Unggah Video" : ""}
               </span>
             </Button>
+
             <div>
               <Button
                 type="primary"
@@ -497,7 +500,7 @@ const Layout = ({ children }: LayoutProps) => {
                 </div>
               </Button>
             </div>
-          </div> */}
+          </div>
         </AntLayout>
       )}
     </>

@@ -44,11 +44,11 @@
 
       &:hover {
         @apply text-sky-600;
-        &>.ant-menu-submenu-title>.ant-menu-submenu-arrow {
+        & > .ant-menu-submenu-title > .ant-menu-submenu-arrow {
           @apply text-sky-600;
         }
       }
-      
+
       &-title:hover {
         @apply text-sky-600;
       }

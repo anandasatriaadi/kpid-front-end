@@ -89,6 +89,9 @@ const SingleResult: NextPageWithLayout = () => {
       .put(`/moderations/${moderationID}/validate`, data)
       .then((_) => {})
       .catch((err) => {
+        if (err?.response?.data !== undefined && err.response !== null) {
+          message.error(err.response.data);
+        }
         console.error(err);
       });
     if (moderationData === undefined) return;
@@ -107,6 +110,9 @@ const SingleResult: NextPageWithLayout = () => {
       .put(`/moderations/${moderationID}/start`, data)
       .then((_) => {})
       .catch((err) => {
+        if (err?.response?.data !== undefined && err.response !== null) {
+          message.error(err.response.data);
+        }
         console.error(err);
       });
     message.success("Video sedang diproses");
@@ -282,7 +288,6 @@ const SingleResult: NextPageWithLayout = () => {
             return acc;
           }
           if (index % step === 0) {
-            console.log(curr);
             acc.push(curr);
           }
           return acc;
@@ -316,8 +321,12 @@ const SingleResult: NextPageWithLayout = () => {
     // Fetch moderation data
     const fetchModerationData = async () => {
       const response = await httpRequest.get(fetchURL).catch((err) => {
+        if (err?.response?.data !== undefined && err.response !== null) {
+          debounceMessage(err.response.data);
+        } else {
+          debounceMessage("Terjadi kesalahan dalam mengambil data moderasi");
+        }
         console.error(err);
-        debounceMessage("Terjadi kesalahan dalam mengambil data moderasi");
         return null;
       });
 
@@ -332,8 +341,12 @@ const SingleResult: NextPageWithLayout = () => {
     // Fetch pasal data
     const fetchPasalData = async () => {
       const response = await httpRequest.get("/pasals").catch((err) => {
+        if (err?.response?.data !== undefined && err.response !== null) {
+          debounceMessage(err.response.data);
+        } else {
+          debounceMessage("Terjadi kesalahan dalam mengambil data pasal");
+        }
         console.error(err);
-        debounceMessage("Terjadi kesalahan dalam mengambil data pasal");
         return null;
       });
 

@@ -46,7 +46,7 @@ const Register: NextPageWithLayout = () => {
       router.push("/");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoggedIn]);
+  }, []);
   //#endregion ::: UseEffect
 
   const [confirmDirty, setConfirmDirty] = React.useState(false);

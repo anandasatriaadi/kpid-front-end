@@ -6,13 +6,13 @@ import {
 } from "@/context/ApplicationContext";
 import { NextPageWithLayout } from "@/pages/_app";
 import Station from "@/types/Station";
+import { isEmpty } from "@/utils/CommonUtil";
 import debounce from "@/utils/Debounce";
 import { tokenizeString } from "@/utils/StringUtil";
 import { faFilter, faPen, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   Button,
-  Divider,
   Drawer,
   Form,
   Input,
@@ -20,10 +20,12 @@ import {
   Modal,
   Pagination,
   Popconfirm,
+  Segmented,
   Spin,
   Table,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import moment from "moment";
 import Head from "next/head";
 import * as React from "react";
 
@@ -42,18 +44,18 @@ const ManageStation: NextPageWithLayout = () => {
 
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] =
     React.useState<boolean>(false);
-  const [isEditModalOpen, setIsEditModalOpen] = React.useState<boolean>(false);
+  const [isModalOpen, setModalOpen] = React.useState<boolean>(false);
   const [isReloading, setIsReloading] = React.useState<boolean>(true);
+  const [modalType, setModalType] = React.useState<"add" | "edit">("edit");
 
   const [stationsData, setStationsData] = React.useState<Station[]>([]);
   const [metadata, setMetadata] = React.useState<any>({});
-  const [editInputName, setEditInputName] = React.useState("");
   const [modalIndex, setModalIndex] = React.useState(0);
 
   const [currentPage, setCurrentPage] = React.useState(1);
   const [pageFilter, setPageFilter] = React.useState<PageFilterType>({
     page: 0,
-    limit: 20,
+    limit: 10,
     sort: "key,ASC",
   });
   const queryParams = {
@@ -62,39 +64,11 @@ const ManageStation: NextPageWithLayout = () => {
 
   const [form] = Form.useForm();
 
-  const columns: ColumnsType<Station> = [
-    { title: "Key", dataIndex: "key", key: "key" },
-    { title: "Nama", dataIndex: "name", key: "name" },
-    { title: "Dibuat", dataIndex: "created_at", key: "created_at" },
-    {
-      title: "Aksi",
-      dataIndex: "",
-      key: "x",
-      render: (val, record, index) => (
-        <div className="flex flex-wrap gap-1">
-          <span
-            className="rounded-lg bg-sky-100 p-2 text-slate-700 transition-all duration-300 hover:cursor-pointer hover:bg-sky-300"
-            onClick={() => {
-              setIsEditModalOpen(!isEditModalOpen);
-              setEditInputName(record.name);
-              setModalIndex(index);
-            }}
-          >
-            <FontAwesomeIcon height={16} icon={faPen} />
-          </span>
-          <Popconfirm
-            title="Yakin hapus stasiun ini?"
-            onConfirm={handleDeleteStation}
-            okText="Yes"
-            cancelText="No"
-          >
-            <span className="rounded-lg bg-orange-100 p-2 text-slate-700 transition-all duration-300 hover:cursor-pointer hover:bg-orange-300">
-              <FontAwesomeIcon height={16} icon={faTrash} />
-            </span>
-          </Popconfirm>
-        </div>
-      ),
-    },
+  // Filters
+  const sortOptions: any[] = [
+    { value: "key,ASC", label: "ID" },
+    { value: "name,ASC", label: "Nama" },
+    { value: "created_at,DESC", label: "Tanggal Dibuat" },
   ];
   //#endregion ::: Variable Initialisations
 
@@ -113,56 +87,191 @@ const ManageStation: NextPageWithLayout = () => {
         .then((response) => {
           message.success("Berhasil mengubah stasiun");
           setPageFilter({ ...pageFilter });
-          setIsEditModalOpen(false);
+          setModalOpen(false);
           setIsReloading(true);
           form.resetFields();
         });
     });
   };
 
-  const handleDeleteStation = (
+  const handleAddStation = (
     e: React.MouseEvent<HTMLElement, MouseEvent> | undefined
   ) => {
-    console.log(e);
+    form
+      .validateFields()
+      .then((values) => {
+        httpRequest
+          .post(`/stations`, {
+            station_name: values["station_name"],
+          })
+          .then((response) => {
+            message.success("Berhasil menambahkan stasiun");
+            setPageFilter({ ...pageFilter });
+            setModalOpen(false);
+            setIsReloading(true);
+            form.resetFields();
+          });
+      })
+      .catch((err) => {
+        if (err?.response?.data !== undefined && err.response !== null) {
+          message.error(err.response.data);
+        } else {
+          message.error("Gagal menambahkan stasiun");
+        }
+        console.error(err);
+      });
+  };
+
+  const handleDeleteStation = (station_index: number) => {
+    httpRequest
+      .delete(`/stations/${stationsData[station_index].key}`)
+      .then((response) => {
+        message.success("Berhasil menghapus stasiun");
+        setPageFilter({ ...pageFilter });
+        setIsReloading(true);
+      })
+      .catch((err) => {
+        if (err?.response?.data !== undefined && err.response !== null) {
+          message.error(err.response.data);
+        } else {
+          message.error("Gagal menghapus stasiun");
+        }
+        console.error(err);
+      });
+  };
+
+  const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    form.setFieldValue("key", tokenizeString(e.target.value, true));
   };
   //#endregion ::: Handlers
 
   //
 
-  //#region ::: Other Methods
+  //#region ::: Renderers
   const RenderFilterBody = (): React.ReactElement => {
     return (
-      <div className="flex flex-col flex-wrap md:flex-row md:justify-between">
-        <div className="grid flex-wrap gap-4 md:flex">
-          <div className="flex flex-col gap-1 text-sm">
-            <p>Status</p>
-          </div>
+      <div className="flex flex-col">
+        <p className="font-normal md:font-semibold">Urutkan</p>
+        <div>
+          <Segmented
+            className="rounded-lg border-[1px] border-slate-300 bg-transparent p-0"
+            options={sortOptions}
+            onChange={(value) => {
+              setIsReloading(true);
+              if (!isEmpty(value))
+                setPageFilter({
+                  ...pageFilter,
+                  sort: value.toString(),
+                });
+              else {
+                const { sort, ...rest } = pageFilter;
+                setPageFilter(rest);
+              }
+            }}
+          />
         </div>
       </div>
     );
   };
+
+  const RenderActionButtons = (
+    value: any,
+    record: any,
+    index: number
+  ): React.ReactNode => {
+    return (
+      <div className="flex flex-wrap justify-center gap-1">
+        <span
+          className="rounded-lg bg-amber-100 p-2 text-amber-700 transition-all duration-300 hover:cursor-pointer hover:bg-amber-200"
+          onClick={() => {
+            form.setFieldValue(
+              "key",
+              tokenizeString(record.name !== undefined ? record.name : "", true)
+            );
+            form.setFieldValue("station_name", record.name);
+            setModalOpen(!isModalOpen);
+            setModalIndex(index);
+            setModalType("edit");
+          }}
+        >
+          <FontAwesomeIcon height={16} icon={faPen} />
+        </span>
+        <Popconfirm
+          title="Yakin hapus stasiun ini?"
+          onConfirm={() => {
+            handleDeleteStation(index);
+          }}
+          okText="Yes"
+          cancelText="No"
+        >
+          <span className="rounded-lg bg-red-100 p-2 text-red-700 transition-all duration-300 hover:cursor-pointer hover:bg-red-200">
+            <FontAwesomeIcon height={16} icon={faTrash} />
+          </span>
+        </Popconfirm>
+      </div>
+    );
+  };
+  //#endregion ::: Renderers
+
+  //
+
+  //#region ::: Other Methods
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const fetchStations = React.useCallback(
+    debounce(() => {
+      httpRequest
+        .get(`/stations`, queryParams)
+        .then((response) => {
+          const result: Station[] = response.data.data;
+          const metadata: any = response.data.metadata;
+
+          setStationsData(result);
+          setMetadata(metadata);
+          setIsReloading(false);
+        })
+        .catch((err) => {
+          if (err?.response?.data !== undefined && err.response !== null) {
+            message.error(err.response.data);
+          }
+          console.error(err);
+        });
+    }, 200),
+    [pageFilter]
+  );
   //#endregion ::: Other Methods
+
+  //
+
+  //#region ::: Form Columns
+  const columns: ColumnsType<Station> = [
+    { title: "ID", dataIndex: "key", key: "key" },
+    { title: "Nama", dataIndex: "name", key: "name" },
+    {
+      title: "Dibuat",
+      dataIndex: "created_at",
+      key: "created_at",
+      render: (val) => {
+        return <span>{moment(val).format("HH:mm:ss DD MMMM YYYY")}</span>;
+      },
+    },
+    {
+      title: "Aksi",
+      dataIndex: "",
+      key: "x",
+      render: RenderActionButtons,
+    },
+  ];
+  //#endregion ::: Form Columns
 
   //
 
   //#region ::: UseEffect
   React.useEffect(() => {
-    httpRequest
-      .get(`/stations`, queryParams)
-      .then((response) => {
-        const result: Station[] = response.data.data;
-        const metadata: any = response.data.metadata;
-
-        setStationsData(result);
-        setMetadata(metadata);
-        setIsReloading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    fetchStations();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageFilter]);
   //#endregion ::: UseEffect
+
   return (
     <div className="flex flex-1 flex-col">
       <Head>
@@ -172,38 +281,53 @@ const ManageStation: NextPageWithLayout = () => {
       </Head>
 
       <h1 className="mb-4 text-xl font-semibold md:text-2xl">Daftar Stasiun</h1>
-      <section className="mb-4 rounded-lg bg-white py-2 px-4 shadow-custom md:p-4">
+      <section className="mb-4 rounded-lg bg-white p-4 shadow-custom md:p-4">
         {isMobile ? (
-          <div className="flex">
-            <span
-              className="flex cursor-pointer items-center gap-2 rounded-lg bg-sky-100 px-2 py-1 text-sky-600 hover:shadow-custom"
-              onClick={() => {
-                setIsFilterDrawerOpen(!isFilterDrawerOpen);
-              }}
-            >
-              <FontAwesomeIcon height={16} icon={faFilter} />
-              <p className="text-base">Filter</p>
-            </span>
-          </div>
-        ) : (
           <>
-            <p className="text-base font-semibold md:text-lg">Filter</p>
-            <Divider className="my-2" />
+            <div className="mb-4 flex justify-between">
+              <span
+                className="flex cursor-pointer items-center gap-2 rounded-lg bg-sky-100 px-2 py-1 text-sky-600 hover:shadow-custom"
+                onClick={() => {
+                  setIsFilterDrawerOpen(!isFilterDrawerOpen);
+                }}
+              >
+                <FontAwesomeIcon height={16} icon={faFilter} />
+                <p className="text-base">Filter</p>
+              </span>
+              <Button
+                type="primary"
+                onClick={() => {
+                  setModalType("add");
+                  setModalOpen(true);
+                }}
+              >
+                Tambah Stasiun
+              </Button>
+            </div>
+            <Drawer
+              title="Filter"
+              open={isFilterDrawerOpen}
+              onClose={() => setIsFilterDrawerOpen(false)}
+            >
+              {RenderFilterBody()}
+            </Drawer>
           </>
-        )}
-        {isMobile ? (
-          <Drawer
-            title="Filter"
-            open={isFilterDrawerOpen}
-            onClose={() => setIsFilterDrawerOpen(false)}
-          >
-            {RenderFilterBody()}
-          </Drawer>
         ) : (
-          RenderFilterBody()
+          <div className="mb-2 flex justify-between">
+            {RenderFilterBody()}
+            <div className="flex flex-col justify-end">
+              <Button
+                type="primary"
+                onClick={() => {
+                  setModalType("add");
+                  setModalOpen(true);
+                }}
+              >
+                Tambah Stasiun
+              </Button>
+            </div>
+          </div>
         )}
-      </section>
-      <section className="mb-4 rounded-lg bg-white py-2 px-4 shadow-custom md:p-4">
         <Spin spinning={isReloading}>
           <Table
             columns={columns}
@@ -217,12 +341,11 @@ const ManageStation: NextPageWithLayout = () => {
                 ? 0
                 : metadata?.total_elements
             }
-            pageSizeOptions={[20, 40, 80]}
-            defaultPageSize={20}
+            pageSizeOptions={[10, 20, 40]}
+            defaultPageSize={10}
             current={currentPage}
             showSizeChanger
             showTotal={(total, range) => {
-              console.log(total, range);
               return `${range[0]}-${range[1]} of ${total} items`;
             }}
             onChange={(page, pageSize) => {
@@ -239,11 +362,12 @@ const ManageStation: NextPageWithLayout = () => {
       </section>
 
       <Modal
-        title="Edit Data Stasiun"
-        open={isEditModalOpen}
+        title={
+          modalType === "edit" ? "Ubah Data Stasiun" : "Tambah Data Stasiun"
+        }
+        open={isModalOpen}
         onCancel={() => {
-          setIsEditModalOpen(false);
-          setEditInputName("");
+          setModalOpen(false);
           setModalIndex(-1);
           form.resetFields();
         }}
@@ -256,12 +380,14 @@ const ManageStation: NextPageWithLayout = () => {
           layout="vertical"
           requiredMark={"optional"}
         >
-          <Form.Item label="Key" name="key">
-            <Input
-              disabled
-              placeholder={tokenizeString(editInputName, true)}
-              className="bg-slate-50"
-            />
+          <Form.Item
+            label="ID"
+            name="key"
+            rules={[
+              { required: true, message: "Konversi dari nama ke ID error" },
+            ]}
+          >
+            <Input disabled className="bg-slate-50" />
           </Form.Item>
 
           <Form.Item
@@ -271,32 +397,33 @@ const ManageStation: NextPageWithLayout = () => {
               { required: true, message: "Silakan masukkan nama stasiun" },
             ]}
           >
-            <Input
-              onInput={debounce((e: React.ChangeEvent<HTMLInputElement>) => {
-                if (e?.target?.value !== undefined) {
-                  setEditInputName(e.target.value);
-                }
-              }, 200)}
-              placeholder={editInputName}
-            />
+            <Input onChange={debounce(handleChangeInput, 200)} />
           </Form.Item>
 
           <Form.Item>
             <div className="flex justify-end gap-4">
               <Button
                 onClick={() => {
-                  setIsEditModalOpen(false);
+                  setModalOpen(false);
                 }}
               >
                 Batal
               </Button>
               <Popconfirm
-                title="Yakin ubah stasiun ini?"
-                onConfirm={handleEditStation}
+                title={
+                  modalType === "edit"
+                    ? "Yakin ubah stasiun ini?"
+                    : "Yakin tambah stasiun ini?"
+                }
+                onConfirm={
+                  modalType === "edit" ? handleEditStation : handleAddStation
+                }
                 okText="Ya"
                 cancelText="Tidak"
               >
-                <Button type="primary">Ubah Data</Button>
+                <Button type="primary">
+                  {modalType === "edit" ? "Ubah" : "Tambah"}
+                </Button>
               </Popconfirm>
             </div>
           </Form.Item>

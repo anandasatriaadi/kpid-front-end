@@ -1,38 +1,38 @@
 .ant-steps {
-    $steps: &;
+  $steps: &;
 
-    &-item {
-        $item: &;
+  &-item {
+    $item: &;
 
-        // &-icon {
-        //     @apply flex justify-center items-center;
-        // }
-        
-        &-process {
-            & #{$item}-container #{$item}-icon {
-                @apply bg-sky-600 border-sky-600;
-            }
+    // &-icon {
+    //     @apply flex justify-center items-center;
+    // }
+
+    &-process {
+      & #{$item}-container #{$item}-icon {
+        @apply border-sky-600 bg-sky-600;
+      }
+    }
+    &-finish {
+      & #{$item}-container #{$item}-icon {
+        @apply border-sky-600;
+
+        & > #{$steps}-icon {
+          @apply text-sky-600;
         }
-        &-finish {
-            & #{$item}-container #{$item}-icon {
-                @apply border-sky-600;
-
-                & > #{$steps}-icon {
-                    @apply text-sky-600;
-                }
-            }
-        }
-
-        &-icon {
-            #{$steps}-icon {
-                @apply my-auto w-full h-full flex justify-center items-center;
-            }
-        }
+      }
     }
 
-    &#{$steps}-vertical#{$steps}-small {
-        #{$steps}-item-content {
-            min-height: 2.25rem;
-        }
+    &-icon {
+      #{$steps}-icon {
+        @apply my-auto flex h-full w-full items-center justify-center;
+      }
     }
+  }
+
+  &#{$steps}-vertical#{$steps}-small {
+    #{$steps}-item-content {
+      min-height: 2.25rem;
+    }
+  }
 }

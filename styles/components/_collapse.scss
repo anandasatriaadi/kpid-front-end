@@ -16,7 +16,7 @@
 
     .ant-collapse {
       &-item {
-        @apply border-[1px] border-slate-200 mb-2 rounded-lg;
+        @apply mb-2 rounded-lg border-[1px] border-slate-200;
 
         &:last-child {
           @apply mb-0;
