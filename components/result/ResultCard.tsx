@@ -1,7 +1,7 @@
 import ViolationIconCard from "@/components/result/ViolationIconCard";
 import ModerationResponse from "@/types/ModerationResponse";
 import ModerationResult from "@/types/ModerationResult";
-import { isNilOrEmpty } from "@/utils/CommonUtil";
+import { isNilOrEmpty } from "@/utils/BooleanUtil";
 import { faClock } from "@fortawesome/free-regular-svg-icons";
 import { faPenToSquare, faTelevision } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -9,62 +9,6 @@ import { Divider, Skeleton } from "antd";
 import moment from "moment";
 import Link from "next/link";
 import * as React from "react";
-
-const timelineItem = [
-  {
-    second: 6,
-    time: "18:25:06",
-    image: "/result.png",
-    violations: [
-      {
-        pasal: "P3SPS Pasal 18 BAB XII Tahun 2012",
-        deskripsi: `Program siaran yang memuat adegan seksual dilarang.<br\>
-        a. menayangkan ketelanjangan dan/atau penampakan alat kelamin;<br\>
-        b. menampilkan adegan yang menggambarkan aktivitas seks dan/atau
-        persenggamaan;<br\>
-        c. menayangkan kekerasan seksual;<br\>
-        d. menampilkan suara yang menggambarkan berlangsungnya aktivitas seks
-        dan/atau persenggamaan;<br\>
-        e. menampilkan percakapan tentang rangkaian aktivitas seks dan/atau
-        persenggamaan;<br\>
-        f. menayangkan adegan dan/atau suara yang menggambarkan hubungan
-        seks antarbinatang secara vulgar;<br\>
-        g. menampilkan adegan ciuman bibir;<br\>
-        h. mengeksploitasi dan/atau menampilkan bagian-bagian tubuh tertentu,
-        seperti: paha, bokong, payudara, secara close up dan/atau medium shot;<br\>
-        i. menampilkan gerakan tubuh dan/atau tarian erotis;<br\>
-        j. mengesankan ketelanjangan;<br\>
-        k. mengesankan ciuman bibir; dan/atau<br\>
-        l. menampilkan kata-kata cabul.<br\>`,
-        decision: null,
-      },
-      {
-        pasal: "P3SPS Pasal 24 BAB XIII Tahun 2012",
-        deskripsi: `
-          (1) Program siaran dilarang menampilkan ungkapan kasar dan makian, baik
-          secara verbal maupun nonverbal, yang mempunyai kecenderungan
-          menghina atau merendahkan martabat manusia, memiliki makna jorok/
-          mesum/cabul/vulgar, dan/atau menghina agama dan Tuhan.<br\><br\>
-          (2) Kata-kata kasar dan makian sebagaimana yang dimaksud pada ayat (1) di
-          atas mencakup kata-kata dalam bahasa Indonesia, bahasa daerah, dan
-          bahasa asing.
-          `,
-        decision: null,
-      },
-    ],
-  },
-];
-
-interface detectedViolations {
-  second: number;
-  time: string;
-  image: string;
-  violations: {
-    pasal: string;
-    deskripsi: string;
-    decision?: boolean | null | undefined;
-  }[];
-}
 
 type Props = {
   data: any;

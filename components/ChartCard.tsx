@@ -89,7 +89,7 @@ function ChartCard(props: Props) {
 
   return (
     <div className="flex h-full w-full flex-1 flex-col">
-      <h2 className="mb-4 px-4 pt-4 text-lg font-bold md:px-6 md:pt-6">
+      <h2 className="mb-4 px-4 pt-2 text-base font-semibold md:px-6 md:pt-4">
         {title}
       </h2>
       <div className="relative max-h-full flex-1 px-4 pb-2 md:px-6 md:pb-4">

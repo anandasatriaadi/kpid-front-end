@@ -5,7 +5,7 @@ import {
   ApplicationContext,
   ApplicationContextInterface,
 } from "@/context/ApplicationContext";
-import { isEmpty, isNil } from "@/utils/CommonUtil";
+import { isEmpty, isNil } from "@/utils/BooleanUtil";
 import { faFilter } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -18,6 +18,7 @@ import {
   Segmented,
   Select,
   SelectProps,
+  Skeleton,
   Spin,
 } from "antd";
 import { RangePickerProps } from "antd/lib/date-picker";
@@ -247,9 +248,7 @@ const Result: NextPageWithLayout = () => {
       </section>
       {!isNil(moderationData) ? (
         isEmpty(moderationData) ? (
-          <Spin spinning={isReloading}>
-            <Empty description="Tidak ada data moderasi" />
-          </Spin>
+          <Empty description="Tidak ada data moderasi" />
         ) : (
           <>
             <Spin spinning={isReloading}>
@@ -283,9 +282,41 @@ const Result: NextPageWithLayout = () => {
           </>
         )
       ) : (
-        <div className="flex flex-1 items-center justify-center">
-          <Spin size="large" className="mx-auto my-auto" />
-        </div>
+        <section className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3 ">
+          {[...Array(12)].map((_, index) => (
+            <div key={index}>
+              <div className="group flex cursor-pointer flex-col rounded-lg bg-white shadow-custom transition-shadow hover:shadow-custom-lg">
+                <div className="relative overflow-hidden rounded-t-lg pt-[50%]">
+                  <div className="absolute top-0 bottom-0 left-0 right-0">
+                    <Skeleton.Image
+                      active
+                      className="h-full w-full"
+                    ></Skeleton.Image>
+                  </div>
+                </div>
+                <div className="flex flex-1 flex-col p-2 text-sm md:p-4">
+                  <Skeleton.Button active size="small" block shape="round" />
+                  <Divider className="m-0 my-2 bg-slate-200"></Divider>
+                  <Skeleton active paragraph={{ rows: 1 }} round />
+                  <Divider className="m-0 my-2 bg-slate-200"></Divider>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[...Array(4)].map((_, index) => (
+                      <div className="flex gap-2" key={index}>
+                        <Skeleton.Avatar active size="small" />
+                        <Skeleton.Button
+                          block
+                          active
+                          size="small"
+                          shape="round"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </section>
       )}
     </div>
   );

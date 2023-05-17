@@ -8,18 +8,23 @@ import {
 import { AuthContext, AuthContextInterface } from "@/context/AuthContext";
 import {
   faAngleLeft,
-  faAngleRight,
   faBars,
+  faChartSimple,
   faCircleQuestion,
   faCloudArrowUp,
-  faFileUpload,
   faHouse,
   faUserShield,
   faVideo,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, MenuProps } from "antd";
-import { Drawer, Dropdown, Layout as AntLayout, Menu, Spin } from "antd";
+import {
+  Drawer,
+  Dropdown,
+  Layout as AntLayout,
+  Menu,
+  MenuProps,
+  Spin,
+} from "antd";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -115,6 +120,16 @@ const Layout = ({ children }: LayoutProps) => {
         </div>
       ),
       label: "Daftar Video",
+      className: "flex items-center",
+    },
+    {
+      key: "/statistic",
+      icon: (
+        <div className="flex w-[1.5rem] justify-center">
+          <FontAwesomeIcon height={18} icon={faChartSimple} />
+        </div>
+      ),
+      label: "Statistik",
       className: "flex items-center",
     },
     {
@@ -463,7 +478,7 @@ const Layout = ({ children }: LayoutProps) => {
               </div>
             </AntLayout.Content>
           </AntLayout>
-          <div
+          {/* <div
             className={
               "absolute bottom-6 flex transition-all duration-500" +
               (showUpload ? " right-6" : " right-0")
@@ -500,7 +515,7 @@ const Layout = ({ children }: LayoutProps) => {
                 </div>
               </Button>
             </div>
-          </div>
+          </div> */}
         </AntLayout>
       )}
     </>

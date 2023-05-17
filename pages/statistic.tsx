@@ -1,197 +1,384 @@
+import httpRequest from "@/common/HttpRequest";
+import ChartCard from "@/components/ChartCard";
 import Layout from "@/components/Layout";
+import {
+  ApplicationContext,
+  ApplicationContextInterface,
+} from "@/context/ApplicationContext";
+import { isNilOrEmpty } from "@/utils/BooleanUtil";
+import { getThisMonthDates } from "@/utils/DatesUtil";
 import debounce from "@/utils/Debounce";
-import { AutoComplete, Button, Form, Select } from "antd";
+import { faFilter } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { DatePicker, Drawer } from "antd";
+import { RangePickerProps } from "antd/lib/date-picker";
+import moment from "moment-timezone";
 import Head from "next/head";
 import * as React from "react";
 import { NextPageWithLayout } from "./_app";
 
-export const chart1 = {
-  title: "Statistik Moderasi Sebulan Terakhir",
-  key1: "Total Video",
-  key2: "Video Melanggar",
-  data: [
-    { name: "1-3-2023", "Total Video": 68, "Video Melanggar": 37 },
-    { name: "2-3-2023", "Total Video": 90, "Video Melanggar": 7 },
-    { name: "3-3-2023", "Total Video": 84, "Video Melanggar": 47 },
-    { name: "4-3-2023", "Total Video": 12, "Video Melanggar": 5 },
-    { name: "5-3-2023", "Total Video": 28, "Video Melanggar": 1 },
-    { name: "6-3-2023", "Total Video": 47, "Video Melanggar": 43 },
-    { name: "7-3-2023", "Total Video": 59, "Video Melanggar": 15 },
-    { name: "8-3-2023", "Total Video": 68, "Video Melanggar": 7 },
-    { name: "9-3-2023", "Total Video": 88, "Video Melanggar": 26 },
-    { name: "10-3-2023", "Total Video": 44, "Video Melanggar": 10 },
-    { name: "11-3-2023", "Total Video": 30, "Video Melanggar": 16 },
-    { name: "12-3-2023", "Total Video": 49, "Video Melanggar": 7 },
-    { name: "13-3-2023", "Total Video": 96, "Video Melanggar": 15 },
-    { name: "14-3-2023", "Total Video": 11, "Video Melanggar": 5 },
-    { name: "15-3-2023", "Total Video": 96, "Video Melanggar": 6 },
-    { name: "16-3-2023", "Total Video": 82, "Video Melanggar": 9 },
-    { name: "17-3-2023", "Total Video": 89, "Video Melanggar": 33 },
-    { name: "18-3-2023", "Total Video": 43, "Video Melanggar": 3 },
-    { name: "19-3-2023", "Total Video": 87, "Video Melanggar": 53 },
-    { name: "20-3-2023", "Total Video": 31, "Video Melanggar": 14 },
-    { name: "21-3-2023", "Total Video": 76, "Video Melanggar": 67 },
-    { name: "22-3-2023", "Total Video": 95, "Video Melanggar": 16 },
-    { name: "23-3-2023", "Total Video": 27, "Video Melanggar": 8 },
-    { name: "24-3-2023", "Total Video": 93, "Video Melanggar": 43 },
-    { name: "25-3-2023", "Total Video": 9, "Video Melanggar": 6 },
-    { name: "26-3-2023", "Total Video": 13, "Video Melanggar": 7 },
-    { name: "27-3-2023", "Total Video": 84, "Video Melanggar": 21 },
-    { name: "28-3-2023", "Total Video": 8, "Video Melanggar": 6 },
-    { name: "29-3-2023", "Total Video": 18, "Video Melanggar": 2 },
-    { name: "30-3-2023", "Total Video": 38, "Video Melanggar": 15 },
-  ],
+type ModerationStatisticResult = {
+  all: any[];
+  detected: any[];
+};
+
+type UserActivityResult = {
+  date: moment.Moment;
+  users_count: number;
+  users: { name: string; email: string }[];
 };
 
 const Statistic: NextPageWithLayout = () => {
-  const [selectOptions, setSelectOptions] = React.useState([
-    {
-      value: "jack",
-      label: "Jack",
-    },
-    {
-      value: "lucy",
-      label: "Lucy",
-    },
-    {
-      value: "tom",
-      label: "Tom",
-    },
-  ]);
+  //#region ::: Variable Initialisations
+  const { isMobile } = React.useContext(
+    ApplicationContext
+  ) as ApplicationContextInterface;
+  const [filterDrawerOpen, setFilterDrawerOpen] =
+    React.useState<boolean>(false);
+  const [selectedDate, setSelectedDate] = React.useState<{
+    startDate: moment.Moment;
+    endDate: moment.Moment;
+  }>({
+    startDate: moment.tz("Asia/Jakarta").add(-30, "days"),
+    endDate: moment.tz("Asia/Jakarta"),
+  });
+  const [barChartData, setBarChartData] = React.useState<any>({
+    title: "Statistik Moderasi",
+    key1: "Total Video",
+    key2: "Video Melanggar",
+    labels: [],
+    datasets: {},
+  });
+  const [userChartData, setUserChartData] = React.useState<any>({
+    title: "Statistik Pengguna",
+    key1: "Jumlah Pengguna",
+    labels: [],
+    datasets: {},
+  });
+  const [userActivityRank, setUserActivityRank] = React.useState<any[]>([]);
+  //#endregion ::: Variable Initialisations
 
-  const [modifiedSelectOptions, setModifiedSelectOptions] =
-    React.useState<any[]>();
-  const getStatusStyling = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "initialized":
-        return {
-          className: "bg-slate-300",
-          text: "Sedang Diunggah",
-        };
-      case "uploaded":
-        return {
-          className: "bg-amber-400",
-          text: "Belum Diproses",
-        };
-      case "in_progress":
-        return {
-          className: "bg-blue-500",
-          text: "Sedang Diproses",
-        };
-      case "approved":
-        return {
-          className: "bg-green-500",
-          text: "Tidak Ditemukan Pelanggaran",
-        };
-      case "rejected":
-        return {
-          className: "bg-red-600 text-white",
-          text: "Ditemukan Pelanggaran",
-        };
-      default:
-        return {
-          className: "bg-stone-700 text-white",
-          text: "Status Tidak Diketahui",
-        };
+  //
+
+  //#region ::: Handlers
+  //#endregion ::: Handlers
+
+  //
+
+  //#region ::: Other Methods
+  const filterModerationData = (data: ModerationStatisticResult) => {
+    let labels: any[] = [];
+    let all_dates = getThisMonthDates(
+      selectedDate.startDate,
+      selectedDate.endDate
+    );
+    let all_data: any[] = [];
+    let detected_data: any[] = [];
+
+    let formatted_date;
+    if (!isNilOrEmpty(data?.all) && !isNilOrEmpty(data?.detected)) {
+      data.all.forEach((item: any) => {
+        item.date = moment(item._id, "YYYY-MM-DD");
+      });
+      data.detected.forEach((item: any) => {
+        item.date = moment(item._id, "YYYY-MM-DD");
+      });
+
+      all_dates.forEach((date: moment.Moment) => {
+        let found = false;
+        data.all.forEach((item: any) => {
+          if (date.isSame(item.date, "day")) {
+            found = true;
+            all_data.push(item.count);
+          }
+        });
+        if (!found) {
+          all_data.push(0);
+        }
+
+        found = false;
+        data.detected.forEach((item: any) => {
+          if (date.isSame(item.date, "day")) {
+            found = true;
+            detected_data.push(item.count);
+          }
+        });
+        if (!found) {
+          detected_data.push(0);
+        }
+        formatted_date = date.format("D MMMM YYYY");
+        labels.push(formatted_date);
+      });
     }
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: "Video Melanggar",
+          data: detected_data,
+          backgroundColor: "#075985",
+        },
+        {
+          label: "Total Video",
+          data: all_data,
+          backgroundColor: "#0285c7",
+        },
+      ],
+    };
   };
 
-  const statuses: string[] = [
-    "initialized",
-    "uploaded",
-    "in_progress",
-    "approved",
-    "rejected",
-    "t",
-  ];
+  const filterUserData = (data: UserActivityResult[]) => {
+    let labels: any[] = [];
+    let all_dates = getThisMonthDates(
+      selectedDate.startDate,
+      selectedDate.endDate
+    );
+    let all_data: any[] = [];
+    let usersMapping: { [key: string]: number } = {};
 
+    let formatted_date;
+    if (!isNilOrEmpty(data)) {
+      data.forEach((item: UserActivityResult) => {
+        item.date = moment(item.date, "ddd, DD MMM YYYY HH:mm:ss [GMT]");
+        item.users.forEach((user: any) => {
+          if (usersMapping[user.email]) {
+            usersMapping[user.email] += 1;
+          } else {
+            usersMapping[user.email] = 1;
+          }
+        });
+      });
+
+      all_dates.forEach((date: moment.Moment) => {
+        let found = false;
+        data.forEach((item: UserActivityResult) => {
+          console.log(date, item.date);
+          if (date.isSame(item.date, "day")) {
+            found = true;
+            all_data.push(item.users_count);
+          }
+        });
+        if (!found) {
+          all_data.push(0);
+        }
+        formatted_date = date.format("D MMMM YYYY");
+        labels.push(formatted_date);
+      });
+    }
+
+    const res = {
+      labels,
+      datasets: [
+        {
+          label: "Jumlah Pengguna",
+          data: all_data,
+          backgroundColor: "#0285c7",
+        },
+      ],
+    };
+    console.log(usersMapping);
+    setUserActivityRank(
+      Object.keys(usersMapping)
+        .map((key) => ({ name: key, count: usersMapping[key] }))
+        .sort((a, b) => b.count - a.count)
+    );
+    return res;
+  };
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const getModerationData = React.useCallback(
+    debounce(async () => {
+      let moderationResult = await httpRequest
+        .get("/moderations/statistics", {
+          params: {
+            start_date: selectedDate.startDate.format("YYYY-MM-DD"),
+            end_date: selectedDate.endDate.format("YYYY-MM-DD"),
+          },
+        })
+        .then((res) => {
+          return res.data;
+        })
+        .catch((err) => {
+          console.error(err);
+          return null;
+        });
+      let moderationData: ModerationStatisticResult = moderationResult?.data;
+      setBarChartData({
+        ...barChartData,
+        ...filterModerationData(moderationData),
+      });
+    }, 200),
+    [selectedDate]
+  );
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const getUserData = React.useCallback(
+    debounce(async () => {
+      let userActivityResult = await httpRequest
+        .get("/activity", {
+          params: {
+            "date.gte": selectedDate.startDate.format("YYYY-MM-DD"),
+            "date.lte": selectedDate.endDate.format("YYYY-MM-DD"),
+          },
+        })
+        .then((res) => {
+          return res.data;
+        })
+        .catch((err) => {
+          console.error(err);
+          return null;
+        });
+      let userActivityData: UserActivityResult[] = userActivityResult?.data;
+      setUserChartData({
+        ...userChartData,
+        ...filterUserData(userActivityData),
+      });
+    }, 200),
+    [selectedDate]
+  );
+  //#endregion ::: Other Methods
+
+  //
+
+  //#region ::: Renderers
+  const RenderFilterBody = (): React.ReactElement => {
+    const disabledDate: RangePickerProps["disabledDate"] = (current) => {
+      if (!current || !selectedDate) {
+        return false;
+      }
+
+      const { startDate, endDate } = selectedDate;
+      const minDate = moment(endDate).add(-31, "days");
+      const maxDate = moment(startDate).add(31, "days");
+
+      return (
+        current > moment().endOf("day") ||
+        current > maxDate ||
+        current < minDate
+      );
+    };
+
+    return (
+      <div className="grid grid-cols-1 flex-row flex-wrap justify-between gap-4 md:flex">
+        <div className="grid grid-cols-1 flex-wrap gap-4 md:flex">
+          <DatePicker.RangePicker
+            className="w-full min-w-[36ch] md:w-min"
+            format="DD/MM/YYYY"
+            disabledDate={disabledDate}
+            defaultValue={[selectedDate.startDate, selectedDate.endDate]}
+            onChange={(value) => {
+              if (
+                value &&
+                value[0] !== undefined &&
+                value[0] !== null &&
+                value[1] !== undefined &&
+                value[1] !== null
+              ) {
+                setSelectedDate({ startDate: value[0], endDate: value[1] });
+              }
+            }}
+          />
+        </div>
+      </div>
+    );
+  };
+  //#endregion ::: Renderers
+
+  //
+
+  //#region ::: UseEffect
   React.useEffect(() => {
-    setModifiedSelectOptions(
-      selectOptions.map((option) => {
-        return {
-          ...option,
-        };
-      })
-    );
+    getModerationData();
+    getUserData();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const onChange = (value: string) => {
-    console.log(`selected ${value}`);
-  };
-
-  const onSearch = debounce((value: string) => {
-    setModifiedSelectOptions(
-      selectOptions.filter((option) =>
-        option.label.toLowerCase().includes(value.toLowerCase())
-      )
-    );
-  }, 250);
-
-  const onFinish = (values: any) => {
-    selectOptions.push({
-      value: values.testing.toLowerCase(),
-      label: values.testing,
-    });
-  };
-
-  const onFinishFailed = (errorInfo: any) => {
-    console.log("Failed:", errorInfo);
-  };
+  }, [selectedDate]);
+  //#endregion ::: UseEffect
 
   return (
     <div>
       <Head>
-        <title>Statistik Moderasi | KPID Jawa Timur</title>
+        <title>Statistik Sistem | KPID Jawa Timur</title>
         <meta name="description" content="Generated by create next app" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className="container mx-auto">
-        <Form
-          name="basic"
-          labelCol={{ span: 8 }}
-          wrapperCol={{ span: 16 }}
-          initialValues={{ remember: true }}
-          onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
-          autoComplete="off"
-        >
-          <Form.Item label="Testing" name="testing">
-            <AutoComplete
-              className="min-w-[16ch]"
-              onSearch={onSearch}
-              placeholder="Select a person"
-              options={modifiedSelectOptions}
-            />
-          </Form.Item>
-
-          <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-            <Button type="primary" htmlType="submit">
-              Submit
-            </Button>
-          </Form.Item>
-        </Form>
-
-        <div className="mb-8"></div>
-        {statuses.map((status, index) => {
-          return (
-            <div
-              key={index}
-              className={
-                " rounded-tr-lg rounded-bl-lg py-2 px-4  text-sm font-semibold tracking-wide " +
-                getStatusStyling(status).className
-              }
+      <section className="mb-4 rounded-lg bg-white py-2 px-4 shadow-custom md:p-6 md:py-4">
+        {isMobile ? (
+          <div className="flex">
+            <span
+              className="flex cursor-pointer items-center gap-2 rounded-lg bg-sky-100 px-2 py-1 text-sky-600 hover:shadow-custom"
+              onClick={() => {
+                setFilterDrawerOpen(!filterDrawerOpen);
+              }}
             >
-              {getStatusStyling(status).text}
+              <FontAwesomeIcon height={16} icon={faFilter} />
+              <p className="text-base">Rentang Tanggal Statistik</p>
+            </span>
+          </div>
+        ) : (
+          <>
+            <p className="mb-2 text-base font-semibold md:text-lg">
+              Rentang Tanggal Statistik
+            </p>
+          </>
+        )}
+        {isMobile ? (
+          <Drawer
+            title="Filter"
+            open={filterDrawerOpen}
+            onClose={() => setFilterDrawerOpen(false)}
+          >
+            {RenderFilterBody()}
+          </Drawer>
+        ) : (
+          RenderFilterBody()
+        )}
+      </section>
+      <section className="mb-4 flex h-[20rem] flex-1 flex-col rounded-lg bg-white shadow-custom">
+        {barChartData?.datasets?.length != undefined &&
+          barChartData?.datasets?.length > 0 && (
+            <ChartCard
+              chartData={barChartData}
+              title="Statistik Moderasi"
+            ></ChartCard>
+          )}
+      </section>
+      <div className="grid h-[20rem] grid-cols-8 gap-4">
+        <section className="col-span-5 flex h-[20rem] flex-1 flex-col rounded-lg bg-white shadow-custom">
+          {userChartData?.datasets?.length != undefined &&
+            userChartData?.datasets?.length > 0 && (
+              <ChartCard
+                chartData={userChartData}
+                title="Statistik Pengguna"
+              ></ChartCard>
+            )}
+        </section>
+        <section className="col-span-3 h-[20rem] rounded-lg bg-white shadow-custom">
+          <div className="h-full py-4 pl-6">
+            <h2 className="text-base font-semibold">Keaktifan Pengguna</h2>
+            <div className="max-h-full min-h-full overflow-y-scroll pr-6 scrollbar-thin scrollbar-track-slate-300 scrollbar-thumb-slate-400 scrollbar-track-rounded-full scrollbar-thumb-rounded-full">
+              {userActivityRank !== undefined &&
+                userActivityRank !== null &&
+                userActivityRank.map((user, index) => {
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between pb-2"
+                    >
+                      <div className="flex items-center">
+                        <p className="text-base">
+                          {index + 1}. {user.name}
+                        </p>
+                      </div>
+                      <p className="text-base">{user.count}</p>
+                    </div>
+                  );
+                })}
             </div>
-          );
-        })}
-        {/* <Navbar />
-        <div className="flex flex-wrap">
-          <ChartCard chartData={chart1} title={chart1.title}></ChartCard>
-          <ChartCard chartData={chart2} title={chart2.title}></ChartCard>
-        </div> */}
+          </div>
+        </section>
       </div>
     </div>
   );

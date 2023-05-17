@@ -6,7 +6,7 @@ import {
 } from "@/context/ApplicationContext";
 import { NextPageWithLayout } from "@/pages/_app";
 import Station from "@/types/Station";
-import { isEmpty } from "@/utils/CommonUtil";
+import { isEmpty } from "@/utils/BooleanUtil";
 import debounce from "@/utils/Debounce";
 import { tokenizeString } from "@/utils/StringUtil";
 import { faFilter, faPen, faTrash } from "@fortawesome/free-solid-svg-icons";

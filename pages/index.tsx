@@ -2,26 +2,22 @@ import httpRequest from "@/common/HttpRequest";
 import ChartCard from "@/components/ChartCard";
 import Layout from "@/components/Layout";
 import { AuthContext, AuthContextInterface } from "@/context/AuthContext";
-import { isNil, isNilOrEmpty } from "@/utils/CommonUtil";
+import { isNil, isNilOrEmpty } from "@/utils/BooleanUtil";
+import { getThisMonthDates } from "@/utils/DatesUtil";
 import debounce from "@/utils/Debounce";
 import {
   faArrowTrendDown,
   faArrowTrendUp,
+  faChartSimple,
   faEquals,
   faNotEqual,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { message } from "antd";
+import { Skeleton } from "antd";
 import moment from "moment-timezone";
 import Head from "next/head";
 import Image from "next/image";
-import {
-  ReactElement,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import React from "react";
 import { NextPageWithLayout } from "./_app";
 
 type StatisticResult = {
@@ -31,8 +27,8 @@ type StatisticResult = {
 
 const Home: NextPageWithLayout = () => {
   //#region ::: Variable Initialisations
-  const { userData } = useContext(AuthContext) as AuthContextInterface;
-  const [videoData, setVideoData] = useState<any>({
+  const { userData } = React.useContext(AuthContext) as AuthContextInterface;
+  const [videoData, setVideoData] = React.useState<any>({
     totalVideo: 0,
     totalDetected: 0,
     lastTotalVideo: 0,
@@ -40,7 +36,7 @@ const Home: NextPageWithLayout = () => {
     totalVideoPercentage: 0,
     totalDetectedPercentage: 0,
   });
-  const [chartData, setChartData] = useState<any>({
+  const [chartData, setChartData] = React.useState<any>({
     title: "Statistik Moderasi Sebulan Terakhir",
     key1: "Total Video",
     key2: "Video Melanggar",
@@ -57,20 +53,11 @@ const Home: NextPageWithLayout = () => {
   //
 
   //#region ::: Other Methods
-  function getDates(): moment.Moment[] {
-    let dateArray = [];
-    let stopDate = moment.tz("Asia/Jakarta");
-    let currentDate = moment.tz("Asia/Jakarta").add(-30, "days");
-    while (currentDate <= stopDate) {
-      dateArray.push(moment(currentDate));
-      currentDate = moment(currentDate).add(1, "days");
-    }
-    return dateArray;
-  }
-
   const filterChartData = (data: StatisticResult) => {
     let labels: any[] = [];
-    let all_dates = getDates();
+    let endDate = moment.tz("Asia/Jakarta");
+    let startDate = moment.tz("Asia/Jakarta").add(-30, "days");
+    let all_dates = getThisMonthDates(startDate, endDate);
     let all_data: any[] = [];
     let detected_data: any[] = [];
 
@@ -160,7 +147,7 @@ const Home: NextPageWithLayout = () => {
   };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const getStatisticData = useCallback(
+  const getStatisticData = React.useCallback(
     debounce(async () => {
       let lastMonth = moment.tz("Asia/Jakarta").add(-30, "days");
       let currentDate = moment.tz("Asia/Jakarta");
@@ -177,11 +164,8 @@ const Home: NextPageWithLayout = () => {
           return res.data;
         })
         .catch((err) => {
-          if (err?.response?.data !== undefined && err.response !== null) {
-            message.error(err.response.data);
-            return null;
-          }
           console.error(err);
+          return null;
         });
 
       let lastMonthResult = await httpRequest
@@ -195,11 +179,8 @@ const Home: NextPageWithLayout = () => {
           return res.data;
         })
         .catch((err) => {
-          if (err?.response?.data !== undefined && err.response !== null) {
-            message.error(err.response.data);
-            return null;
-          }
           console.error(err);
+          return null;
         });
 
       let thisMonthData: StatisticResult = thisMonthResult?.data;
@@ -249,7 +230,7 @@ const Home: NextPageWithLayout = () => {
   //
 
   //#region ::: UseEffect
-  useEffect(() => {
+  React.useEffect(() => {
     getStatisticData();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -312,7 +293,7 @@ const Home: NextPageWithLayout = () => {
                 </div>
                 <div
                   className={
-                    "my-auto flex h-12 w-12 items-center justify-center rounded-xl " +
+                    "my-auto flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-300 " +
                     (videoData?.totalVideoPercentage >= 0
                       ? "bg-green-100"
                       : "bg-red-100")
@@ -322,7 +303,7 @@ const Home: NextPageWithLayout = () => {
                     icon={faEquals}
                     height="24px"
                     className={
-                      "text-2xl " +
+                      "text-2xl transition-all duration-300 " +
                       (videoData?.totalVideoPercentage >= 0
                         ? "text-green-500"
                         : "text-red-500")
@@ -333,7 +314,7 @@ const Home: NextPageWithLayout = () => {
               <div className="mt-4 flex gap-2 rounded-lg bg-slate-100 p-3.5">
                 <span
                   className={
-                    "flex gap-2 " +
+                    "flex items-center justify-center gap-2 transition-all duration-300 " +
                     (videoData?.totalVideoPercentage >= 0
                       ? "text-green-500"
                       : "text-red-500")
@@ -346,6 +327,10 @@ const Home: NextPageWithLayout = () => {
                         : faArrowTrendDown
                     }
                     height="24px"
+                    className={
+                      "transform transition-transform duration-300 " +
+                      (videoData?.totalVideoPercentage < 0 && "rotate-[360deg]")
+                    }
                   />{" "}
                   {videoData?.totalVideoPercentage}%
                 </span>{" "}
@@ -362,7 +347,7 @@ const Home: NextPageWithLayout = () => {
                 </div>
                 <div
                   className={
-                    "my-auto flex h-12 w-12 items-center justify-center rounded-xl " +
+                    "my-auto flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-300 " +
                     (videoData?.totalDetectedPercentage >= 0
                       ? "bg-green-100"
                       : "bg-red-100")
@@ -372,7 +357,7 @@ const Home: NextPageWithLayout = () => {
                     icon={faNotEqual}
                     height="24px"
                     className={
-                      "text-2xl " +
+                      "text-2xl transition-all duration-300 " +
                       (videoData?.totalDetectedPercentage >= 0
                         ? "text-green-500"
                         : "text-red-500")
@@ -383,7 +368,7 @@ const Home: NextPageWithLayout = () => {
               <div className="mt-4 flex gap-2 rounded-lg bg-slate-100 p-3.5">
                 <span
                   className={
-                    "flex gap-2 " +
+                    "flex items-center justify-center gap-2 transition-all duration-300 " +
                     (videoData?.totalDetectedPercentage >= 0
                       ? "text-green-500"
                       : "text-red-500")
@@ -396,6 +381,11 @@ const Home: NextPageWithLayout = () => {
                         : faArrowTrendDown
                     }
                     height="24px"
+                    className={
+                      "transform transition-transform duration-300 " +
+                      (videoData?.totalDetectedPercentage < 0 &&
+                        "rotate-[360deg]")
+                    }
                   />{" "}
                   {videoData?.totalDetectedPercentage}%
                 </span>{" "}
@@ -406,12 +396,25 @@ const Home: NextPageWithLayout = () => {
         </section>
         <section className="flex min-h-[20rem] flex-1 flex-col rounded-lg bg-white">
           {chartData?.datasets?.length != undefined &&
-            chartData?.datasets?.length > 0 && (
-              <ChartCard
-                chartData={chartData}
-                title="Statistik Moderasi Sebulan Terakhir"
-              ></ChartCard>
-            )}
+          chartData?.datasets?.length > 0 ? (
+            <ChartCard
+              chartData={chartData}
+              title="Statistik Moderasi Sebulan Terakhir"
+            ></ChartCard>
+          ) : (
+            <div className="relative m-6 flex-1 overflow-hidden rounded-lg">
+              <Skeleton.Node
+                className="absolute top-0 right-0 bottom-0 left-0 h-full w-full"
+                active
+              >
+                <FontAwesomeIcon
+                  height={40}
+                  icon={faChartSimple}
+                  className="flex h-10 w-10 items-center justify-center text-neutral-400"
+                />
+              </Skeleton.Node>
+            </div>
+          )}
         </section>
       </div>
     </>
@@ -420,6 +423,6 @@ const Home: NextPageWithLayout = () => {
 
 export default Home;
 
-Home.getLayout = function getLayout(page: ReactElement) {
+Home.getLayout = function getLayout(page: React.ReactElement) {
   return <Layout>{page}</Layout>;
 };

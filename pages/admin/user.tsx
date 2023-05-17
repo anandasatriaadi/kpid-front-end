@@ -7,7 +7,7 @@ import {
 import { AuthContext, AuthContextInterface } from "@/context/AuthContext";
 import { NextPageWithLayout } from "@/pages/_app";
 import UserData from "@/types/UserData";
-import { isEmpty } from "@/utils/CommonUtil";
+import { isEmpty } from "@/utils/BooleanUtil";
 import debounce from "@/utils/Debounce";
 import {
   faFilter,

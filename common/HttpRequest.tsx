@@ -1,7 +1,7 @@
 import { message } from "antd";
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
 import { authService } from "@/common/AuthService";
-import { isNilOrEmpty } from "@/utils/CommonUtil";
+import { isNilOrEmpty } from "@/utils/BooleanUtil";
 import debounce from "@/utils/Debounce";
 
 class HttpRequest {

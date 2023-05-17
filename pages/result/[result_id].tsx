@@ -6,7 +6,7 @@ import FrameResult from "@/types/FrameResult";
 import ModerationDecision from "@/types/ModerationDecision";
 import ModerationResponse from "@/types/ModerationResponse";
 import ModerationResult from "@/types/ModerationResult";
-import { isNil, isNilOrEmpty } from "@/utils/CommonUtil";
+import { isNil, isNilOrEmpty } from "@/utils/BooleanUtil";
 import parse from "html-react-parser";
 import DOMPurify from "dompurify";
 import {
