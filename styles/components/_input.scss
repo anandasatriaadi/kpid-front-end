@@ -6,7 +6,7 @@
         $option: &;
 
         &-selected:not(#{$option}-disabled) {
-          @apply bg-sky-100 text-sky-600;
+          @apply bg-sky-100 text-sky-700;
         }
       }
     }

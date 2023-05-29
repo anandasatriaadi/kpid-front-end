@@ -20,11 +20,11 @@
           @apply mt-0 rounded-lg;
 
           &:hover {
-            @apply text-sky-600;
+            @apply text-sky-700;
           }
 
           &-selected {
-            @apply bg-sky-100 text-sky-600;
+            @apply bg-sky-100 text-sky-700;
             &::after {
               @apply scale-y-0;
             }
@@ -39,6 +39,6 @@
   @apply flex cursor-pointer items-center text-lg leading-[64px] transition duration-300;
 
   &:hover {
-    @apply text-sky-600;
+    @apply text-sky-700;
   }
 }

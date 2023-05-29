@@ -1,5 +1,5 @@
 import httpRequest from "@/common/HttpRequest";
-import ChartCard from "@/components/ChartCard";
+import BarChartCard from "@/components/chart/BarChartCard";
 import Layout from "@/components/Layout";
 import { AuthContext, AuthContextInterface } from "@/context/AuthContext";
 import { isNil, isNilOrEmpty } from "@/utils/BooleanUtil";
@@ -121,27 +121,23 @@ const Home: NextPageWithLayout = () => {
       !isNil(currVideoData?.lastTotalVideo) &&
       !isNil(currVideoData?.lastTotalDetected)
     ) {
-      if (currVideoData.lastTotalVideo != 0) {
-        let totalVideoPercentage = Math.round(
-          ((currVideoData.totalVideo - currVideoData.lastTotalVideo) /
-            currVideoData.lastTotalVideo) *
-            100
-        );
-        currVideoData = { ...currVideoData, totalVideoPercentage };
-      } else {
-        currVideoData = { ...currVideoData, totalVideoPercentage: 0 };
-      }
+      let totalVideoPercentage = Math.round(
+        ((currVideoData.totalVideo - currVideoData.lastTotalVideo) /
+          (currVideoData.lastTotalVideo != 0
+            ? currVideoData.lastTotalVideo
+            : 1)) *
+          100
+      );
+      currVideoData = { ...currVideoData, totalVideoPercentage };
 
-      if (currVideoData.lastTotalDetected != 0) {
-        let totalDetectedPercentage = Math.round(
-          ((currVideoData.totalDetected - currVideoData.lastTotalDetected) /
-            currVideoData.lastTotalDetected) *
-            100
-        );
-        currVideoData = { ...currVideoData, totalDetectedPercentage };
-      } else {
-        currVideoData = { ...currVideoData, totalDetectedPercentage: 0 };
-      }
+      let totalDetectedPercentage = Math.round(
+        ((currVideoData.totalDetected - currVideoData.lastTotalDetected) /
+          (currVideoData.lastTotalDetected != 0
+            ? currVideoData.lastTotalDetected
+            : 1)) *
+          100
+      );
+      currVideoData = { ...currVideoData, totalDetectedPercentage };
       setVideoData(currVideoData);
     }
   };
@@ -248,13 +244,14 @@ const Home: NextPageWithLayout = () => {
       <div className="flex h-full flex-col gap-4">
         <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <div className="hidden rounded-lg bg-white shadow-custom md:block">
-            <div className="rounded-t-lg bg-sky-100 px-6 pt-6 pb-4">
+            <div className="rounded-t-lg bg-sky-100 p-4 pt-6">
               <div className="flex items-center">
                 <span className="relative mr-2 h-16 w-16 rounded-full">
                   <Image
                     src={"/user.png"}
                     alt="User Profile Image"
                     layout="fill"
+                    objectFit="cover"
                   ></Image>
                 </span>
                 <span className="flex-1">
@@ -267,7 +264,7 @@ const Home: NextPageWithLayout = () => {
                 </span>
               </div>
             </div>
-            <div className="px-6 pb-6 pt-4">
+            <div className="p-4 pb-6 text-justify">
               <p className="mb-4">
                 Sistem rekomendasi ini dirancang untuk membantu KPID Jawa Timur
                 dalam melakukan moderasi siaran televisi. Sistem ini memudahkan
@@ -285,136 +282,79 @@ const Home: NextPageWithLayout = () => {
             </div>
           </div>
           <div className="grid gap-4">
-            <div className="gap-4 rounded-lg bg-white p-6 shadow-custom">
-              <div className="flex">
-                <div className="flex-1">
-                  <h3 className="">Video Terunggah</h3>
-                  <p className="text-2xl font-bold">{videoData?.totalVideo}</p>
-                </div>
+            {[
+              {
+                title: "Video Terunggah",
+                total: videoData?.totalVideo,
+                percentage: videoData?.totalVideoPercentage,
+              },
+              {
+                title: "Video Terdeteksi Melanggar",
+                total: videoData?.totalDetected,
+                percentage: videoData?.totalDetectedPercentage,
+              },
+            ].map((key, index) => {
+              return (
                 <div
-                  className={
-                    "my-auto flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-300 " +
-                    (videoData?.totalVideoPercentage >= 0
-                      ? "bg-green-100"
-                      : "bg-red-100")
-                  }
+                  key={index}
+                  className="gap-4 rounded-lg bg-white py-6 px-4 shadow-custom"
                 >
-                  <FontAwesomeIcon
-                    icon={faEquals}
-                    height="24px"
-                    className={
-                      "text-2xl transition-all duration-300 " +
-                      (videoData?.totalVideoPercentage >= 0
-                        ? "text-green-500"
-                        : "text-red-500")
-                    }
-                  />
+                  <div className="flex">
+                    <div className="flex-1">
+                      <h3 className="">{key.title}</h3>
+                      <p className="text-2xl font-bold">{key.total}</p>
+                    </div>
+                    <div
+                      className={
+                        "my-auto flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-300 " +
+                        (key.percentage >= 0 ? "bg-green-100" : "bg-red-100")
+                      }
+                    >
+                      <FontAwesomeIcon
+                        icon={faEquals}
+                        className={
+                          "h-[18px] text-2xl transition-all duration-300 " +
+                          (key.percentage >= 0
+                            ? "text-green-500"
+                            : "text-red-500")
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-4 flex gap-2 rounded-lg bg-slate-100 p-3.5">
+                    <span
+                      className={
+                        "flex items-center justify-center gap-2 transition-all duration-300 " +
+                        (key.percentage >= 0
+                          ? "text-green-500"
+                          : "text-red-500")
+                      }
+                    >
+                      <FontAwesomeIcon
+                        icon={
+                          key.percentage >= 0
+                            ? faArrowTrendUp
+                            : faArrowTrendDown
+                        }
+                        className={
+                          "h-[18px] transform transition-transform duration-300 " +
+                          (key.percentage < 0 && "rotate-[360deg]")
+                        }
+                      />{" "}
+                      {key.percentage}%
+                    </span>{" "}
+                    dari bulan lalu.
+                  </div>
                 </div>
-              </div>
-              <div className="mt-4 flex gap-2 rounded-lg bg-slate-100 p-3.5">
-                <span
-                  className={
-                    "flex items-center justify-center gap-2 transition-all duration-300 " +
-                    (videoData?.totalVideoPercentage >= 0
-                      ? "text-green-500"
-                      : "text-red-500")
-                  }
-                >
-                  <FontAwesomeIcon
-                    icon={
-                      videoData?.totalVideoPercentage >= 0
-                        ? faArrowTrendUp
-                        : faArrowTrendDown
-                    }
-                    height="24px"
-                    className={
-                      "transform transition-transform duration-300 " +
-                      (videoData?.totalVideoPercentage < 0 && "rotate-[360deg]")
-                    }
-                  />{" "}
-                  {videoData?.totalVideoPercentage}%
-                </span>{" "}
-                dari bulan lalu.
-              </div>
-            </div>
-            <div className="gap-4 rounded-lg bg-white p-6 shadow-custom">
-              <div className="flex">
-                <div className="flex-1">
-                  <h3 className="">Video Terdeteksi Melanggar</h3>
-                  <p className="text-2xl font-bold">
-                    {videoData?.totalDetected}
-                  </p>
-                </div>
-                <div
-                  className={
-                    "my-auto flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-300 " +
-                    (videoData?.totalDetectedPercentage >= 0
-                      ? "bg-green-100"
-                      : "bg-red-100")
-                  }
-                >
-                  <FontAwesomeIcon
-                    icon={faNotEqual}
-                    height="24px"
-                    className={
-                      "text-2xl transition-all duration-300 " +
-                      (videoData?.totalDetectedPercentage >= 0
-                        ? "text-green-500"
-                        : "text-red-500")
-                    }
-                  />
-                </div>
-              </div>
-              <div className="mt-4 flex gap-2 rounded-lg bg-slate-100 p-3.5">
-                <span
-                  className={
-                    "flex items-center justify-center gap-2 transition-all duration-300 " +
-                    (videoData?.totalDetectedPercentage >= 0
-                      ? "text-green-500"
-                      : "text-red-500")
-                  }
-                >
-                  <FontAwesomeIcon
-                    icon={
-                      videoData?.totalDetectedPercentage >= 0
-                        ? faArrowTrendUp
-                        : faArrowTrendDown
-                    }
-                    height="24px"
-                    className={
-                      "transform transition-transform duration-300 " +
-                      (videoData?.totalDetectedPercentage < 0 &&
-                        "rotate-[360deg]")
-                    }
-                  />{" "}
-                  {videoData?.totalDetectedPercentage}%
-                </span>{" "}
-                dari bulan lalu.
-              </div>
-            </div>
+              );
+            })}
           </div>
         </section>
         <section className="flex min-h-[20rem] flex-1 flex-col rounded-lg bg-white">
-          {chartData?.datasets?.length != undefined &&
-          chartData?.datasets?.length > 0 ? (
-            <ChartCard
-              chartData={chartData}
-              title="Statistik Moderasi Sebulan Terakhir"
-            ></ChartCard>
-          ) : (
-            <div className="relative m-6 flex-1 overflow-hidden rounded-lg">
-              <Skeleton.Node
-                className="absolute top-0 right-0 bottom-0 left-0 h-full w-full"
-                active
-              >
-                <FontAwesomeIcon
-                  height={40}
-                  icon={faChartSimple}
-                  className="flex h-10 w-10 items-center justify-center text-neutral-400"
-                />
-              </Skeleton.Node>
-            </div>
-          )}
+          <BarChartCard
+            chartData={chartData}
+            title="Statistik Moderasi Sebulan Terakhir"
+          ></BarChartCard>
         </section>
       </div>
     </>

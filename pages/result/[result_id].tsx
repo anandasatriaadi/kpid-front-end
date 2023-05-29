@@ -1,6 +1,6 @@
 import httpRequest from "@/common/HttpRequest";
 import Layout from "@/components/Layout";
-import ViolationIconCard from "@/components/result/ViolationIconCard";
+import ViolationIconCard from "@/components/ViolationIconCard";
 import { NextPageWithLayout } from "@/pages/_app";
 import FrameResult from "@/types/FrameResult";
 import ModerationDecision from "@/types/ModerationDecision";
@@ -27,15 +27,18 @@ import { Tab } from "rc-tabs/lib/interface";
 import * as React from "react";
 import PasalResponse from "@/types/PasalResponse";
 import debounce from "@/utils/Debounce";
+import Image from "next/image";
+import ViolationDesc from "@/components/result/ViolationDesc";
+import FrameSection from "@/components/result/FrameSection";
 
 const SingleResult: NextPageWithLayout = () => {
   //#region ::: Variable Initialisations
   // States
+  const [isModerated, setIsModerated] = React.useState<boolean>(true);
+  const [updateData, setUpdateData] = React.useState<boolean>(false);
   const [categorySummary, setCategorySummary] = React.useState<any | undefined>(
     undefined
   );
-  const [framesToShow, setFramesToShow] = React.useState<FrameResult[]>([]);
-  const [isModerated, setIsModerated] = React.useState<boolean>(true);
   const [moderationData, setModerationData] =
     React.useState<ModerationResponse>();
   const [categorisedPasal, setCategorisedPasal] = React.useState<{
@@ -87,7 +90,9 @@ const SingleResult: NextPageWithLayout = () => {
     data.set("decision", decision.toUpperCase());
     httpRequest
       .put(`/moderations/${moderationID}/validate`, data)
-      .then((_) => {})
+      .then((_) => {
+        checkIfAllModerated();
+      })
       .catch((err) => {
         if (err?.response?.data !== undefined && err.response !== null) {
           message.error(err.response.data);
@@ -100,7 +105,6 @@ const SingleResult: NextPageWithLayout = () => {
     if (temp?.result === undefined) return;
     temp.result[timelineKey].decision = decision;
     setModerationData(temp);
-    checkIfAllModerated();
   };
 
   const handleStartModeration = () => {
@@ -156,82 +160,39 @@ const SingleResult: NextPageWithLayout = () => {
       if (moderationData?.result.length === 0) {
         isAllModerated = false;
       } else {
-        moderationData.result.forEach((timeline: ModerationResult) => {
-          if (timeline.decision.toString() === "PENDING") {
+        moderationData.result.forEach((result: ModerationResult) => {
+          if (result.decision.toString() === "PENDING") {
             isAllModerated = false;
           }
         });
       }
     }
-    setIsModerated(isAllModerated);
-  };
-
-  // Render the Violations Tabs (Daftar Pelanggaran)
-  const RenderViolationTabs = (result: ModerationResult) => {
-    let responses = result.category.map((item: string, index: any) => {
-      let idx: string = index.toString();
-      let response: Tab = {
-        key: idx,
-        label: (
-          <span className="flex items-center">
-            {String(item).replace("_", " ")}
-          </span>
-        ),
-        children: (
-          <Collapse className="custom-panel">
-            <>
-              {categorisedPasal[item.toLowerCase()] !== undefined &&
-                categorisedPasal[item.toLowerCase()].map((pasal, pIndex) => {
-                  return (
-                    <Collapse.Panel
-                      header={`${pIndex + 1}. Pasal ${pasal.pasal} BAB ${
-                        pasal.chapter
-                      } Tahun 2012`}
-                      key={pIndex}
-                    >
-                      <div className="kpid-pasal-list">
-                        {parse(DOMPurify.sanitize(pasal.description))}
-                      </div>
-                    </Collapse.Panel>
-                  );
-                })}
-            </>
-            {/* {timelineItem[0].violations.map((violation, vIndex) => {
-              return (
-                <Collapse.Panel
-                  header={vIndex + 1 + ". " + violation.pasal}
-                  key={vIndex}
-                >
-                  <div className="kpid-pasal-list">
-                    {parse(DOMPurify.sanitize(violation.deskripsi))}
-                  </div>
-                </Collapse.Panel>
-              );
-            })} */}
-          </Collapse>
-        ),
-      };
-      return response;
-    });
-    return responses;
+    if (isAllModerated) {
+      setUpdateData(true);
+    }
   };
 
   // Conditionally Get The Status Styling
   const getStatusStyling = (status: string) => {
     switch (status.toLowerCase()) {
+      case "initialized":
+        return {
+          className: "bg-slate-300",
+          text: "Sedang Diunggah",
+        };
       case "uploaded":
         return {
           className: "bg-amber-400",
           text: "Belum Diproses",
         };
-      case "on_process":
+      case "in_progress":
         return {
-          className: "bg-cyan-500",
+          className: "bg-blue-600 text-white",
           text: "Sedang Diproses",
         };
       case "approved":
         return {
-          className: "bg-green-500",
+          className: "bg-lime-500",
           text: "Tidak Ditemukan Pelanggaran",
         };
       case "rejected":
@@ -239,10 +200,15 @@ const SingleResult: NextPageWithLayout = () => {
           className: "bg-red-600 text-white",
           text: "Ditemukan Pelanggaran",
         };
+      case "validated":
+        return {
+          className: "bg-lime-500 text-white",
+          text: "Tervalidasi",
+        };
       default:
         return {
-          className: "bg-amber-400",
-          text: "Belum Diproses",
+          className: "bg-stone-700 text-white",
+          text: "Status Tidak Diketahui",
         };
     }
   };
@@ -276,29 +242,6 @@ const SingleResult: NextPageWithLayout = () => {
     setCategorySummary(summary);
   };
 
-  // Set the frames to show, equally thoughout the video
-  const divideAndSetFrames = (data: ModerationResponse) => {
-    let tempFrames: FrameResult[] = [];
-    if (data?.frames !== undefined && data?.frames !== null) {
-      if (data.frames.length > 20) {
-        let step =
-          data?.frames !== undefined ? Math.floor(data.frames.length / 20) : 0;
-        tempFrames = data.frames.reduce((acc: FrameResult[], curr, index) => {
-          if (acc.length === 20) {
-            return acc;
-          }
-          if (index % step === 0) {
-            acc.push(curr);
-          }
-          return acc;
-        }, []);
-      } else {
-        tempFrames = data.frames;
-      }
-    }
-    setFramesToShow(tempFrames);
-  };
-
   // Sort the pasal into its categories
   const sortPasal = (data: PasalResponse[]) => {
     let tempCategory: { [key: string]: PasalResponse[] } = {};
@@ -318,6 +261,8 @@ const SingleResult: NextPageWithLayout = () => {
 
   //#region ::: UseEffect
   React.useEffect(() => {
+    setIsModerated(true);
+
     // Fetch moderation data
     const fetchModerationData = async () => {
       const response = await httpRequest.get(fetchURL).catch((err) => {
@@ -335,7 +280,6 @@ const SingleResult: NextPageWithLayout = () => {
 
       setModerationData(result);
       categorizeResult(result);
-      divideAndSetFrames(result);
     };
 
     // Fetch pasal data
@@ -359,7 +303,7 @@ const SingleResult: NextPageWithLayout = () => {
     fetchModerationData();
     fetchPasalData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router]);
+  }, [router, updateData]);
   //#endregion ::: UseEffect
 
   return (
@@ -398,7 +342,10 @@ const SingleResult: NextPageWithLayout = () => {
                   return (
                     <div key={index} className="flex items-center gap-4">
                       <span className="flex min-w-[2.825rem] justify-center rounded-lg bg-sky-200 p-2 text-sky-700">
-                        <FontAwesomeIcon icon={item.icon} height="24px" />
+                        <FontAwesomeIcon
+                          icon={item.icon}
+                          className="h-[18px]"
+                        />
                       </span>
                       <span>
                         <p className="text-sm">{item.title}</p>
@@ -449,7 +396,10 @@ const SingleResult: NextPageWithLayout = () => {
                 <div className="mt-4 grid grid-cols-1 gap-y-2 md:grid-cols-2 xl:grid-cols-3">
                   <div className="flex gap-2">
                     <span className="flex min-w-[2.825rem] items-center justify-center rounded-lg bg-sky-200 p-2 text-sky-700 ">
-                      <FontAwesomeIcon icon={faTelevision} height="24px" />
+                      <FontAwesomeIcon
+                        icon={faTelevision}
+                        className="h-[18x]"
+                      />
                     </span>
                     <span className="flex flex-col justify-center">
                       <p className="text-sm">Stasiun</p>
@@ -464,7 +414,10 @@ const SingleResult: NextPageWithLayout = () => {
                   </div>
                   <div className="flex gap-2">
                     <span className="flex min-w-[2.825rem] items-center justify-center rounded-lg bg-sky-200 p-2 text-sky-700 ">
-                      <FontAwesomeIcon icon={faPenToSquare} height="24px" />
+                      <FontAwesomeIcon
+                        icon={faPenToSquare}
+                        className="h-[18px]"
+                      />
                     </span>
                     <span>
                       <p className="text-sm">Program</p>
@@ -475,7 +428,7 @@ const SingleResult: NextPageWithLayout = () => {
                   </div>
                   <div className="flex gap-2">
                     <span className="flex min-w-[2.825rem] items-center justify-center rounded-lg bg-sky-200 p-2 text-sky-700 ">
-                      <FontAwesomeIcon icon={faClock} height="24px" />
+                      <FontAwesomeIcon icon={faClock} className="h-[18px]" />
                     </span>
                     <span>
                       <p className="text-sm">Tanggal Rekaman</p>
@@ -491,7 +444,10 @@ const SingleResult: NextPageWithLayout = () => {
                     return (
                       <div key={index} className="flex gap-2 lg:hidden">
                         <span className="flex min-w-[2.825rem] justify-center rounded-lg bg-sky-200 p-2 text-sky-700">
-                          <FontAwesomeIcon icon={item.icon} height="24px" />
+                          <FontAwesomeIcon
+                            icon={item.icon}
+                            className="h-[18px]"
+                          />
                         </span>
                         <span>
                           <p className="text-sm">{item.title}</p>
@@ -505,47 +461,17 @@ const SingleResult: NextPageWithLayout = () => {
               </div>
             </section>
             {/* #region ::: Video Frames Section */}
-            <section className="mt-8 rounded-lg bg-white shadow-custom">
-              <Collapse defaultActiveKey="1" ghost>
-                <Collapse.Panel
-                  header="Potongan Frame Video"
-                  key="1"
-                  className="text-base font-semibold md:text-lg"
-                >
-                  <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
-                    {framesToShow.map(
-                      (frame_data: FrameResult, index: number) => {
-                        return (
-                          <div
-                            key={index}
-                            className="bg-cover pt-[56.25%]"
-                            style={{
-                              backgroundImage: `url(https://${
-                                process.env.NEXT_PUBLIC_BUCKET_NAME
-                              }.storage.googleapis.com/${encodeURI(
-                                frame_data.frame_url
-                              )})`,
-                            }}
-                          ></div>
-                        );
-                      }
-                    )}
-                  </div>
-                  {moderationData?.frames !== undefined &&
-                    moderationData?.frames !== null &&
-                    moderationData?.frames.length > 20 && (
-                      <p className="mt-4 text-right text-base font-normal opacity-70">
-                        dan {moderationData?.frames.length - 20} potongan frame
-                        lainnya.
-                      </p>
-                    )}
-                </Collapse.Panel>
-              </Collapse>
-            </section>
+            {moderationData !== undefined && (
+              <FrameSection
+                data={moderationData}
+                className="mt-8 rounded-lg bg-white shadow-custom"
+              ></FrameSection>
+            )}
             {/* #endregion ::: Video Frames Section */}
 
             {moderationData?.status !== undefined &&
-              moderationData?.status.includes("REJECTED") && (
+              (moderationData?.status.includes("REJECTED") ||
+                moderationData?.status.includes("VALIDATED")) && (
                 <section className="mt-8 rounded-lg bg-white shadow-custom">
                   <Collapse defaultActiveKey="1" ghost activeKey={1}>
                     <Collapse.Panel
@@ -553,111 +479,18 @@ const SingleResult: NextPageWithLayout = () => {
                       key={1}
                       className="panel-disabled text-base font-semibold md:text-lg"
                     >
-                      {moderationData?.result !== undefined &&
-                        moderationData?.result.length > 0 && (
-                          <Collapse className="custom-panel rounded-b-lg font-normal">
-                            {moderationData.result.map(
-                              (item: ModerationResult, index: number) => (
-                                <Collapse.Panel
-                                  className="text-base"
-                                  header={
-                                    <div className="flex items-center justify-between">
-                                      <p>Detik {item.second.toFixed(2)}</p>
-                                      {item.decision?.toUpperCase() !=
-                                      "PENDING" ? (
-                                        item.decision?.toUpperCase() ==
-                                        "VALID" ? (
-                                          <div className="ml-2 rounded-lg border-2 border-dashed border-lime-600 px-2 py-0.5 text-sm">
-                                            Valid
-                                          </div>
-                                        ) : (
-                                          <div className="ml-2 rounded-lg border-2 border-dashed border-red-600 px-2 py-0.5 text-sm">
-                                            Invalid
-                                          </div>
-                                        )
-                                      ) : (
-                                        <div className="ml-2 rounded-lg border-2 border-dashed border-amber-500 px-2 py-0.5 text-sm">
-                                          Belum Diverifikasi
-                                        </div>
-                                      )}
-                                    </div>
-                                  }
-                                  key={index}
-                                >
-                                  <div className="flex flex-col lg:flex-row">
-                                    <div className="lg:flex-[3]">
-                                      <div className="relative bg-cover bg-center pt-[52%]">
-                                        <div className="absolute top-0 right-0 bottom-0 left-0 bg-black">
-                                          <video
-                                            className="h-full w-full"
-                                            controls
-                                            controlsList="nodownload"
-                                            src={`https://${
-                                              process.env
-                                                .NEXT_PUBLIC_BUCKET_NAME
-                                            }.storage.googleapis.com/${encodeURI(
-                                              item.clip_url
-                                            )}`}
-                                          ></video>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <div className="mt-4 lg:ml-4 lg:mt-0 lg:mb-0 lg:flex-[3]">
-                                      <div className="mb-4 flex gap-4">
-                                        <h3 className="text-lg font-semibold">
-                                          Dugaan Pelanggaran
-                                        </h3>
-                                      </div>
-                                      <Tabs
-                                        type="card"
-                                        className="mb-4"
-                                        items={RenderViolationTabs(item)}
-                                      />
-
-                                      {item.decision.toUpperCase() ===
-                                        "PENDING" && (
-                                        <div className="flex justify-end gap-4">
-                                          <Button
-                                            type="default"
-                                            onClick={(e) => {
-                                              handlePasalValidation(
-                                                index,
-                                                ModerationDecision.INVALID
-                                              );
-                                            }}
-                                          >
-                                            Invalid
-                                          </Button>
-                                          <Button
-                                            type="primary"
-                                            onClick={(e) => {
-                                              handlePasalValidation(
-                                                index,
-                                                ModerationDecision.VALID
-                                              );
-                                            }}
-                                          >
-                                            Valid
-                                          </Button>
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                </Collapse.Panel>
-                              )
-                            )}
-                          </Collapse>
-                        )}
+                      <ViolationDesc
+                        moderationData={moderationData}
+                        pasalData={categorisedPasal}
+                        pasalValidationHandler={handlePasalValidation}
+                      />
                     </Collapse.Panel>
                   </Collapse>
-                  {/* <h2 className="px-4 pb-3 text-base font-semibold md:text-lg">
-                    
-                  </h2> */}
                 </section>
               )}
             {moderationData?.status !== undefined &&
               (moderationData?.status.includes("UPLOADED") || isModerated) && (
-                <div className="sticky bottom-0 mt-4 flex gap-2">
+                <div className="sticky bottom-2 mt-4 flex gap-2">
                   {moderationData?.status.includes("UPLOADED") && (
                     <div className="flex justify-end">
                       <Button
@@ -676,8 +509,11 @@ const SingleResult: NextPageWithLayout = () => {
                       onClick={handleGenerateLaporan}
                     >
                       <span className="flex items-center justify-center gap-2">
-                        <FontAwesomeIcon height={24} icon={faFileDownload} />
-                        Generate Laporan
+                        <FontAwesomeIcon
+                          className="h-[18px]"
+                          icon={faFileDownload}
+                        />
+                        Buat Laporan
                       </span>
                     </Button>
                   )}

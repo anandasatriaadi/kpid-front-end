@@ -41,7 +41,7 @@ type SelectOption = {
   value: string;
 };
 
-function UploadModal(props: UploadModalProps) {
+function UploadModal({ modalOpen, setModalOpen }: UploadModalProps) {
   //#region ::: Variable Initialisations
   // Contexts
   const { isLoggedIn } = React.useContext(AuthContext) as AuthContextInterface;
@@ -50,12 +50,11 @@ function UploadModal(props: UploadModalProps) {
   ) as ApplicationContextInterface;
 
   // States
-  const { modalOpen, setModalOpen } = props;
+  const [isUploading, setIsUploading] = React.useState<boolean>(false);
   const [currentStep, setCurrentStep] = React.useState(0);
   const [uploadProgressPercent, setUploadProgressPercent] =
     React.useState<number>(0);
   const [uploadFile, setUploadFile] = React.useState<UploadFile>();
-  const [autoValue, setAutoValue] = React.useState<string>("");
   const [resSelectOptions, setResSelectOptions] = React.useState<
     SelectOption[]
   >([]);
@@ -103,7 +102,8 @@ function UploadModal(props: UploadModalProps) {
     }
   };
 
-  const handleForm = (values: any) => {
+  const handleForm = debounce((values: any) => {
+    setIsUploading(true);
     let form = new FormData();
     for (const key in values) {
       form.append(key, values[key]);
@@ -127,17 +127,20 @@ function UploadModal(props: UploadModalProps) {
             router.reload();
           }
           handleCloseModal();
+          setIsUploading(false);
         } else {
           message.error(result.data);
         }
       })
       .catch((err) => {
-        if (err?.response?.data !== undefined && err.response !== null) {
-          message.error(err.response.data);
+        handleCloseModal();
+        setIsUploading(false);
+        if (err.response !== null && err?.response?.data?.data !== undefined) {
+          message.error(err.response.data.data);
         }
         console.error(err);
       });
-  };
+  }, 500);
 
   const handleFormFailed = (errorInfo: any) => {
     console.log("Failed: ", errorInfo);
@@ -199,8 +202,14 @@ function UploadModal(props: UploadModalProps) {
   return (
     <Modal
       centered
+      closable={!isUploading}
+      maskClosable={!isUploading}
       open={modalOpen}
-      onCancel={() => handleCloseModal()}
+      onCancel={() => {
+        isUploading
+          ? message.warning("Sedang mengunggah video")
+          : handleCloseModal();
+      }}
       footer={null}
       className={"w-full max-w-[1000px] px-4 "}
     >
@@ -245,13 +254,12 @@ function UploadModal(props: UploadModalProps) {
             >
               <div className="flex flex-col text-base md:text-lg">
                 <div className="flex justify-center">
-                  <span>
+                  <div className="h-10 w-10">
                     <FontAwesomeIcon
                       icon={faFileVideo}
-                      width={"36px"}
-                      className={isLoggedIn ? "text-sky-600" : "text-gray-300"}
+                      className="h-10 w-10 text-sky-600"
                     />
-                  </span>
+                  </div>
                 </div>
                 <div className="flex justify-center">
                   <Button
@@ -279,7 +287,7 @@ function UploadModal(props: UploadModalProps) {
             onFinishFailed={handleFormFailed}
             autoComplete="off"
             layout="vertical"
-            className="pt-4"
+            className="custom-form pt-4"
             requiredMark={"optional"}
           >
             <div>
@@ -375,6 +383,7 @@ function UploadModal(props: UploadModalProps) {
               className="text-lg"
               type="default"
               onClick={() => setCurrentStep(currentStep - 1)}
+              loading={isUploading}
             >
               Sebelumnya
             </Button>
@@ -387,6 +396,7 @@ function UploadModal(props: UploadModalProps) {
                     form.submit();
                   });
                 }}
+                loading={isUploading}
               >
                 Unggah
               </Button>

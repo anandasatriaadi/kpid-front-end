@@ -2,7 +2,7 @@
   @apply overflow-hidden;
 
   &-thumb {
-    @apply bg-sky-100 rounded-xl;
+    @apply rounded-xl bg-sky-100;
   }
 
   &-item {
@@ -10,11 +10,11 @@
     @apply flex-1 rounded-lg;
 
     &-label {
-      @apply rounded-lg py-[0.125rem] shadow-none transition-all duration-300 hover:text-sky-600;
+      @apply rounded-lg py-[0.125rem] shadow-none transition-all duration-300 hover:text-sky-700;
     }
 
     &-selected {
-      @apply rounded-lg bg-sky-100 text-sky-600 shadow-none;
+      @apply rounded-lg bg-sky-100 text-sky-700 shadow-none;
     }
   }
 }

@@ -1,4 +1,4 @@
-import ViolationIconCard from "@/components/result/ViolationIconCard";
+import ViolationIconCard from "@/components/ViolationIconCard";
 import ModerationResponse from "@/types/ModerationResponse";
 import ModerationResult from "@/types/ModerationResult";
 import { isNilOrEmpty } from "@/utils/BooleanUtil";
@@ -47,12 +47,17 @@ function ResultCard(props: Props) {
       case "approved":
         return {
           className: "bg-green-500",
-          text: "Tidak Ditemukan Pelanggaran",
+          text: "Tanpa Pelanggaran",
         };
       case "rejected":
         return {
           className: "bg-red-600 text-white",
           text: "Ditemukan Pelanggaran",
+        };
+      case "validated":
+        return {
+          className: "bg-green-500 text-white",
+          text: "Tervalidasi",
         };
       default:
         return {
@@ -146,7 +151,7 @@ function ResultCard(props: Props) {
           </div>
         </div>
         <div className="flex flex-1 flex-col p-2 text-sm md:p-4">
-          <h4 className="mt-2 mb-2 text-sm font-semibold transition-colors duration-300 group-hover:text-sky-600 md:mt-0 md:text-base">
+          <h4 className="mt-2 mb-2 text-sm font-semibold transition-colors duration-300 group-hover:text-sky-700 md:mt-0 md:text-base">
             {moderationData.filename}
           </h4>
           <Divider className="m-0 my-2 bg-slate-200"></Divider>

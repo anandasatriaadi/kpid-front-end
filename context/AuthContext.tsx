@@ -50,10 +50,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const response = await httpRequest
           .get(`/users/${userId}`)
           .catch((error) => {
-            if (
-              error?.response?.data !== undefined &&
-              error.response !== null
-            ) {
+            if (error?.response?.data?.data !== undefined) {
               return error.response;
             } else {
               throw error;

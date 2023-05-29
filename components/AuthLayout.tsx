@@ -57,10 +57,10 @@ const AuthLayout = ({ children }: LayoutProps) => {
             </div>
           </div>
           <div className="flex flex-col items-center">
-            <p className="mt-16 text-justify text-base font-light uppercase tracking-tight text-white opacity-80 md:w-3/4 md:text-lg 2xl:mt-24">
+            <p className="mt-16 text-justify text-lg tracking-tight text-white md:w-3/4 md:text-2xl 2xl:mt-24">
               Website Moderasi Video KPID Jawa Timur 2023
             </p>
-            <p className="mt-4 text-lg text-white md:w-3/4 md:text-2xl">
+            <p className="mt-4 text-justify text-base tracking-tight text-white md:w-3/4 md:text-lg">
               Melindungi masyarakat Indonesia dari siaran mengandung 5S: SARU,
               SARA, SADIS, SIHIR, dan Siaran Partisan melalui pengawasan siaran
               televisi
@@ -77,7 +77,7 @@ const AuthLayout = ({ children }: LayoutProps) => {
             </div>
           </div>
         </section>
-        <section className="flex max-h-screen min-h-screen flex-col overflow-y-scroll bg-slate-100 py-8 px-8 scrollbar-thin scrollbar-track-slate-300 scrollbar-thumb-slate-400 scrollbar-track-rounded-full scrollbar-thumb-rounded-full md:py-16 md:px-16">
+        <section className="flex max-h-screen min-h-screen flex-col overflow-y-scroll bg-slate-50 py-8 px-8 scrollbar-thin scrollbar-track-slate-300 scrollbar-thumb-slate-400 scrollbar-track-rounded-full scrollbar-thumb-rounded-full md:py-16 md:px-16">
           {children}
         </section>
       </div>

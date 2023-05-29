@@ -49,12 +49,16 @@ const ManageUser: NextPageWithLayout = () => {
   const { isMobile } = React.useContext(
     ApplicationContext
   ) as ApplicationContextInterface;
-  const { userData } = React.useContext(AuthContext) as AuthContextInterface;
+  const { userData, logout } = React.useContext(
+    AuthContext
+  ) as AuthContextInterface;
 
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] =
     React.useState<boolean>(false);
   const [isEditModalOpen, setIsEditModalOpen] = React.useState<boolean>(false);
   const [isReloading, setIsReloading] = React.useState<boolean>(true);
+  const [confirmDirty, setConfirmDirty] = React.useState(false);
+
   const [modalType, setModalType] = React.useState<"edit" | "admin">("edit");
 
   const [usersData, setUsersData] = React.useState<TableData[]>([]);
@@ -85,18 +89,28 @@ const ManageUser: NextPageWithLayout = () => {
   //
 
   //#region ::: Handlers
-  const handleEditUser = (
-    e: React.MouseEvent<HTMLElement, MouseEvent> | undefined
-  ) => {
+  const handleEditUser = () => {
     form.validateFields().then((values) => {
-      values = { ...values, user_id: userData?._id };
-      httpRequest.put(`/users`, values).then((response) => {
-        message.success("Berhasil mengubah pengguna");
-        setPageFilter({ ...pageFilter });
-        setIsEditModalOpen(false);
-        setIsReloading(true);
-        form.resetFields();
-      });
+      values = { ...values, user_id: usersData[modalIndex]._id };
+      httpRequest
+        .put(`/users`, values)
+        .then((response) => {
+          message.success("Berhasil mengubah pengguna");
+          setPageFilter({ ...pageFilter });
+          setIsEditModalOpen(false);
+          setIsReloading(true);
+          form.resetFields();
+          usersData[modalIndex]._id === userData?._id ? logout() : null;
+        })
+        .catch((err) => {
+          if (
+            err.response !== null &&
+            err?.response?.data?.data !== undefined
+          ) {
+            message.error(err.response.data.data);
+          }
+          console.error(err);
+        });
     });
   };
 
@@ -109,6 +123,12 @@ const ManageUser: NextPageWithLayout = () => {
         setIsEditModalOpen(false);
         setIsReloading(true);
         form.resetFields();
+      })
+      .catch((err) => {
+        if (err.response !== null && err?.response?.data?.data !== undefined) {
+          message.error(err.response.data.data);
+        }
+        console.error(err);
       });
   };
 
@@ -123,6 +143,30 @@ const ManageUser: NextPageWithLayout = () => {
         form.resetFields();
       });
     });
+  };
+
+  const validatePassword = (_: any, value: any, callback: any) => {
+    const { validateFields } = form;
+
+    if (value && confirmDirty) {
+      validateFields(["confirmPassword"]);
+    }
+    callback();
+  };
+
+  const compareToFirstPassword = (_: any, value: any, callback: any) => {
+    const { getFieldValue } = form;
+
+    if (value && value !== getFieldValue("password")) {
+      callback("Kata sandi tidak cocok!");
+    } else {
+      callback();
+    }
+  };
+
+  const handleConfirmBlur = (e: any) => {
+    const { value } = e.target;
+    setConfirmDirty(confirmDirty || !!value);
   };
   //#endregion ::: Handlers
 
@@ -208,7 +252,7 @@ const ManageUser: NextPageWithLayout = () => {
           }
         }}
       >
-        <FontAwesomeIcon height={16} icon={faPen} />
+        <FontAwesomeIcon className="h-[16px]" icon={faPen} />
       </span>
       <span
         className={
@@ -229,7 +273,7 @@ const ManageUser: NextPageWithLayout = () => {
           }
         }}
       >
-        <FontAwesomeIcon height={16} icon={faShield} />
+        <FontAwesomeIcon className="h-[16px]" icon={faShield} />
       </span>
       <Popconfirm
         title="Yakin hapus pengguna ini?"
@@ -248,7 +292,7 @@ const ManageUser: NextPageWithLayout = () => {
               : " bg-red-100 text-red-700 hover:cursor-pointer hover:bg-red-200")
           }
         >
-          <FontAwesomeIcon height={16} icon={faTrash} />
+          <FontAwesomeIcon className="h-[16px]" icon={faTrash} />
         </span>
       </Popconfirm>
     </div>
@@ -310,12 +354,12 @@ const ManageUser: NextPageWithLayout = () => {
           <>
             <div className="mb-4 flex justify-between">
               <span
-                className="flex cursor-pointer items-center gap-2 rounded-lg bg-sky-100 px-2 py-1 text-sky-600 hover:shadow-custom"
+                className="flex cursor-pointer items-center gap-2 rounded-lg bg-sky-100 px-2 py-1 text-sky-700 hover:shadow-custom"
                 onClick={() => {
                   setIsFilterDrawerOpen(!isFilterDrawerOpen);
                 }}
               >
-                <FontAwesomeIcon height={16} icon={faFilter} />
+                <FontAwesomeIcon className="h-[16px]" icon={faFilter} />
                 <p className="text-base">Filter</p>
               </span>
             </div>
@@ -372,7 +416,7 @@ const ManageUser: NextPageWithLayout = () => {
         footer={null}
       >
         <Form
-          name="login_form"
+          name="update_user_form"
           form={form}
           autoComplete="off"
           layout="vertical"
@@ -395,6 +439,58 @@ const ManageUser: NextPageWithLayout = () => {
             ]}
           >
             <Input disabled={modalType === "admin"} />
+          </Form.Item>
+
+          <Form.Item
+            label="Password Lama"
+            name="old_password"
+            rules={[
+              {
+                required: true,
+                message: "Silakan masukkan kata sandi lama Anda",
+              },
+              {
+                pattern: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/,
+                message:
+                  "Kata sandi harus terdiri dari minimal 8 karakter dan mengandung kombinasi huruf dan angka.",
+              },
+            ]}
+          >
+            <Input.Password />
+          </Form.Item>
+
+          <Form.Item
+            label="Password"
+            name="password"
+            rules={[
+              {
+                required: true,
+                message: "Silakan masukkan kata sandi Anda",
+              },
+              { validator: validatePassword },
+              {
+                pattern: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/,
+                message:
+                  "Kata sandi harus terdiri dari minimal 8 karakter dan mengandung kombinasi huruf dan angka.",
+              },
+            ]}
+          >
+            <Input.Password />
+          </Form.Item>
+
+          <Form.Item
+            label="Konfirmasi Password"
+            name="confirm_password"
+            dependencies={["password"]}
+            rules={[
+              {
+                required: true,
+                message: "Silakan konfirmasi kata sandi Anda",
+              },
+              { validator: compareToFirstPassword },
+            ]}
+          >
+            <Input.Password onBlur={handleConfirmBlur} />
           </Form.Item>
 
           <Form.Item>
@@ -449,7 +545,9 @@ const ManageUser: NextPageWithLayout = () => {
               ) : (
                 <Popconfirm
                   title="Yakin ubah pengguna ini?"
-                  onConfirm={handleEditUser}
+                  onConfirm={() => {
+                    handleEditUser();
+                  }}
                   okText="Ya"
                   cancelText="Tidak"
                 >

@@ -79,6 +79,7 @@ function HelpCollapse({ title, steps }: HelpCollapseProps) {
                     src={steps[currentUploadStep].image}
                     alt={steps[currentUploadStep].title}
                     layout="fill"
+                    objectFit="cover"
                   />
                 </div>
                 <div className="mt-6 text-justify font-normal">

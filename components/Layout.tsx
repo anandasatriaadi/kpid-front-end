@@ -8,16 +8,19 @@ import {
 import { AuthContext, AuthContextInterface } from "@/context/AuthContext";
 import {
   faAngleLeft,
+  faAngleRight,
   faBars,
   faChartSimple,
   faCircleQuestion,
   faCloudArrowUp,
+  faFileUpload,
   faHouse,
   faUserShield,
   faVideo,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  Button,
   Drawer,
   Dropdown,
   Layout as AntLayout,
@@ -106,7 +109,7 @@ const Layout = ({ children }: LayoutProps) => {
       key: "/",
       icon: (
         <div className="flex w-[1.5rem] justify-center">
-          <FontAwesomeIcon height={18} icon={faHouse} />
+          <FontAwesomeIcon className="h-[18px]" icon={faHouse} />
         </div>
       ),
       label: "Dasbor",
@@ -116,7 +119,7 @@ const Layout = ({ children }: LayoutProps) => {
       key: "/result",
       icon: (
         <div className="flex w-[1.5rem] justify-center">
-          <FontAwesomeIcon height={18} icon={faVideo} />
+          <FontAwesomeIcon className="h-[18px]" icon={faVideo} />
         </div>
       ),
       label: "Daftar Video",
@@ -126,27 +129,27 @@ const Layout = ({ children }: LayoutProps) => {
       key: "/statistic",
       icon: (
         <div className="flex w-[1.5rem] justify-center">
-          <FontAwesomeIcon height={18} icon={faChartSimple} />
+          <FontAwesomeIcon className="h-[18px]" icon={faChartSimple} />
         </div>
       ),
       label: "Statistik",
       className: "flex items-center",
     },
-    {
-      key: "upload-modal",
-      icon: (
-        <div className="flex w-[1.5rem] justify-center">
-          <FontAwesomeIcon height={18} icon={faCloudArrowUp} />
-        </div>
-      ),
-      label: "Unggah Video",
-      className: "flex items-center",
-    },
+    // {
+    //   key: "upload-modal",
+    //   icon: (
+    //     <div className="flex w-[1.5rem] justify-center">
+    //       <FontAwesomeIcon className="h-[18px]" icon={faCloudArrowUp} />
+    //     </div>
+    //   ),
+    //   label: "Unggah Video",
+    //   className: "flex items-center",
+    // },
     {
       key: "/help",
       icon: (
         <div className="flex w-[1.5rem] justify-center">
-          <FontAwesomeIcon height={18} icon={faCircleQuestion} />
+          <FontAwesomeIcon className="h-[18px]" icon={faCircleQuestion} />
         </div>
       ),
       label: "Panduan",
@@ -159,7 +162,7 @@ const Layout = ({ children }: LayoutProps) => {
       key: "submenu",
       icon: (
         <div className="flex w-[1.5rem] justify-center">
-          <FontAwesomeIcon height={18} icon={faUserShield} />
+          <FontAwesomeIcon className="h-[18px]" icon={faUserShield} />
         </div>
       ),
       label: "Admin",
@@ -232,6 +235,20 @@ const Layout = ({ children }: LayoutProps) => {
   }, [router]);
   //#endregion ::: UseEffect
 
+  if (isVerifying || !isLoggedIn) {
+    return (
+      <Spin
+        size="large"
+        className="flex h-screen w-full items-center justify-center"
+        spinning={isLoggedIn}
+      >
+        <UploadModal
+          modalOpen={uploadModalOpen}
+          setModalOpen={setUploadModalOpen}
+        />
+      </Spin>
+    );
+  }
   return (
     <>
       <UploadModal
@@ -250,10 +267,9 @@ const Layout = ({ children }: LayoutProps) => {
                 onClick={() => setDrawerMenuOpen(!drawerMenuOpen)}
               >
                 <FontAwesomeIcon
-                  height={18}
                   icon={faBars}
                   className={
-                    "transform duration-300" +
+                    "h-[18px] transform duration-300" +
                     (drawerMenuOpen && " -rotate-180")
                   }
                 />
@@ -422,10 +438,10 @@ const Layout = ({ children }: LayoutProps) => {
                 onClick={() => setCollapsed(!collapsed)}
               >
                 <FontAwesomeIcon
-                  height={18}
                   icon={faAngleLeft}
                   className={
-                    "transform duration-300" + (collapsed && " -rotate-180")
+                    "h-[18px] transform duration-300" +
+                    (collapsed && " -rotate-180")
                   }
                 />
               </div>
@@ -449,6 +465,7 @@ const Layout = ({ children }: LayoutProps) => {
                         src={"/user.png"}
                         alt="User Profile Image"
                         layout="fill"
+                        objectFit="cover"
                       />
                       <span className="absolute bottom-0 left-0 right-0 top-0 z-0 flex flex-col items-center justify-end">
                         <span className="rounded-full bg-slate-200 p-3.5"></span>
@@ -478,22 +495,22 @@ const Layout = ({ children }: LayoutProps) => {
               </div>
             </AntLayout.Content>
           </AntLayout>
-          {/* <div
+          <div
             className={
-              "absolute bottom-6 flex transition-all duration-500" +
+              "absolute bottom-6 flex overflow-hidden transition-all duration-500" +
               (showUpload ? " right-6" : " right-0")
             }
           >
             <Button
               type="primary"
               className={
-                "overflow-x-hidden rounded-r-none text-lg" +
-                (showUpload ? "" : " w-0 px-0 opacity-0")
+                "overflow-x-hidden rounded-r-none text-lg transition-all duration-500" +
+                (showUpload ? " max-w-min " : " max-w-0 px-0 opacity-0")
               }
               onClick={() => setUploadModalOpen(!uploadModalOpen)}
             >
               <span className="flex items-center justify-center gap-2">
-                <FontAwesomeIcon height={24} icon={faFileUpload} />
+                <FontAwesomeIcon className="h-[18px] " icon={faFileUpload} />
                 {showUpload ? "Unggah Video" : ""}
               </span>
             </Button>
@@ -507,15 +524,15 @@ const Layout = ({ children }: LayoutProps) => {
                 }
                 onClick={() => setShowUpload(!showUpload)}
               >
-                <div className="px-1">
+                <div className="flex flex-col justify-center px-1">
                   <FontAwesomeIcon
-                    height={16}
+                    className="h-[16px]"
                     icon={showUpload ? faAngleRight : faAngleLeft}
                   />
                 </div>
               </Button>
             </div>
-          </div> */}
+          </div>
         </AntLayout>
       )}
     </>

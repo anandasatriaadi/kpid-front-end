@@ -63,7 +63,6 @@ const Register: NextPageWithLayout = () => {
   const compareToFirstPassword = (_: any, value: any, callback: any) => {
     const { getFieldValue } = form;
 
-    console.log(value, getFieldValue("password"));
     if (value && value !== getFieldValue("password")) {
       callback("Kata sandi tidak cocok!");
     } else {
@@ -96,90 +95,97 @@ const Register: NextPageWithLayout = () => {
               />
             </Link>
           </div>
-          <div className="rounded-lg bg-white p-6 pb-8 shadow-custom">
-            <h2 className="text-center text-lg font-semibold md:text-xl">
-              Daftarkan Akun Anda
-            </h2>
-            <Divider className="my-4" />
-            <Form
-              form={form}
-              name="register_form"
-              onFinish={handleForm}
-              onFinishFailed={handleFormFailed}
-              autoComplete="off"
-              layout="vertical"
-              requiredMark={"optional"}
-            >
-              <Form.Item
-                label="Nama"
-                name="name"
-                rules={[
-                  { required: true, message: "Silakan masukkan nama Anda" },
-                ]}
+          <div className="rounded-lg bg-white shadow-custom">
+            <div className="rounded-t-lg bg-sky-100 p-6 pb-4">
+              <h2 className="text-center text-2xl font-semibold text-sky-700">
+                Daftarkan Akun Anda
+              </h2>
+            </div>
+            <div className="p-6 pt-4">
+              <Form
+                form={form}
+                name="register_form"
+                onFinish={handleForm}
+                onFinishFailed={handleFormFailed}
+                autoComplete="off"
+                layout="vertical"
+                className="custom-form"
+                requiredMark={"optional"}
               >
-                <Input />
-              </Form.Item>
-              <Form.Item
-                label="Email"
-                name="email"
-                rules={[
-                  { required: true, message: "Silakan masukkan email Anda" },
-                  { type: "email", message: "Alamat email tidak valid!" },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-
-              <Form.Item
-                label="Password"
-                name="password"
-                rules={[
-                  {
-                    required: true,
-                    message: "Silakan masukkan kata sandi Anda",
-                  },
-                  { validator: validatePassword },
-                  {
-                    pattern: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/,
-                    message:
-                      "Kata sandi harus terdiri dari minimal 8 karakter dan mengandung kombinasi huruf dan angka.",
-                  },
-                ]}
-              >
-                <Input.Password />
-              </Form.Item>
-
-              <Form.Item
-                label="Konfirmasi Password"
-                name="confirm_password"
-                dependencies={["password"]}
-                rules={[
-                  {
-                    required: true,
-                    message: "Silakan konfirmasi kata sandi Anda",
-                  },
-                  { validator: compareToFirstPassword },
-                ]}
-              >
-                <Input.Password onBlur={handleConfirmBlur} />
-              </Form.Item>
-
-              <Form.Item>
-                <Button
-                  className="mt-4 w-full py-2 text-lg md:text-xl"
-                  type="primary"
-                  htmlType="submit"
+                <Form.Item
+                  label="Nama"
+                  name="name"
+                  rules={[
+                    { required: true, message: "Silakan masukkan nama Anda" },
+                  ]}
                 >
-                  Register
-                </Button>
-              </Form.Item>
-            </Form>
+                  <Input />
+                </Form.Item>
+                <Form.Item
+                  label="Email"
+                  name="email"
+                  rules={[
+                    { required: true, message: "Silakan masukkan email Anda" },
+                    { type: "email", message: "Alamat email tidak valid!" },
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+
+                <Form.Item
+                  label="Password"
+                  name="password"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Silakan masukkan kata sandi Anda",
+                    },
+                    { validator: validatePassword },
+                    {
+                      pattern: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/,
+                      message:
+                        "Kata sandi harus terdiri dari minimal 8 karakter dan mengandung kombinasi huruf dan angka.",
+                    },
+                  ]}
+                >
+                  <Input.Password />
+                </Form.Item>
+
+                <Form.Item
+                  label="Konfirmasi Password"
+                  name="confirm_password"
+                  dependencies={["password"]}
+                  rules={[
+                    {
+                      required: true,
+                      message: "Silakan konfirmasi kata sandi Anda",
+                    },
+                    { validator: compareToFirstPassword },
+                  ]}
+                >
+                  <Input.Password onBlur={handleConfirmBlur} />
+                </Form.Item>
+
+                <Form.Item>
+                  <Button
+                    className="mt-4 w-full py-2 text-lg md:text-xl"
+                    type="primary"
+                    htmlType="submit"
+                  >
+                    Register
+                  </Button>
+                </Form.Item>
+              </Form>
+            </div>
           </div>
 
-          <div className="mt-8 rounded-lg bg-slate-200 p-4 text-center text-sm shadow-custom md:text-base">
+          <div className="mt-8 rounded-lg bg-sky-100 p-4 text-center text-sm text-sky-700 shadow-custom md:text-base">
             Sudah memiliki akun?
             <Link href={"/login"}>
-              <a className="text-sky-600 hover:text-sky-400"> Masuk</a>
+              <a className="font-semibold text-sky-700 hover:text-sky-500">
+                {" "}
+                Masuk
+              </a>
             </Link>
           </div>
         </div>

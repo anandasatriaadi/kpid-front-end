@@ -63,59 +63,65 @@ const Login: NextPageWithLayout = () => {
               </div>
             </Link>
           </div>
-          <div className="rounded-lg bg-white p-6 pb-8 shadow-custom">
-            <h2 className="text-center text-2xl font-semibold">
-              Masuk ke Akun Anda
-            </h2>
-            <Divider className="my-4" />
-            <Form
-              name="login_form"
-              onFinish={handleForm}
-              onFinishFailed={handleFormFailed}
-              autoComplete="off"
-              layout="vertical"
-              className="custom-form"
-              requiredMark={"optional"}
-            >
-              <Form.Item
-                label="Email"
-                name="email"
-                rules={[
-                  { required: true, message: "Please input your email!" },
-                ]}
+          <div className="rounded-lg bg-white shadow-custom">
+            <div className="rounded-t-lg bg-sky-100 p-6 pb-4">
+              <h2 className="text-center text-2xl font-semibold text-sky-700">
+                Masuk ke Akun Anda
+              </h2>
+            </div>
+            <div className="p-6 pt-4">
+              <Form
+                name="login_form"
+                onFinish={handleForm}
+                onFinishFailed={handleFormFailed}
+                autoComplete="off"
+                layout="vertical"
+                className="custom-form"
+                requiredMark={"optional"}
               >
-                <Input />
-              </Form.Item>
-
-              <Form.Item
-                label="Password"
-                name="password"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your password!",
-                  },
-                ]}
-              >
-                <Input.Password />
-              </Form.Item>
-
-              <Form.Item>
-                <Button
-                  className="mt-4 w-full py-2 text-lg md:text-xl"
-                  type="primary"
-                  htmlType="submit"
+                <Form.Item
+                  label="Email"
+                  name="email"
+                  rules={[
+                    { required: true, message: "Please input your email!" },
+                  ]}
                 >
-                  Login
-                </Button>
-              </Form.Item>
-            </Form>
+                  <Input />
+                </Form.Item>
+
+                <Form.Item
+                  label="Password"
+                  name="password"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input your password!",
+                    },
+                  ]}
+                >
+                  <Input.Password />
+                </Form.Item>
+
+                <Form.Item>
+                  <Button
+                    className="mt-4 w-full py-2 text-lg md:text-xl"
+                    type="primary"
+                    htmlType="submit"
+                  >
+                    Login
+                  </Button>
+                </Form.Item>
+              </Form>
+            </div>
           </div>
 
-          <div className="mt-8 rounded-lg bg-slate-200 p-4 text-center text-sm shadow-custom md:text-base">
+          <div className="mt-8 rounded-lg bg-sky-100 p-4 text-center text-sm text-sky-700 shadow-custom md:text-base">
             Belum memiliki akun?
             <Link href={"/register"}>
-              <a className="text-sky-600 hover:text-sky-400"> Daftar</a>
+              <a className="font-semibold text-sky-700 hover:text-sky-500">
+                {" "}
+                Daftar
+              </a>
             </Link>
           </div>
         </div>

@@ -29,11 +29,10 @@ export const authOptions: NextAuthOptions = {
         };
 
         let response = axios
-          .post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/login`, form)
+          .post(`${process.env.NEXT_PUBLIC_BACK_END_URL}/api/login`, form)
           .then((response) => {
             const result = response.data;
             if (result.status == 200) {
-              console.log(result.data.user_data);
               return result.data.user_data;
             }
           });

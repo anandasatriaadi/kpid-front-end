@@ -25,7 +25,7 @@ import { RangePickerProps } from "antd/lib/date-picker";
 import moment from "moment";
 import Head from "next/head";
 import * as React from "react";
-import { NextPageWithLayout } from "./_app";
+import { NextPageWithLayout } from "../_app";
 
 type PageFilterType = {
   page: number;
@@ -40,10 +40,11 @@ type PageFilterType = {
 
 const statusFilterOptions: SelectProps["options"] = [
   { value: "", label: "Tanpa Filter" },
-  { value: "initialized", label: "Sedang Diunggah" },
-  { value: "in_progress", label: "Sedang Diproses" },
-  { value: "uploaded", label: "Belum Diproses" },
+  { value: "validated", label: "Tervalidasi" },
   { value: "rejected", label: "Ditemukan Pelanggaran" },
+  { value: "uploaded", label: "Belum Diproses" },
+  { value: "in_progress", label: "Sedang Diproses" },
+  { value: "initialized", label: "Sedang Diunggah" },
   { value: "approved", label: "Tanpa Pelanggaran" },
 ];
 
@@ -219,12 +220,12 @@ const Result: NextPageWithLayout = () => {
         {isMobile ? (
           <div className="flex">
             <span
-              className="flex cursor-pointer items-center gap-2 rounded-lg bg-sky-100 px-2 py-1 text-sky-600 hover:shadow-custom"
+              className="flex cursor-pointer items-center gap-2 rounded-lg bg-sky-100 px-2 py-1 text-sky-700 hover:shadow-custom"
               onClick={() => {
                 setFilterDrawerOpen(!filterDrawerOpen);
               }}
             >
-              <FontAwesomeIcon height={16} icon={faFilter} />
+              <FontAwesomeIcon className="h-[16px]" icon={faFilter} />
               <p className="text-base">Filter</p>
             </span>
           </div>

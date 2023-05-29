@@ -50,32 +50,35 @@ class HttpRequest {
     );
   }
 
-  async get(url: string, config: AxiosRequestConfig = {}) {
-    const response = await this.axiosInstance.get(url, config);
-    return response;
+  get(url: string, config: AxiosRequestConfig = {}) {
+    return this.axiosInstance.get(url, config).then((response) => response);
   }
 
-  async post(url: string, data: any, config: AxiosRequestConfig = {}) {
-    const response = await this.axiosInstance.post(url, data, config);
-    return response;
+  post(url: string, data: any, config: AxiosRequestConfig = {}) {
+    return this.axiosInstance
+      .post(url, data, config)
+      .then((response) => response);
   }
 
-  async put(url: string, data: any, config: AxiosRequestConfig = {}) {
-    const response = await this.axiosInstance.put(url, data, config);
-    return response;
+  put(url: string, data: any, config: AxiosRequestConfig = {}) {
+    return this.axiosInstance
+      .put(url, data, config)
+      .then((response) => response);
   }
 
-  async patch(url: string, data: any, config: AxiosRequestConfig = {}) {
-    const response = await this.axiosInstance.patch(url, data, config);
-    return response;
+  patch(url: string, data: any, config: AxiosRequestConfig = {}) {
+    return this.axiosInstance
+      .patch(url, data, config)
+      .then((response) => response);
   }
 
-  async delete(url: string, config: AxiosRequestConfig = {}) {
-    const response = await this.axiosInstance.delete(url, config);
-    return response;
+  delete(url: string, config: AxiosRequestConfig = {}) {
+    return this.axiosInstance.delete(url, config).then((response) => response);
   }
 }
 
-const httpRequest = new HttpRequest(`${process.env.NEXT_PUBLIC_BASE_URL}/api`);
+const httpRequest = new HttpRequest(
+  `${process.env.NEXT_PUBLIC_BACK_END_URL}/api`
+);
 
 export default httpRequest;

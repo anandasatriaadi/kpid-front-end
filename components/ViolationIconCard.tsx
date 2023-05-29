@@ -3,12 +3,12 @@ import * as React from "react";
 import {
   ApplicationContext,
   ApplicationContextInterface,
-} from "../../context/ApplicationContext";
-import Sadis from "../icons/Sadis";
-import Sara from "../icons/Sara";
-import Saru from "../icons/Saru";
-import SiaranPartisan from "../icons/SiaranPartisan";
-import Sihir from "../icons/Sihir";
+} from "../context/ApplicationContext";
+import Sadis from "./icons/Sadis";
+import Sara from "./icons/Sara";
+import Saru from "./icons/Saru";
+import SiaranPartisan from "./icons/SiaranPartisan";
+import Sihir from "./icons/Sihir";
 
 type IconProps = {
   className?: string;

@@ -1,7 +1,31 @@
-.ant {
-  &-dropdown {
-    &-menu {
-      @apply rounded-lg;
+.ant-dropdown-menu {
+  $menu: &;
+  @apply rounded-lg;
+
+  &-inline {
+    @apply border-r-0;
+  }
+
+  &-title-content {
+    @apply text-sm md:text-base;
+  }
+
+  &-light {
+    #{$menu}-item {
+      &:hover {
+        @apply bg-sky-100 text-sky-700;
+      }
+      &-active {
+        @apply bg-sky-100 text-sky-700;
+      }
+    }
+  }
+
+  &:not(.ant-menu-horizontal) {
+    #{$menu}-item {
+      &-selected {
+        @apply bg-sky-100 text-sky-700;
+      }
     }
   }
 }

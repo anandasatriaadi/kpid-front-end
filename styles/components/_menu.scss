@@ -1,5 +1,29 @@
 .ant-menu {
+  $menu: &;
+
   &-inline {
     @apply border-r-0;
+  }
+
+  &-light {
+    #{$menu}-item {
+      &:hover {
+        @apply bg-sky-100 text-sky-700;
+      }
+      &-active {
+        @apply bg-sky-100 text-sky-700;
+      }
+    }
+  }
+
+  &-item {
+  }
+
+  &:not(.ant-menu-horizontal) {
+    #{$menu}-item {
+      &-selected {
+        @apply bg-sky-100 text-sky-700;
+      }
+    }
   }
 }

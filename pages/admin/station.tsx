@@ -194,7 +194,7 @@ const ManageStation: NextPageWithLayout = () => {
             setModalType("edit");
           }}
         >
-          <FontAwesomeIcon height={16} icon={faPen} />
+          <FontAwesomeIcon className="h-[16px]" icon={faPen} />
         </span>
         <Popconfirm
           title="Yakin hapus stasiun ini?"
@@ -205,7 +205,7 @@ const ManageStation: NextPageWithLayout = () => {
           cancelText="No"
         >
           <span className="rounded-lg bg-red-100 p-2 text-red-700 transition-all duration-300 hover:cursor-pointer hover:bg-red-200">
-            <FontAwesomeIcon height={16} icon={faTrash} />
+            <FontAwesomeIcon className="h-[16px]" icon={faTrash} />
           </span>
         </Popconfirm>
       </div>
@@ -286,12 +286,12 @@ const ManageStation: NextPageWithLayout = () => {
           <>
             <div className="mb-4 flex justify-between">
               <span
-                className="flex cursor-pointer items-center gap-2 rounded-lg bg-sky-100 px-2 py-1 text-sky-600 hover:shadow-custom"
+                className="flex cursor-pointer items-center gap-2 rounded-lg bg-sky-100 px-2 py-1 text-sky-700 hover:shadow-custom"
                 onClick={() => {
                   setIsFilterDrawerOpen(!isFilterDrawerOpen);
                 }}
               >
-                <FontAwesomeIcon height={16} icon={faFilter} />
+                <FontAwesomeIcon className="h-[16px]" icon={faFilter} />
                 <p className="text-base">Filter</p>
               </span>
               <Button

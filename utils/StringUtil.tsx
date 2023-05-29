@@ -3,10 +3,10 @@ export function tokenizeString(input: string, lower: boolean = false): string {
   const [name, extension] = input.split(".");
 
   // Replace spaces with underscores in the name
-  let nameWithUnderscores = name.replace(/ /g, "_");
+  let nameWithUnderscores = name.replace(/ /g, "-");
 
   // Replace non-alphanumeric characters with hyphens in the name
-  let tokenizedName = nameWithUnderscores.replace(/[^a-zA-Z0-9]/g, "-");
+  let tokenizedName = nameWithUnderscores.replace(/[^a-zA-Z0-9_]/g, "-");
 
   // Merge consecutive hyphens into a single hyphen
   tokenizedName = tokenizedName.replace(/-+/g, "-");
