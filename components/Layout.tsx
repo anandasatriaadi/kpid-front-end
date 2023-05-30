@@ -223,7 +223,6 @@ const Layout = ({ children }: LayoutProps) => {
         pathname: "/login",
       };
 
-      console.log(router.asPath);
       if (router.asPath !== "/") {
         url.query = { redirect: router.asPath };
       }

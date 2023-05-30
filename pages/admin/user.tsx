@@ -1,4 +1,6 @@
 import httpRequest from "@/common/HttpRequest";
+import EditUserForm from "@/components/admin/EditUserForm";
+import UpdateUserRoleForm from "@/components/admin/UpdateUserRoleForm";
 import Layout from "@/components/Layout";
 import {
   ApplicationContext,
@@ -17,10 +19,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  Button,
   Drawer,
   Form,
-  Input,
   message,
   Modal,
   Pagination,
@@ -30,6 +30,7 @@ import {
   Table,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import moment from "moment";
 import Head from "next/head";
 import * as React from "react";
 
@@ -49,17 +50,16 @@ const ManageUser: NextPageWithLayout = () => {
   const { isMobile } = React.useContext(
     ApplicationContext
   ) as ApplicationContextInterface;
-  const { userData, logout } = React.useContext(
-    AuthContext
-  ) as AuthContextInterface;
+  const { userData } = React.useContext(AuthContext) as AuthContextInterface;
 
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] =
     React.useState<boolean>(false);
   const [isEditModalOpen, setIsEditModalOpen] = React.useState<boolean>(false);
   const [isReloading, setIsReloading] = React.useState<boolean>(true);
-  const [confirmDirty, setConfirmDirty] = React.useState(false);
 
-  const [modalType, setModalType] = React.useState<"edit" | "admin">("edit");
+  const [modalType, setModalType] = React.useState<"edit" | "admin" | "none">(
+    "edit"
+  );
 
   const [usersData, setUsersData] = React.useState<TableData[]>([]);
   const [metadata, setMetadata] = React.useState<any>({});
@@ -89,40 +89,14 @@ const ManageUser: NextPageWithLayout = () => {
   //
 
   //#region ::: Handlers
-  const handleEditUser = () => {
-    form.validateFields().then((values) => {
-      values = { ...values, user_id: usersData[modalIndex]._id };
-      httpRequest
-        .put(`/users`, values)
-        .then((response) => {
-          message.success("Berhasil mengubah pengguna");
-          setPageFilter({ ...pageFilter });
-          setIsEditModalOpen(false);
-          setIsReloading(true);
-          form.resetFields();
-          usersData[modalIndex]._id === userData?._id ? logout() : null;
-        })
-        .catch((err) => {
-          if (
-            err.response !== null &&
-            err?.response?.data?.data !== undefined
-          ) {
-            message.error(err.response.data.data);
-          }
-          console.error(err);
-        });
-    });
-  };
-
-  const handleDeleteUser = (data_index: number) => {
-    httpRequest
+  const handleDeleteUser = async (data_index: number) => {
+    await httpRequest
       .delete(`/users/${usersData[data_index]._id}`)
       .then((response) => {
         message.success("Berhasil menonaktifkan pengguna");
         setPageFilter({ ...pageFilter });
         setIsEditModalOpen(false);
         setIsReloading(true);
-        form.resetFields();
       })
       .catch((err) => {
         if (err.response !== null && err?.response?.data?.data !== undefined) {
@@ -131,74 +105,34 @@ const ManageUser: NextPageWithLayout = () => {
         console.error(err);
       });
   };
-
-  const handleUpdateUserRole = (role: string) => {
-    form.validateFields().then((values) => {
-      values = { user_id: usersData[modalIndex]._id, role: role };
-      httpRequest.put(`/users/role`, values).then((response) => {
-        message.success("Berhasil mengubah role pengguna");
-        setPageFilter({ ...pageFilter });
-        setIsEditModalOpen(false);
-        setIsReloading(true);
-        form.resetFields();
-      });
-    });
-  };
-
-  const validatePassword = (_: any, value: any, callback: any) => {
-    const { validateFields } = form;
-
-    if (value && confirmDirty) {
-      validateFields(["confirmPassword"]);
-    }
-    callback();
-  };
-
-  const compareToFirstPassword = (_: any, value: any, callback: any) => {
-    const { getFieldValue } = form;
-
-    if (value && value !== getFieldValue("password")) {
-      callback("Kata sandi tidak cocok!");
-    } else {
-      callback();
-    }
-  };
-
-  const handleConfirmBlur = (e: any) => {
-    const { value } = e.target;
-    setConfirmDirty(confirmDirty || !!value);
-  };
   //#endregion ::: Handlers
 
   //
 
   //#region ::: Other Methods
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const fetchUsers = React.useCallback(
-    debounce(() => {
-      httpRequest
-        .get(`/users`, queryParams)
-        .then((response) => {
-          const temp: UserData[] = response.data.data;
-          const metadata: any = response.data.metadata;
+  const fetchUsers = debounce(() => {
+    httpRequest
+      .get(`/users`, queryParams)
+      .then((response) => {
+        const temp: UserData[] = response.data.data;
+        const metadata: any = response.data.metadata;
 
-          const result: TableData[] = temp.map((item, index) => {
-            return { key: index, ...item };
-          });
-
-          setUsersData(result);
-          setMetadata(metadata);
-          setIsReloading(false);
-        })
-        .catch((err) => {
-          if (err?.response?.data !== undefined && err.response !== null) {
-            message.error(err.response.data);
-          }
-          console.error(err);
+        const result: TableData[] = temp.map((item, index) => {
+          return { key: index, ...item };
         });
-    }, 200),
-    [pageFilter]
-  );
+
+        setUsersData(result);
+        setMetadata(metadata);
+        setIsReloading(false);
+      })
+      .catch((err) => {
+        if (err?.response?.data !== undefined && err.response !== null) {
+          message.error(err.response.data);
+        }
+        console.error(err);
+      });
+  }, 200);
 
   //#endregion ::: Other Methods
 
@@ -320,7 +254,18 @@ const ManageUser: NextPageWithLayout = () => {
         </span>
       ),
     },
-    { title: "Login Terakhir", dataIndex: "last_login", key: "last_login" },
+    {
+      title: "Login Terakhir",
+      dataIndex: "last_login",
+      key: "last_login",
+      render: (val) => {
+        return (
+          <span>
+            {moment(val).format("HH:mm:ss DD MMMM YYYY")}
+          </span>
+        );
+      },
+    },
     {
       title: "Aksi",
       dataIndex: "",
@@ -410,153 +355,33 @@ const ManageUser: NextPageWithLayout = () => {
         }
         open={isEditModalOpen}
         onCancel={() => {
+          setModalType("none");
           setIsEditModalOpen(false);
-          form.resetFields();
         }}
         footer={null}
       >
-        <Form
-          name="update_user_form"
-          form={form}
-          autoComplete="off"
-          layout="vertical"
-          requiredMark={"optional"}
-        >
-          <Form.Item
-            label="Nama"
-            name="name"
-            rules={[{ required: true, message: "Silakan masukkan nama Anda" }]}
-          >
-            <Input disabled={modalType === "admin"} />
-          </Form.Item>
-
-          <Form.Item
-            label="Email"
-            name="email"
-            rules={[
-              { required: true, message: "Silakan masukkan email Anda" },
-              { type: "email", message: "Alamat email tidak valid!" },
-            ]}
-          >
-            <Input disabled={modalType === "admin"} />
-          </Form.Item>
-
-          <Form.Item
-            label="Password Lama"
-            name="old_password"
-            rules={[
-              {
-                required: true,
-                message: "Silakan masukkan kata sandi lama Anda",
-              },
-              {
-                pattern: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/,
-                message:
-                  "Kata sandi harus terdiri dari minimal 8 karakter dan mengandung kombinasi huruf dan angka.",
-              },
-            ]}
-          >
-            <Input.Password />
-          </Form.Item>
-
-          <Form.Item
-            label="Password"
-            name="password"
-            rules={[
-              {
-                required: true,
-                message: "Silakan masukkan kata sandi Anda",
-              },
-              { validator: validatePassword },
-              {
-                pattern: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/,
-                message:
-                  "Kata sandi harus terdiri dari minimal 8 karakter dan mengandung kombinasi huruf dan angka.",
-              },
-            ]}
-          >
-            <Input.Password />
-          </Form.Item>
-
-          <Form.Item
-            label="Konfirmasi Password"
-            name="confirm_password"
-            dependencies={["password"]}
-            rules={[
-              {
-                required: true,
-                message: "Silakan konfirmasi kata sandi Anda",
-              },
-              { validator: compareToFirstPassword },
-            ]}
-          >
-            <Input.Password onBlur={handleConfirmBlur} />
-          </Form.Item>
-
-          <Form.Item>
-            <div className="flex justify-end gap-4">
-              <Button
-                onClick={() => {
-                  setIsEditModalOpen(false);
-                }}
-              >
-                Batal
-              </Button>
-              {modalType === "admin" ? (
-                <>
-                  {usersData[modalIndex]._id === userData?._id ? (
-                    <Popconfirm
-                      title={
-                        <div className="max-w-[48ch]">
-                          <div className="font-semibold capitalize">
-                            Yakin hapus akses admin anda?
-                          </div>
-                          Aksi ini tidak dapat diurungkan. Anda akan kehilangan
-                          akses halaman admin
-                        </div>
-                      }
-                      onConfirm={() => handleUpdateUserRole("user")}
-                      okText="Ya"
-                      cancelText="Tidak"
-                    >
-                      <Button type="primary" danger>
-                        Deaktivasi Admin
-                      </Button>
-                    </Popconfirm>
-                  ) : (
-                    <Popconfirm
-                      title={
-                        <div className="max-w-[48ch]">
-                          <div className="font-semibold capitalize">
-                            Yakin tambahkan pengguna sebagai admin?
-                          </div>
-                          Aksi ini tidak dapat diurungkan. Pengguna harus
-                          mendeaktivasi diri sendiri ketika sudah menjadi admin
-                        </div>
-                      }
-                      onConfirm={() => handleUpdateUserRole("admin")}
-                      okText="Ya"
-                      cancelText="Tidak"
-                    >
-                      <Button type="primary">Aktivasi Admin</Button>
-                    </Popconfirm>
-                  )}
-                </>
-              ) : (
-                <Popconfirm
-                  title="Yakin ubah pengguna ini?"
-                  onConfirm={() => {
-                    handleEditUser();
-                  }}
-                  okText="Ya"
-                  cancelText="Tidak"
-                >
-                  <Button type="primary">Ubah Data</Button>
-                </Popconfirm>
-              )}
-            </div>
-          </Form.Item>
-        </Form>
+        {modalType === "admin" && (
+          <UpdateUserRoleForm
+            form={form}
+            usersData={usersData}
+            userIndex={modalIndex}
+            pageFilter={pageFilter}
+            setPageFilter={setPageFilter}
+            setIsModalOpen={setIsEditModalOpen}
+            setIsReloading={setIsReloading}
+          />
+        )}
+        {modalType === "edit" && (
+          <EditUserForm
+            form={form}
+            usersData={usersData}
+            userIndex={modalIndex}
+            pageFilter={pageFilter}
+            setPageFilter={setPageFilter}
+            setIsModalOpen={setIsEditModalOpen}
+            setIsReloading={setIsReloading}
+          />
+        )}
       </Modal>
     </div>
   );

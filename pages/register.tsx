@@ -172,7 +172,7 @@ const Register: NextPageWithLayout = () => {
                     type="primary"
                     htmlType="submit"
                   >
-                    Register
+                    Daftar
                   </Button>
                 </Form.Item>
               </Form>

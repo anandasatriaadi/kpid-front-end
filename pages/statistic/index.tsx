@@ -97,9 +97,6 @@ const Statistic: NextPageWithLayout = () => {
   //
 
   //#region ::: UseEffect
-  React.useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDate]);
   //#endregion ::: UseEffect
 
   return (

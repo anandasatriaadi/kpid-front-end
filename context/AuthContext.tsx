@@ -150,13 +150,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUserData(undefined);
 
     // Check whether the user is on the login page or not
-    console.log(router.asPath);
     if (router.pathname !== "/login") {
       let url: UrlObject = {
         pathname: "/login",
       };
 
-      console.log(router.asPath);
       if (router.asPath !== "/") {
         url.query = { redirect: router.asPath };
       }

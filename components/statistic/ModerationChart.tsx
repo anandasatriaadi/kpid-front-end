@@ -162,7 +162,10 @@ function ModerationChart({ selectedDate }: ChartProps) {
   //
 
   //#region ::: UseEffect
-  getModerationData();
+  React.useEffect(() => {
+    getModerationData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDate]);
   //#endregion ::: UseEffect
 
   return (
