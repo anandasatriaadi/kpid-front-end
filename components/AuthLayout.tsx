@@ -19,7 +19,9 @@ const IconSubtitleClass = "mt-2 text-lg text-center";
 const AuthLayout = ({ children }: LayoutProps) => {
   //#region ::: Variable Initialisations
   const router = useRouter();
-  const { isLoggedIn } = React.useContext(AuthContext) as AuthContextInterface;
+  const { isLoggedIn, isVerifying } = React.useContext(
+    AuthContext
+  ) as AuthContextInterface;
   //#endregion ::: Variable Initialisations
 
   //
@@ -48,6 +50,9 @@ const AuthLayout = ({ children }: LayoutProps) => {
   }, [isLoggedIn]);
   //#endregion ::: UseEffect
 
+  if (isVerifying && !isLoggedIn) {
+    return <></>;
+  }
   return (
     <div>
       <div className="grid grid-cols-1 lg:grid-cols-2">

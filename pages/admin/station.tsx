@@ -97,6 +97,19 @@ const ManageStation: NextPageWithLayout = () => {
           setModalOpen(false);
           setIsReloading(true);
           form.resetFields();
+        })
+        .catch((err) => {
+          if (err?.response?.data?.data !== undefined) {
+            if (
+              err.response.data.status !== 401 &&
+              err.response.data.status !== 403
+            ) {
+              debounceErrorMessage(err.response.data.data);
+            }
+          } else {
+            debounceSuccessMessage("Gagal Menambahkan Stasiun");
+          }
+          console.error(err);
         });
     });
   };
@@ -117,19 +130,22 @@ const ManageStation: NextPageWithLayout = () => {
             setModalOpen(false);
             setIsReloading(true);
             form.resetFields();
+          })
+          .catch((err) => {
+            if (err?.response?.data?.data !== undefined) {
+              if (
+                err.response.data.status !== 401 &&
+                err.response.data.status !== 403
+              ) {
+                debounceErrorMessage(err.response.data.data);
+              }
+            } else {
+              debounceSuccessMessage("Gagal Menambahkan Stasiun");
+            }
+            console.error(err);
           });
       })
       .catch((err) => {
-        if (err?.response?.data?.data !== undefined) {
-          if (
-            err.response.data.status !== 401 &&
-            err.response.data.status !== 403
-          ) {
-            debounceErrorMessage(err.response.data.data);
-          }
-        } else {
-          debounceSuccessMessage("Gagal Menambahkan Stasiun");
-        }
         console.error(err);
       });
   };

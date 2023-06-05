@@ -179,33 +179,35 @@ function UploadModal({ modalOpen, setModalOpen }: UploadModalProps) {
 
   //#region ::: UseEffect
   React.useEffect(() => {
-    httpRequest
-      .get("/stations")
-      .then((res) => {
-        if (res === undefined || res === null) return;
-        const result: any = res.data;
-
-        const filteredData = result.data.map((station: any) => {
-          return {
-            label: station.name,
-            value: station.name,
-          };
-        });
-
-        setResSelectOptions(filteredData);
-        setModSelectOptions(filteredData);
-      })
-      .catch((err) => {
-        if (err?.response?.data?.data !== undefined) {
-          if (
-            err.response.data.status !== 401 &&
-            err.response.data.status !== 403
-          ) {
-            debounceErrorMessage(err.response.data.data);
+    if (isLoggedIn) {
+      httpRequest
+        .get("/stations")
+        .then((res) => {
+          if (res === undefined || res === null) return;
+          const result: any = res.data;
+  
+          const filteredData = result.data.map((station: any) => {
+            return {
+              label: station.name,
+              value: station.name,
+            };
+          });
+  
+          setResSelectOptions(filteredData);
+          setModSelectOptions(filteredData);
+        })
+        .catch((err) => {
+          if (err?.response?.data?.data !== undefined) {
+            if (
+              err.response.data.status !== 401 &&
+              err.response.data.status !== 403
+            ) {
+              debounceErrorMessage(err.response.data.data);
+            }
           }
-        }
-        console.error(err);
-      });
+          console.error(err);
+        });
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modalOpen]);

@@ -141,6 +141,17 @@ const SingleResult: NextPageWithLayout = () => {
           moderationData?.station_name.name
         }_${moment().format("DD MMMM YYYY")}.pdf`;
         link.click();
+      })
+      .catch((err) => {
+        if (err?.response?.data?.data !== undefined) {
+          if (
+            err.response.data.status !== 401 &&
+            err.response.data.status !== 403
+          ) {
+            debounceErrorMessage(err.response.data.data);
+          }
+        }
+        console.error(err);
       });
     debounceSuccessMessage("Laporan Berhasil Dibuat");
   };

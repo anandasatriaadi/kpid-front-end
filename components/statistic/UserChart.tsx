@@ -1,23 +1,11 @@
 import httpRequest from "@/common/HttpRequest";
-import BarChartCard from "@/components/chart/BarChartCard";
-import Layout from "@/components/Layout";
-import ModerationBarChart from "@/components/statistic/ModerationChart";
-import {
-  ApplicationContext,
-  ApplicationContextInterface,
-} from "@/context/ApplicationContext";
 import { isNilOrEmpty } from "@/utils/BooleanUtil";
 import { getThisMonthDates } from "@/utils/DatesUtil";
-import debounce from "@/utils/Debounce";
-import { faFilter } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { DatePicker, Drawer, Table } from "antd";
-import { RangePickerProps } from "antd/lib/date-picker";
-import moment from "moment-timezone";
-import Head from "next/head";
-import * as React from "react";
+import debounce, { debounceErrorMessage } from "@/utils/Debounce";
+import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import PieChartCard from "@/components/chart/PieChartCard";
+import moment from "moment-timezone";
+import * as React from "react";
 import LineChartCard from "../chart/LineChartCard";
 
 type SelectedDate = {
@@ -145,8 +133,15 @@ function UserChart({ selectedDate }: ChartProps) {
           return res.data;
         })
         .catch((err) => {
+          if (err?.response?.data?.data !== undefined) {
+            if (
+              err.response.data.status !== 401 &&
+              err.response.data.status !== 403
+            ) {
+              debounceErrorMessage(err.response.data.data);
+            }
+          }
           console.error(err);
-          return null;
         });
       let userActivityData: UserActivityResult[] = userActivityResult?.data;
       setUserChartData({

@@ -3,7 +3,7 @@ import BarChartCard from "@/components/chart/BarChartCard";
 import PieChartCard from "@/components/chart/PieChartCard";
 import { isNilOrEmpty } from "@/utils/BooleanUtil";
 import { getThisMonthDates } from "@/utils/DatesUtil";
-import debounce from "@/utils/Debounce";
+import debounce, { debounceErrorMessage } from "@/utils/Debounce";
 import moment from "moment-timezone";
 import * as React from "react";
 
@@ -148,8 +148,15 @@ function ModerationChart({ selectedDate }: ChartProps) {
           return res.data;
         })
         .catch((err) => {
+          if (err?.response?.data?.data !== undefined) {
+            if (
+              err.response.data.status !== 401 &&
+              err.response.data.status !== 403
+            ) {
+              debounceErrorMessage(err.response.data.data);
+            }
+          }
           console.error(err);
-          return null;
         });
       let moderationData: ModerationStatisticResult = moderationResult?.data;
       filterModerationDataBar(moderationData);

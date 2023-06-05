@@ -59,18 +59,6 @@ function ViolationDesc({
                   );
                 })}
             </>
-            {/* {timelineItem[0].violations.map((violation, vIndex) => {
-              return (
-                <Collapse.Panel
-                  header={vIndex + 1 + ". " + violation.pasal}
-                  key={vIndex}
-                >
-                  <div className="kpid-pasal-list">
-                    {parse(DOMPurify.sanitize(violation.deskripsi))}
-                  </div>
-                </Collapse.Panel>
-              );
-            })} */}
           </Collapse>
         ),
       };
@@ -113,7 +101,7 @@ function ViolationDesc({
                     </div>
                   ) : (
                     <div className="ml-2 rounded-lg bg-red-600 px-2 py-0.5 text-sm font-semibold text-white">
-                      Invalid
+                      Tidak Valid
                     </div>
                   )
                 ) : (

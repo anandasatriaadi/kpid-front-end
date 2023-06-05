@@ -239,7 +239,7 @@ const Layout = ({ children }: LayoutProps) => {
   }, [router]);
   //#endregion ::: UseEffect
 
-  if (isVerifying || !isLoggedIn) {
+  if (isVerifying && !isLoggedIn) {
     return (
       <Spin
         size="large"

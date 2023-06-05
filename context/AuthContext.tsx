@@ -76,6 +76,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const login = async (values: { [key: string]: any }) => {
+    debounceLoadingMessage("Logging In");
     const form = new FormData();
     for (const key in values) {
       form.append(key, values[key]);
@@ -85,7 +86,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await httpRequest
         .post("/users/login", form)
         .catch((error) => {
-          if (error?.response?.data !== undefined && error.response !== null) {
+          if (error?.response?.data?.data !== undefined) {
             return error.response;
           } else {
             throw error;
@@ -116,6 +117,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const register = async (values: { [key: string]: any }) => {
+    debounceLoadingMessage("Registrasi Pengguna");
     const form = new FormData();
     for (const key in values) {
       form.append(key, values[key]);
@@ -125,7 +127,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await httpRequest
         .post("/users/signup", form)
         .catch((error) => {
-          if (error?.response?.data !== undefined && error.response !== null) {
+          if (error?.response?.data?.data) {
             return error.response;
           } else {
             throw error;

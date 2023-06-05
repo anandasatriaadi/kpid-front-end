@@ -4,7 +4,7 @@ import Layout from "@/components/Layout";
 import { AuthContext, AuthContextInterface } from "@/context/AuthContext";
 import { isNil, isNilOrEmpty } from "@/utils/BooleanUtil";
 import { getThisMonthDates } from "@/utils/DatesUtil";
-import debounce from "@/utils/Debounce";
+import debounce, { debounceErrorMessage } from "@/utils/Debounce";
 import {
   faArrowTrendDown,
   faArrowTrendUp,
@@ -157,8 +157,15 @@ const Home: NextPageWithLayout = () => {
           return res.data;
         })
         .catch((err) => {
+          if (err?.response?.data?.data !== undefined) {
+            if (
+              err.response.data.status !== 401 &&
+              err.response.data.status !== 403
+            ) {
+              debounceErrorMessage(err.response.data.data);
+            }
+          }
           console.error(err);
-          return null;
         });
 
       let lastMonthResult = await httpRequest
@@ -172,8 +179,15 @@ const Home: NextPageWithLayout = () => {
           return res.data;
         })
         .catch((err) => {
+          if (err?.response?.data?.data !== undefined) {
+            if (
+              err.response.data.status !== 401 &&
+              err.response.data.status !== 403
+            ) {
+              debounceErrorMessage(err.response.data.data);
+            }
+          }
           console.error(err);
-          return null;
         });
 
       let thisMonthData: StatisticResult = thisMonthResult?.data;

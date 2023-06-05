@@ -1,8 +1,7 @@
 import AuthLayout from "@/components/AuthLayout";
 import { AuthContext, AuthContextInterface } from "@/context/AuthContext";
 import { NextPageWithLayout } from "@/pages/_app";
-import { debounceLoadingMessage } from "@/utils/Debounce";
-import { Button, Form, Input, message } from "antd";
+import { Button, Form, Input } from "antd";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,7 +14,6 @@ const Login: NextPageWithLayout = () => {
 
   //#region ::: Handlers
   const handleForm = (values: any) => {
-    debounceLoadingMessage("Logging in...");
     login(values);
   };
 
@@ -73,7 +71,8 @@ const Login: NextPageWithLayout = () => {
                   label="Email"
                   name="email"
                   rules={[
-                    { required: true, message: "Please input your email!" },
+                    { required: true, message: "Silakan masukkan email Anda" },
+                    { type: "email", message: "Alamat email tidak valid!" },
                   ]}
                 >
                   <Input />
@@ -85,7 +84,7 @@ const Login: NextPageWithLayout = () => {
                   rules={[
                     {
                       required: true,
-                      message: "Please input your password!",
+                      message: "Silakan masukkan password Anda",
                     },
                   ]}
                 >
