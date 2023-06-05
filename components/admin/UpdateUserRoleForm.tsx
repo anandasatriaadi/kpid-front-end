@@ -1,7 +1,8 @@
 import httpRequest from "@/common/HttpRequest";
 import { AuthContext, AuthContextInterface } from "@/context/AuthContext";
 import UserData from "@/types/UserData";
-import { Button, Form, Input, message, Popconfirm } from "antd";
+import { debounceErrorMessage, debounceSuccessMessage } from "@/utils/Debounce";
+import { Button, Form, Input, Popconfirm } from "antd";
 import { FormInstance } from "antd/es/form/Form";
 import * as React from "react";
 
@@ -42,15 +43,20 @@ function UpdateUserRoleForm({
     httpRequest
       .put(`/users/role`, temp_values)
       .then((response) => {
-        message.success("Berhasil mengubah role pengguna");
+        debounceSuccessMessage("Berhasil Mengubah Peran Pengguna");
         setPageFilter({ ...pageFilter });
         setIsModalOpen(false);
         setIsReloading(true);
         form.resetFields();
       })
       .catch((err) => {
-        if (err.response !== null && err?.response?.data?.data !== undefined) {
-          message.error(err.response.data.data);
+        if (err?.response?.data?.data !== undefined) {
+          if (
+            err.response.data.status !== 401 &&
+            err.response.data.status !== 403
+          ) {
+            debounceErrorMessage(err.response.data.data);
+          }
         }
         console.error(err);
       });

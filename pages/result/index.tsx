@@ -3,27 +3,27 @@ import Layout from "@/components/Layout";
 import ResultCard from "@/components/result/ResultCard";
 import {
   ApplicationContext,
-  ApplicationContextInterface,
+  ApplicationContextInterface
 } from "@/context/ApplicationContext";
 import { isEmpty, isNil } from "@/utils/BooleanUtil";
+import { debounceErrorMessage } from "@/utils/Debounce";
 import { faFilter } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   DatePicker,
   Divider,
   Drawer,
-  Empty,
-  message,
-  Pagination,
+  Empty, Pagination,
   Segmented,
   Select,
   SelectProps,
   Skeleton,
-  Spin,
+  Spin
 } from "antd";
 import { RangePickerProps } from "antd/lib/date-picker";
 import moment from "moment";
 import Head from "next/head";
+import Router from "next/router";
 import * as React from "react";
 import { NextPageWithLayout } from "../_app";
 
@@ -195,10 +195,16 @@ const Result: NextPageWithLayout = () => {
         setMetadata(result.metadata);
       })
       .catch((err) => {
-        if (err?.response?.data !== undefined && err.response !== null) {
-          message.error(err.response.data);
+        if (err?.response?.data?.data !== undefined) {
+          if (
+            err.response.data.status !== 401 &&
+            err.response.data.status !== 403
+          ) {
+            debounceErrorMessage(err.response.data.data);
+          }
         }
         console.error(err);
+        Router.push("/");
       });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps

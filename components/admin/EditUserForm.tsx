@@ -1,7 +1,8 @@
 import httpRequest from "@/common/HttpRequest";
 import { AuthContext, AuthContextInterface } from "@/context/AuthContext";
 import UserData from "@/types/UserData";
-import { Button, Form, Input, message, Popconfirm } from "antd";
+import { debounceErrorMessage, debounceSuccessMessage } from "@/utils/Debounce";
+import { Button, Form, Input, Popconfirm } from "antd";
 import { FormInstance } from "antd/es/form/Form";
 import * as React from "react";
 
@@ -34,13 +35,13 @@ function EditUserForm({
 
   //
 
-  //#region ::: Handlers
+  //#region :::
   const onFinishEditUser = async (values: { [key: string]: any }) => {
     let temp_values = { ...values, user_id: usersData[userIndex]._id };
     httpRequest
       .put(`/users`, temp_values)
       .then((response) => {
-        message.success("Berhasil mengubah pengguna");
+        debounceSuccessMessage("Berhasil Memperbarui Data Pengguna");
         setPageFilter({ ...pageFilter });
         setIsModalOpen(false);
         setIsReloading(true);
@@ -48,8 +49,13 @@ function EditUserForm({
         usersData[userIndex]._id === userData?._id ? logout() : null;
       })
       .catch((err) => {
-        if (err.response !== null && err?.response?.data?.data !== undefined) {
-          message.error(err.response.data.data);
+        if (err?.response?.data?.data !== undefined) {
+          if (
+            err.response.data.status !== 401 &&
+            err.response.data.status !== 403
+          ) {
+            debounceErrorMessage(err.response.data.data);
+          }
         }
         console.error(err);
       });

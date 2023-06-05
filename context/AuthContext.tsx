@@ -1,6 +1,11 @@
 import { authService } from "@/common/AuthService";
 import httpRequest from "@/common/HttpRequest";
 import UserData from "@/types/UserData";
+import {
+  debounceErrorMessage,
+  debounceLoadingMessage,
+  debounceSuccessMessage,
+} from "@/utils/Debounce";
 import { message } from "antd";
 import { useRouter } from "next/router";
 import * as React from "react";
@@ -45,7 +50,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const userToken = localStorage.getItem("token");
     const userId = localStorage.getItem("user");
 
-    if (userToken && userId) {
+    if (!!userToken && !!userId) {
       try {
         const response = await httpRequest
           .get(`/users/${userId}`)
@@ -93,7 +98,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.setItem("user", data.user_data._id);
         setIsLoggedIn(true);
         setUserData(data.user_data);
-        message.success("Login Success");
+        debounceSuccessMessage("Login Berhasil");
 
         const { redirect } = router.query;
         if (redirect) {
@@ -102,11 +107,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           router.push("/");
         }
       } else {
-        message.error(data);
+        debounceErrorMessage(data);
       }
     } catch (error) {
       console.error(error);
-      message.error("Terjadi kesalahan dalam login");
+      debounceErrorMessage("Terjadi Kesalahan dalam Login");
     }
   };
 
@@ -129,30 +134,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const { status, data } = response.data;
 
       if (status === 201) {
-        message.success(data);
-        setTimeout(() => {
-          router.push("/login");
-        }, 200);
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", data.user_data._id);
+        setIsLoggedIn(true);
+        setUserData(data.user_data);
+        debounceSuccessMessage("Berhasil Mendaftarkan Akun");
+        router.push("/");
       } else {
-        message.error(data);
+        debounceErrorMessage(data);
       }
     } catch (error) {
       console.error(error);
-      message.error("Terjadi kesalahan dalam mendaftarkan akun");
+      debounceErrorMessage("Terjadi Kesalahan dalam Mendaftarkan Akun");
     }
   };
 
   const logout = () => {
-    message.loading("Logging Out", 0.5);
+    debounceLoadingMessage("Logging Out");
 
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setIsLoggedIn(false);
     setUserData(undefined);
 
     // Check whether the user is on the login page or not
-    if (router.pathname !== "/login") {
+    if (router.pathname !== "/auth/login") {
       let url: UrlObject = {
-        pathname: "/login",
+        pathname: "/auth/login",
       };
 
       if (router.asPath !== "/") {
@@ -164,6 +172,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const unauthorized = () => {
+    debounceErrorMessage("Anda Tidak Memiliki Hak Akses");
     router.push("/");
   };
 

@@ -4,10 +4,14 @@ import {
   ApplicationContext,
   ApplicationContextInterface,
 } from "@/context/ApplicationContext";
+import { AuthContext, AuthContextInterface } from "@/context/AuthContext";
 import { NextPageWithLayout } from "@/pages/_app";
 import Station from "@/types/Station";
 import { isEmpty } from "@/utils/BooleanUtil";
-import debounce from "@/utils/Debounce";
+import debounce, {
+  debounceSuccessMessage,
+  debounceErrorMessage,
+} from "@/utils/Debounce";
 import { tokenizeString } from "@/utils/StringUtil";
 import { faFilter, faPen, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -27,6 +31,7 @@ import {
 import type { ColumnsType } from "antd/es/table";
 import moment from "moment";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import * as React from "react";
 
 type PageFilterType = {
@@ -41,6 +46,7 @@ const ManageStation: NextPageWithLayout = () => {
   const { isMobile } = React.useContext(
     ApplicationContext
   ) as ApplicationContextInterface;
+  const { userData } = React.useContext(AuthContext) as AuthContextInterface;
 
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] =
     React.useState<boolean>(false);
@@ -63,6 +69,7 @@ const ManageStation: NextPageWithLayout = () => {
   };
 
   const [form] = Form.useForm();
+  const router = useRouter();
 
   // Filters
   const sortOptions: any[] = [
@@ -85,7 +92,7 @@ const ManageStation: NextPageWithLayout = () => {
           station_name: values["station_name"],
         })
         .then((response) => {
-          message.success("Berhasil mengubah stasiun");
+          debounceSuccessMessage("Berhasil Mengubah Stasiun");
           setPageFilter({ ...pageFilter });
           setModalOpen(false);
           setIsReloading(true);
@@ -105,7 +112,7 @@ const ManageStation: NextPageWithLayout = () => {
             station_name: values["station_name"],
           })
           .then((response) => {
-            message.success("Berhasil menambahkan stasiun");
+            debounceSuccessMessage("Berhasil Menambahkan Stasiun");
             setPageFilter({ ...pageFilter });
             setModalOpen(false);
             setIsReloading(true);
@@ -113,10 +120,15 @@ const ManageStation: NextPageWithLayout = () => {
           });
       })
       .catch((err) => {
-        if (err?.response?.data !== undefined && err.response !== null) {
-          message.error(err.response.data);
+        if (err?.response?.data?.data !== undefined) {
+          if (
+            err.response.data.status !== 401 &&
+            err.response.data.status !== 403
+          ) {
+            debounceErrorMessage(err.response.data.data);
+          }
         } else {
-          message.error("Gagal menambahkan stasiun");
+          debounceSuccessMessage("Gagal Menambahkan Stasiun");
         }
         console.error(err);
       });
@@ -126,15 +138,20 @@ const ManageStation: NextPageWithLayout = () => {
     httpRequest
       .delete(`/stations/${stationsData[station_index].key}`)
       .then((response) => {
-        message.success("Berhasil menghapus stasiun");
+        debounceSuccessMessage("Berhasil Menghapus Stasiun");
         setPageFilter({ ...pageFilter });
         setIsReloading(true);
       })
       .catch((err) => {
-        if (err?.response?.data !== undefined && err.response !== null) {
-          message.error(err.response.data);
+        if (err?.response?.data?.data !== undefined) {
+          if (
+            err.response.data.status !== 401 &&
+            err.response.data.status !== 403
+          ) {
+            debounceErrorMessage(err.response.data.data);
+          }
         } else {
-          message.error("Gagal menghapus stasiun");
+          debounceErrorMessage("Gagal Menghapus Stasiun");
         }
         console.error(err);
       });
@@ -201,8 +218,8 @@ const ManageStation: NextPageWithLayout = () => {
           onConfirm={() => {
             handleDeleteStation(index);
           }}
-          okText="Yes"
-          cancelText="No"
+          okText="Ya"
+          cancelText="Tidak"
         >
           <span className="rounded-lg bg-red-100 p-2 text-red-700 transition-all duration-300 hover:cursor-pointer hover:bg-red-200">
             <FontAwesomeIcon className="h-[16px]" icon={faTrash} />
@@ -230,8 +247,16 @@ const ManageStation: NextPageWithLayout = () => {
           setIsReloading(false);
         })
         .catch((err) => {
-          if (err?.response?.data !== undefined && err.response !== null) {
-            message.error(err.response.data);
+          if (
+            err?.response?.data?.data !== undefined &&
+            err.response !== null
+          ) {
+            if (
+              err.response.data.status !== 401 &&
+              err.response.data.status !== 403
+            ) {
+              debounceErrorMessage(err.response.data.data);
+            }
           }
           console.error(err);
         });
@@ -271,6 +296,11 @@ const ManageStation: NextPageWithLayout = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageFilter]);
   //#endregion ::: UseEffect
+
+  if (userData?.role !== "admin") {
+    router.push("/");
+    return <></>;
+  }
 
   return (
     <div className="flex flex-1 flex-col">

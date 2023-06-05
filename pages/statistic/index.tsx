@@ -108,7 +108,7 @@ const Statistic: NextPageWithLayout = () => {
       </Head>
 
       <h1 className="mb-4 text-xl font-semibold md:text-2xl">
-        Panduan Penggunaan Sistem Rekomendasi
+        Statistik Sistem Rekomendasi
       </h1>
       <section className="mb-4 rounded-lg bg-white py-2 px-4 shadow-custom md:p-4">
         {isMobile ? (

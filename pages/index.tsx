@@ -8,12 +8,9 @@ import debounce from "@/utils/Debounce";
 import {
   faArrowTrendDown,
   faArrowTrendUp,
-  faChartSimple,
   faEquals,
-  faNotEqual,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Skeleton } from "antd";
 import moment from "moment-timezone";
 import Head from "next/head";
 import Image from "next/image";
@@ -366,3 +363,4 @@ export default Home;
 Home.getLayout = function getLayout(page: React.ReactElement) {
   return <Layout>{page}</Layout>;
 };
+  

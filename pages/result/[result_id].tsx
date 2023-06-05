@@ -1,14 +1,15 @@
 import httpRequest from "@/common/HttpRequest";
 import Layout from "@/components/Layout";
+import FrameSection from "@/components/result/FrameSection";
+import ViolationDesc from "@/components/result/ViolationDesc";
 import ViolationIconCard from "@/components/ViolationIconCard";
 import { NextPageWithLayout } from "@/pages/_app";
-import FrameResult from "@/types/FrameResult";
 import ModerationDecision from "@/types/ModerationDecision";
 import ModerationResponse from "@/types/ModerationResponse";
 import ModerationResult from "@/types/ModerationResult";
+import PasalResponse from "@/types/PasalResponse";
 import { isNil, isNilOrEmpty } from "@/utils/BooleanUtil";
-import parse from "html-react-parser";
-import DOMPurify from "dompurify";
+import { debounceErrorMessage, debounceSuccessMessage } from "@/utils/Debounce";
 import {
   faClock,
   faFileDownload,
@@ -19,17 +20,11 @@ import {
   faXmarkCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, Collapse, message, Skeleton, Tabs } from "antd";
+import { Button, Collapse, Skeleton } from "antd";
 import moment from "moment";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { Tab } from "rc-tabs/lib/interface";
 import * as React from "react";
-import PasalResponse from "@/types/PasalResponse";
-import debounce from "@/utils/Debounce";
-import Image from "next/image";
-import ViolationDesc from "@/components/result/ViolationDesc";
-import FrameSection from "@/components/result/FrameSection";
 
 const SingleResult: NextPageWithLayout = () => {
   //#region ::: Variable Initialisations
@@ -94,8 +89,13 @@ const SingleResult: NextPageWithLayout = () => {
         checkIfAllModerated();
       })
       .catch((err) => {
-        if (err?.response?.data !== undefined && err.response !== null) {
-          message.error(err.response.data);
+        if (err?.response?.data?.data !== undefined) {
+          if (
+            err.response.data.status !== 401 &&
+            err.response.data.status !== 403
+          ) {
+            debounceErrorMessage(err.response.data.data);
+          }
         }
         console.error(err);
       });
@@ -114,12 +114,17 @@ const SingleResult: NextPageWithLayout = () => {
       .put(`/moderations/${moderationID}/start`, data)
       .then((_) => {})
       .catch((err) => {
-        if (err?.response?.data !== undefined && err.response !== null) {
-          message.error(err.response.data);
+        if (err?.response?.data?.data !== undefined) {
+          if (
+            err.response.data.status !== 401 &&
+            err.response.data.status !== 403
+          ) {
+            debounceErrorMessage(err.response.data.data);
+          }
         }
         console.error(err);
       });
-    message.success("Video sedang diproses");
+    debounceSuccessMessage("Video Sedang Diproses");
     router.push(`/result`);
   };
 
@@ -132,27 +137,18 @@ const SingleResult: NextPageWithLayout = () => {
         const blob = new Blob([response.data], { type: type });
         const link = document.createElement("a");
         link.href = window.URL.createObjectURL(blob);
-        const station_name =
-          typeof moderationData?.station_name === "object" &&
-          !Array.isArray(moderationData?.station_name) &&
-          moderationData?.station_name !== null
-            ? moderationData?.station_name.name
-            : moderationData?.station_name;
-        link.download = `Laporan_${station_name}_${moderationData.created_at}.pdf`;
+        link.download = `Laporan_${
+          moderationData?.station_name.name
+        }_${moment().format("DD MMMM YYYY")}.pdf`;
         link.click();
       });
-    message.success("Laporan berhasil di-generate");
+    debounceSuccessMessage("Laporan Berhasil Dibuat");
   };
   //#endregion ::: Handlers
 
   //
 
   //#region ::: Other Methods
-  // Debounce message method
-  const debounceMessage = debounce((msg: string) => {
-    message.error(msg);
-  }, 500);
-
   // Check if all results has been verified
   const checkIfAllModerated = () => {
     let isAllModerated = true;
@@ -266,16 +262,26 @@ const SingleResult: NextPageWithLayout = () => {
     // Fetch moderation data
     const fetchModerationData = async () => {
       const response = await httpRequest.get(fetchURL).catch((err) => {
-        if (err?.response?.data !== undefined && err.response !== null) {
-          debounceMessage(err.response.data);
+        if (err?.response?.data?.data !== undefined) {
+          if (
+            err.response.data.status !== 401 &&
+            err.response.data.status !== 403
+          ) {
+            debounceErrorMessage(err.response.data.data);
+          }
         } else {
-          debounceMessage("Terjadi kesalahan dalam mengambil data moderasi");
+          debounceErrorMessage(
+            "Terjadi kesalahan dalam mengambil data moderasi"
+          );
         }
         console.error(err);
         return null;
       });
 
-      if (response === null) return;
+      if (response === null) {
+        router.push("/result");
+        return;
+      }
       const result: ModerationResponse = response.data.data;
 
       setModerationData(result);
@@ -285,10 +291,10 @@ const SingleResult: NextPageWithLayout = () => {
     // Fetch pasal data
     const fetchPasalData = async () => {
       const response = await httpRequest.get("/pasals").catch((err) => {
-        if (err?.response?.data !== undefined && err.response !== null) {
-          debounceMessage(err.response.data);
+        if (err?.response?.data?.data !== undefined) {
+          debounceErrorMessage(err.response.data.data);
         } else {
-          debounceMessage("Terjadi kesalahan dalam mengambil data pasal");
+          debounceErrorMessage("Terjadi kesalahan dalam mengambil data pasal");
         }
         console.error(err);
         return null;

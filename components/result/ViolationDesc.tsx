@@ -150,7 +150,7 @@ function ViolationDesc({
                         );
                       }}
                     >
-                      Invalid
+                      Tidak Valid
                     </Button>
                     <Button
                       type="primary"

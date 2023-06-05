@@ -1,5 +1,4 @@
 import { authService } from "@/common/AuthService";
-import Navlink from "@/components/Navlink";
 import UploadModal from "@/components/UploadModal";
 import {
   ApplicationContext,
@@ -135,16 +134,6 @@ const Layout = ({ children }: LayoutProps) => {
       label: "Statistik",
       className: "flex items-center",
     },
-    // {
-    //   key: "upload-modal",
-    //   icon: (
-    //     <div className="flex w-[1.5rem] justify-center">
-    //       <FontAwesomeIcon className="h-[18px]" icon={faCloudArrowUp} />
-    //     </div>
-    //   ),
-    //   label: "Unggah Video",
-    //   className: "flex items-center",
-    // },
     {
       key: "/help",
       icon: (
@@ -156,6 +145,21 @@ const Layout = ({ children }: LayoutProps) => {
       className: "flex items-center",
     },
   ];
+
+  if (isMobile) {
+    sidebarMenus.push( 
+    {
+      key: "upload-modal",
+      icon: (
+        <div className="flex w-[1.5rem] justify-center">
+          <FontAwesomeIcon className="h-[18px]" icon={faCloudArrowUp} />
+        </div>
+      ),
+      label: "Unggah Video",
+      className: "flex items-center",
+    },
+    )
+  }
 
   if (userData !== undefined && userData?.role === "admin") {
     sidebarMenus.push({
@@ -204,6 +208,7 @@ const Layout = ({ children }: LayoutProps) => {
   const handleMenuOnClick = ({ key, keyPath }: MenuInfo) => {
     if (key.startsWith("/")) {
       router.push(key);
+      setDrawerMenuOpen(false);
     } else if (key === "upload-modal") {
       setUploadModalOpen(!uploadModalOpen);
       setDrawerMenuOpen(false);
@@ -218,9 +223,9 @@ const Layout = ({ children }: LayoutProps) => {
     const shouldRedirect = !isVerifying && !isLoggedIn;
 
     // Redirect to login page if not logged in
-    if (shouldRedirect && router.pathname !== "/login") {
+    if (shouldRedirect && router.pathname !== "/auth/login") {
       let url: UrlObject = {
-        pathname: "/login",
+        pathname: "/auth/login",
       };
 
       if (router.asPath !== "/") {
@@ -238,7 +243,7 @@ const Layout = ({ children }: LayoutProps) => {
     return (
       <Spin
         size="large"
-        className="flex h-screen w-full items-center justify-center"
+        className="flex h-screen max-h-screen w-full items-center justify-center"
         spinning={isLoggedIn}
       >
         <UploadModal
@@ -320,7 +325,7 @@ const Layout = ({ children }: LayoutProps) => {
             >
               <Menu
                 mode="inline"
-                defaultSelectedKeys={[getSelectedMenuKey()]}
+                selectedKeys={[getSelectedMenuKey()]}
                 items={sidebarMenus}
                 onClick={handleMenuOnClick}
               />
@@ -445,40 +450,27 @@ const Layout = ({ children }: LayoutProps) => {
                 />
               </div>
               <div className="flex flex-1 items-center justify-end gap-x-4 text-lg">
-                {!isLoggedIn ? (
-                  <>
-                    <Navlink route="/login" title="Login" />
-                    <Navlink
-                      className="ant-btn ant-btn-primary text-lg"
-                      route="/login?tab=register"
-                      title="Register"
-                      useLinkStyle={false}
-                      useAnchorTag={false}
+                <div className="flex items-center">
+                  <span className="relative mr-2 rounded-full p-4">
+                    <Image
+                      className="z-10"
+                      src={"/user.png"}
+                      alt="User Profile Image"
+                      layout="fill"
+                      objectFit="cover"
                     />
-                  </>
-                ) : (
-                  <div className="flex items-center">
-                    <span className="relative mr-2 rounded-full p-4">
-                      <Image
-                        className="z-10"
-                        src={"/user.png"}
-                        alt="User Profile Image"
-                        layout="fill"
-                        objectFit="cover"
-                      />
-                      <span className="absolute bottom-0 left-0 right-0 top-0 z-0 flex flex-col items-center justify-end">
-                        <span className="rounded-full bg-slate-200 p-3.5"></span>
-                      </span>
+                    <span className="absolute bottom-0 left-0 right-0 top-0 z-0 flex flex-col items-center justify-end">
+                      <span className="rounded-full bg-slate-200 p-3.5"></span>
                     </span>
-                    <Dropdown menu={accountMenu} placement="bottomRight">
-                      <a onClick={(e) => e.preventDefault()}>
-                        <p className="capitalize">
-                          {userData !== undefined && userData.name}
-                        </p>
-                      </a>
-                    </Dropdown>
-                  </div>
-                )}
+                  </span>
+                  <Dropdown menu={accountMenu} placement="bottomRight">
+                    <a onClick={(e) => e.preventDefault()}>
+                      <p className="capitalize">
+                        {userData !== undefined && userData.name}
+                      </p>
+                    </a>
+                  </Dropdown>
+                </div>
               </div>
             </AntLayout.Header>
             <AntLayout.Content className="flex grow flex-col rounded-tl-lg bg-slate-50">

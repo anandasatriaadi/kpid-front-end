@@ -3,7 +3,9 @@ import Sara from "@/components/icons/Sara";
 import Saru from "@/components/icons/Saru";
 import SiaranPartisan from "@/components/icons/SiaranPartisan";
 import Sihir from "@/components/icons/Sihir";
+import { AuthContext, AuthContextInterface } from "@/context/AuthContext";
 import Image from "next/image";
+import { useRouter } from "next/router";
 import React from "react";
 
 type LayoutProps = {
@@ -15,6 +17,37 @@ const IconCardClass = "rounded-lg p-2 bg-slate-900 bg-opacity-30 shadow-custom";
 const IconSubtitleClass = "mt-2 text-lg text-center";
 
 const AuthLayout = ({ children }: LayoutProps) => {
+  //#region ::: Variable Initialisations
+  const router = useRouter();
+  const { isLoggedIn } = React.useContext(AuthContext) as AuthContextInterface;
+  //#endregion ::: Variable Initialisations
+
+  //
+
+  //#region ::: Handlers
+  //#endregion ::: Handlers
+
+  //
+
+  //#region ::: Other Methods
+  //#endregion ::: Other Methods
+
+  //
+
+  //#region ::: UseEffect
+  React.useEffect(() => {
+    if (isLoggedIn) {
+      const { redirect } = router.query;
+      if (redirect) {
+        router.push(redirect.toString());
+      } else {
+        router.push("/");
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoggedIn]);
+  //#endregion ::: UseEffect
+
   return (
     <div>
       <div className="grid grid-cols-1 lg:grid-cols-2">

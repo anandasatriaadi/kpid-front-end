@@ -6,6 +6,7 @@ import { faClock } from "@fortawesome/free-regular-svg-icons";
 import { faPenToSquare, faTelevision } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Divider, Skeleton } from "antd";
+import Paragraph from "antd/lib/typography/Paragraph";
 import moment from "moment";
 import Link from "next/link";
 import * as React from "react";
@@ -151,9 +152,12 @@ function ResultCard(props: Props) {
           </div>
         </div>
         <div className="flex flex-1 flex-col p-2 text-sm md:p-4">
-          <h4 className="mt-2 mb-2 text-sm font-semibold transition-colors duration-300 group-hover:text-sky-700 md:mt-0 md:text-base">
+          <Paragraph
+            ellipsis={{ rows: 1, tooltip: moderationData.filename }}
+            className="mt-2 mb-2 text-sm font-semibold transition-colors duration-300 group-hover:text-sky-700 md:mt-0 md:text-base"
+          >
             {moderationData.filename}
-          </h4>
+          </Paragraph>
           <Divider className="m-0 my-2 bg-slate-200"></Divider>
           <span className="flex-1">
             <p className="font-semibold">Deskripsi</p>

@@ -2,7 +2,7 @@ import { message } from "antd";
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
 import { authService } from "@/common/AuthService";
 import { isNilOrEmpty } from "@/utils/BooleanUtil";
-import debounce from "@/utils/Debounce";
+import debounce, { debounceErrorMessage } from "@/utils/Debounce";
 
 class HttpRequest {
   axiosInstance: AxiosInstance;
@@ -13,12 +13,11 @@ class HttpRequest {
     });
 
     const logout = debounce(() => {
-      message.error("Your session has expired. Please login again.");
+      debounceErrorMessage("Sesi Anda Telah Berakhir. Mohon Login Kembali");
       authService.logout();
     }, 500);
 
     const unauthorized = debounce(() => {
-      message.error("You are not authorized to access this page");
       authService.unauthorized();
     }, 500);
 

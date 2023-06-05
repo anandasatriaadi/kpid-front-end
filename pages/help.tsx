@@ -117,7 +117,7 @@ const HelpPage: NextPageWithLayout = () => {
       </div>
       <div className="overflow-clip rounded-lg bg-white transition-all md:p-4 md:shadow-custom">
         <HelpCollapse
-          title="Bagaimana Melakukan Memvalidasi Moderasi Video?"
+          title="Bagaimana Memvalidasi Hasil Moderasi Video?"
           steps={UPLOAD_VIDEO_STEPS}
         ></HelpCollapse>
       </div>

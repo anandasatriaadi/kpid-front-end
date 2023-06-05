@@ -64,7 +64,7 @@ function ViolationIconCard(props: IconProps) {
   //#region ::: Other Methods
   const getIconClassName = (count: number) => {
     return (
-      "absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full text-sm font-semibold " +
+      "absolute -top-2 -right-2 flex px-1 py-0.5 items-center justify-center rounded-lg text-sm font-semibold " +
       (count > 0
         ? count > 2
           ? "bg-red-600 text-white"

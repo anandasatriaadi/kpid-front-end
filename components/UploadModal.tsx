@@ -5,7 +5,10 @@ import {
 } from "@/context/ApplicationContext";
 import { AuthContext, AuthContextInterface } from "@/context/AuthContext";
 import { isEmpty } from "@/utils/BooleanUtil";
-import debounce from "@/utils/Debounce";
+import debounce, {
+  debounceErrorMessage,
+  debounceSuccessMessage,
+} from "@/utils/Debounce";
 import { faFileVideo } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -15,7 +18,6 @@ import {
   DatePicker,
   Form,
   Input,
-  message,
   Modal,
   Progress,
   Steps,
@@ -80,7 +82,7 @@ function UploadModal({ modalOpen, setModalOpen }: UploadModalProps) {
         setUploadFile(file);
         return false;
       } else {
-        message.error("Anda harus login terlebih dahulu");
+        debounceErrorMessage("Anda Harus Login Terlebih Dahulu");
         return false;
       }
     },
@@ -120,7 +122,7 @@ function UploadModal({ modalOpen, setModalOpen }: UploadModalProps) {
       .then((response) => {
         const result = response.data;
         if (result.status == 200) {
-          message.success("Formulir terunggah dengan ID " + result.data);
+          debounceSuccessMessage("Formulir Terunggah dengan ID " + result.data);
           if (router.pathname !== "/result") {
             router.replace("/result");
           } else {
@@ -129,14 +131,19 @@ function UploadModal({ modalOpen, setModalOpen }: UploadModalProps) {
           handleCloseModal();
           setIsUploading(false);
         } else {
-          message.error(result.data);
+          debounceErrorMessage(result.data);
         }
       })
       .catch((err) => {
         handleCloseModal();
         setIsUploading(false);
-        if (err.response !== null && err?.response?.data?.data !== undefined) {
-          message.error(err.response.data.data);
+        if (err?.response?.data?.data !== undefined) {
+          if (
+            err.response.data.status !== 401 &&
+            err.response.data.status !== 403
+          ) {
+            debounceErrorMessage(err.response.data.data);
+          }
         }
         console.error(err);
       });
@@ -189,8 +196,13 @@ function UploadModal({ modalOpen, setModalOpen }: UploadModalProps) {
         setModSelectOptions(filteredData);
       })
       .catch((err) => {
-        if (err?.response?.data !== undefined && err.response !== null) {
-          message.error(err.response.data);
+        if (err?.response?.data?.data !== undefined) {
+          if (
+            err.response.data.status !== 401 &&
+            err.response.data.status !== 403
+          ) {
+            debounceErrorMessage(err.response.data.data);
+          }
         }
         console.error(err);
       });
@@ -207,7 +219,7 @@ function UploadModal({ modalOpen, setModalOpen }: UploadModalProps) {
       open={modalOpen}
       onCancel={() => {
         isUploading
-          ? message.warning("Sedang mengunggah video")
+          ? debounceSuccessMessage("Sedang Mengunggah Video")
           : handleCloseModal();
       }}
       footer={null}

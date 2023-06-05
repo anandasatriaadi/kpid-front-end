@@ -10,7 +10,10 @@ import { AuthContext, AuthContextInterface } from "@/context/AuthContext";
 import { NextPageWithLayout } from "@/pages/_app";
 import UserData from "@/types/UserData";
 import { isEmpty } from "@/utils/BooleanUtil";
-import debounce from "@/utils/Debounce";
+import debounce, {
+  debounceSuccessMessage,
+  debounceErrorMessage,
+} from "@/utils/Debounce";
 import {
   faFilter,
   faPen,
@@ -32,6 +35,7 @@ import {
 import type { ColumnsType } from "antd/es/table";
 import moment from "moment";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import * as React from "react";
 
 interface TableData extends UserData {
@@ -76,6 +80,7 @@ const ManageUser: NextPageWithLayout = () => {
   };
 
   const [form] = Form.useForm();
+  const router = useRouter();
 
   // Filters
   const sortOptions: any[] = [
@@ -88,19 +93,24 @@ const ManageUser: NextPageWithLayout = () => {
 
   //
 
-  //#region ::: Handlers
+  //#region :::
   const handleDeleteUser = async (data_index: number) => {
     await httpRequest
       .delete(`/users/${usersData[data_index]._id}`)
       .then((response) => {
-        message.success("Berhasil menonaktifkan pengguna");
+        debounceSuccessMessage("Berhasil Menonaktifkan Pengguna");
         setPageFilter({ ...pageFilter });
         setIsEditModalOpen(false);
         setIsReloading(true);
       })
       .catch((err) => {
-        if (err.response !== null && err?.response?.data?.data !== undefined) {
-          message.error(err.response.data.data);
+        if (err?.response?.data?.data !== undefined) {
+          if (
+            err.response.data.status !== 401 &&
+            err.response.data.status !== 403
+          ) {
+            debounceErrorMessage(err.response.data.data);
+          }
         }
         console.error(err);
       });
@@ -127,8 +137,13 @@ const ManageUser: NextPageWithLayout = () => {
         setIsReloading(false);
       })
       .catch((err) => {
-        if (err?.response?.data !== undefined && err.response !== null) {
-          message.error(err.response.data);
+        if (err?.response?.data?.data !== undefined) {
+          if (
+            err.response.data.status !== 401 &&
+            err.response.data.status !== 403
+          ) {
+            debounceErrorMessage(err.response.data.data);
+          }
         }
         console.error(err);
       });
@@ -214,8 +229,8 @@ const ManageUser: NextPageWithLayout = () => {
         onConfirm={() => {
           handleDeleteUser(index);
         }}
-        okText="Yes"
-        cancelText="No"
+        okText="Ya"
+        cancelText="Tidak"
         disabled={record.role === "admin" && record._id !== userData?._id}
       >
         <span
@@ -240,7 +255,7 @@ const ManageUser: NextPageWithLayout = () => {
     { title: "Nama", dataIndex: "name", key: "name" },
     { title: "Email", dataIndex: "email", key: "email" },
     {
-      title: "Role",
+      title: "Peran",
       dataIndex: "role",
       key: "role",
       render: (value) => (
@@ -259,11 +274,7 @@ const ManageUser: NextPageWithLayout = () => {
       dataIndex: "last_login",
       key: "last_login",
       render: (val) => {
-        return (
-          <span>
-            {moment(val).format("HH:mm:ss DD MMMM YYYY")}
-          </span>
-        );
+        return <span>{moment(val).format("HH:mm:ss DD MMMM YYYY")}</span>;
       },
     },
     {
@@ -283,6 +294,11 @@ const ManageUser: NextPageWithLayout = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageFilter]);
   //#endregion ::: UseEffect
+  if (userData?.role !== "admin") {
+    router.push("/");
+    return <></>;
+  }
+
   return (
     <div className="flex flex-1 flex-col">
       <Head>

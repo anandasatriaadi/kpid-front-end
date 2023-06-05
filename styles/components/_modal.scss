@@ -2,4 +2,7 @@
   &-content {
     @apply rounded-lg shadow-2xl;
   }
+  &-header {
+    @apply rounded-t-lg;
+  }
 }

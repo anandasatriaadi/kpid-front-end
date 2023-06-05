@@ -1,8 +1,12 @@
 import FrameResult from "@/types/FrameResult";
 import ModerationResponse from "@/types/ModerationResponse";
+import { isNil } from "@/utils/BooleanUtil";
 import { Collapse } from "antd";
 import Image from "next/image";
 import * as React from "react";
+import Lightbox, { SlideImage } from "yet-another-react-lightbox";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import "yet-another-react-lightbox/styles.css";
 
 type FrameSectionProps = {
   data: ModerationResponse;
@@ -11,7 +15,13 @@ type FrameSectionProps = {
 
 function FrameSection({ data, className }: FrameSectionProps) {
   //#region ::: Variable Initialisations
+  const [images, setImages] = React.useState<SlideImage[]>([]);
+  const [lightboxOpen, setLightboxOpen] = React.useState<boolean>(false);
+  const [lightboxIndex, setLightboxIndex] = React.useState<number>(0);
   const [framesToShow, setFramesToShow] = React.useState<FrameResult[]>([]);
+  const [resultMapping, setResultMapping] = React.useState<{
+    [key: number]: boolean;
+  }>({});
   //#endregion ::: Variable Initialisations
 
   //
@@ -48,6 +58,30 @@ function FrameSection({ data, className }: FrameSectionProps) {
       }
     }
     setFramesToShow(tempFrames);
+    setImages(
+      tempFrames.map((frame) => {
+        let image: SlideImage = { src: `https://${
+          process.env.NEXT_PUBLIC_BUCKET_NAME
+        }.storage.googleapis.com/${encodeURI(
+          frame.frame_url
+        )}` };
+        return image;
+      })
+    );
+  };
+
+  const getResultMapping = (inputData: ModerationResponse) => {
+    let tempResultMapping: { [key: number]: boolean } = {};
+    if (
+      inputData?.result !== undefined &&
+      inputData?.result !== null &&
+      inputData?.result.length > 0
+    ) {
+      inputData.result.forEach((result) => {
+        tempResultMapping[result.second] = true;
+      });
+    }
+    setResultMapping(tempResultMapping);
   };
   //#endregion ::: Other Methods
 
@@ -56,12 +90,23 @@ function FrameSection({ data, className }: FrameSectionProps) {
   //#region ::: UseEffect
   React.useEffect(() => {
     divideAndSetFrames(data);
+    getResultMapping(data);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   //#endregion ::: UseEffect
 
   return (
     <section className={className}>
+      <Lightbox
+        styles={{
+          root: { "--yarl__color_backdrop": "rgba(0, 0, 0, 0.7)" },
+        }}
+        plugins={[Zoom]}
+        open={lightboxOpen}
+        index={lightboxIndex}
+        close={() => setLightboxOpen(false)}
+        slides={images}
+      />
       <Collapse defaultActiveKey="1" ghost>
         <Collapse.Panel
           header="Potongan Frame Video"
@@ -78,9 +123,15 @@ function FrameSection({ data, className }: FrameSectionProps) {
                 .padStart(2, "0")}:${remainingSeconds
                 .toString()
                 .padStart(2, "0")}`;
-
               return (
-                <div key={index} className="relative bg-cover pt-[56.25%]">
+                <div
+                  key={index}
+                  className="relative cursor-pointer bg-cover pt-[56.25%]"
+                  onClick={() => {
+                    setLightboxIndex(index);
+                    setLightboxOpen(true);
+                  }}
+                >
                   <Image
                     src={`https://${
                       process.env.NEXT_PUBLIC_BUCKET_NAME
@@ -91,7 +142,14 @@ function FrameSection({ data, className }: FrameSectionProps) {
                     objectFit="cover"
                     layout="fill"
                   ></Image>
-                  <div className="absolute bottom-0 left-0 rounded-tr-lg bg-slate-700 bg-opacity-75 p-1 text-sm font-normal text-white">
+                  <div
+                    className={
+                      "absolute bottom-0 left-0 rounded-tr-lg bg-opacity-75 p-1 text-sm font-normal text-white " +
+                      (isNil(resultMapping[frame_data.frame_time])
+                        ? "bg-slate-700"
+                        : "bg-red-600")
+                    }
+                  >
                     {timestamp}
                   </div>
                 </div>

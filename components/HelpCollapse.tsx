@@ -2,7 +2,7 @@ import {
   ApplicationContext,
   ApplicationContextInterface,
 } from "@/context/ApplicationContext";
-import { Collapse, Steps, Timeline } from "antd";
+import { Button, Collapse, Skeleton, Steps, Timeline } from "antd";
 import Image from "next/image";
 import * as React from "react";
 import Lightbox, { SlideImage } from "yet-another-react-lightbox";
@@ -66,31 +66,54 @@ function HelpCollapse({ title, steps }: HelpCollapseProps) {
             />
           </div>
           <div className="xl:col-span-3">
-            <li className="font-semibold">
-              <div className="gap-4">
-                <div
-                  className="relative mb-2 overflow-hidden rounded-lg bg-slate-300 bg-cover bg-no-repeat pt-[177%] hover:cursor-pointer md:pt-[56%]"
-                  onClick={() => {
-                    setLightboxIndex(currentUploadStep);
-                    setLightboxOpen(true);
-                  }}
-                >
-                  <Image
-                    src={steps[currentUploadStep].image}
-                    alt={steps[currentUploadStep].title}
-                    layout="fill"
-                    objectFit="cover"
-                  />
-                </div>
-                <div className="mt-6 text-justify font-normal">
-                  <Timeline>
-                    {steps[currentUploadStep].description.map((val, index) => {
-                      return <Timeline.Item key={index}>{val}</Timeline.Item>;
-                    })}
-                  </Timeline>
-                </div>
-              </div>
-            </li>
+            <div className="font-semibold xl:hidden mb-2">
+              {steps[currentUploadStep].title}
+            </div>
+            <div
+              className="relative mb-2 overflow-hidden rounded-lg bg-cover bg-no-repeat pt-[56%] hover:cursor-pointer"
+              onClick={() => {
+                setLightboxIndex(currentUploadStep);
+                setLightboxOpen(true);
+              }}
+            >
+              <Skeleton.Image
+                active
+                className="absolute top-0 left-0 right-0 bottom-0 h-full w-full"
+              />
+              <Image
+                src={steps[currentUploadStep].image}
+                alt={steps[currentUploadStep].title}
+                sizes="(max-width: 1280px) 100vw, 50vw)"
+                layout="fill"
+                objectFit="cover"
+              />
+            </div>
+            <div className="mt-4 text-justify font-normal">
+              <Timeline>
+                {steps[currentUploadStep].description.map((val, index) => {
+                  return <Timeline.Item key={index}>{val}</Timeline.Item>;
+                })}
+              </Timeline>
+            </div>
+            <div className="flex justify-end gap-4">
+              <Button
+                onClick={() => {
+                  setCurrentUploadStep(Math.max(currentUploadStep - 1, 0));
+                }}
+              >
+                Sebelumnya
+              </Button>
+              <Button
+                type="primary"
+                onClick={() => {
+                  setCurrentUploadStep(
+                    Math.min(currentUploadStep + 1, steps.length - 1)
+                  );
+                }}
+              >
+                Selanjutnya
+              </Button>
+            </div>
           </div>
         </section>
       </Collapse.Panel>

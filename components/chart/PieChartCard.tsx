@@ -1,13 +1,13 @@
-import React from "react";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
-import { Pie } from "react-chartjs-2";
-import { Skeleton } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChartSimple } from "@fortawesome/free-solid-svg-icons";
 import {
   ApplicationContext,
   ApplicationContextInterface,
 } from "@/context/ApplicationContext";
+import { faChartSimple } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Skeleton } from "antd";
+import { ArcElement, Chart as ChartJS, Legend, Tooltip } from "chart.js";
+import React from "react";
+import { Pie } from "react-chartjs-2";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 

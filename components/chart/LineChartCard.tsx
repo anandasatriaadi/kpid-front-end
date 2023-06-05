@@ -1,23 +1,23 @@
-import React from "react";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Filler,
-  Legend,
-} from "chart.js";
-import { Line } from "react-chartjs-2";
 import {
   ApplicationContext,
   ApplicationContextInterface,
 } from "@/context/ApplicationContext";
-import { Skeleton } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChartSimple } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Skeleton } from "antd";
+import {
+  CategoryScale,
+  Chart as ChartJS,
+  Filler,
+  Legend,
+  LinearScale,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+} from "chart.js";
+import React from "react";
+import { Line } from "react-chartjs-2";
 
 ChartJS.register(
   CategoryScale,

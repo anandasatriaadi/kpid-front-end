@@ -8,7 +8,7 @@ type ModerationResponse = {
   user_id: string;
   filename: string;
   program_name: string;
-  station_name: Station | string;
+  station_name: Station;
   start_time: string;
   end_time: string;
   fps: number;
