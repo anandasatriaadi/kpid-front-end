@@ -221,7 +221,6 @@ const Layout = ({ children }: LayoutProps) => {
   //#region ::: UseEffect
   React.useEffect(() => {
     const shouldRedirect = !isVerifying && !isLoggedIn;
-
     // Redirect to login page if not logged in
     if (shouldRedirect && router.pathname !== "/auth/login") {
       let url: UrlObject = {
@@ -236,7 +235,7 @@ const Layout = ({ children }: LayoutProps) => {
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router]);
+  }, [router, isVerifying, isLoggedIn]);
   //#endregion ::: UseEffect
 
   if (isVerifying && !isLoggedIn) {
