@@ -9,15 +9,15 @@ const HelpPage: NextPageWithLayout = () => {
   //#region ::: Variable Initialisations
   const UPLOAD_VIDEO_STEPS = [
     {
-      title: 'Pilih menu "Unggah Video"',
+      title: 'Pilih Menu "Unggah Video"',
       image: "/help_upload_1.png",
       description: [
         <>
-          Untuk memulai mengunggah video, anda dapat memilih menu &quot;Unggah
-          Video&quot; yang terdapat pada pojok kanan bawah laman.
+          Untuk mulai mengunggah video, anda dapat memilih menu <span className="font-semibold">Unggah
+          Video</span> yang terdapat pada pojok kanan bawah laman.
         </>,
         <>
-          Selain pada pojok kanan bawah layar, menu &quot;Unggah Video&quot;
+          Selain pada pojok kanan bawah layar, menu <span className="font-semibold">Unggah Video</span>
           juga dapat diakses dari menu akun anda pada pojok kanan atas.
         </>,
       ],
@@ -27,7 +27,7 @@ const HelpPage: NextPageWithLayout = () => {
       image: "/help_upload_2.png",
       description: [
         <>
-          Pada menu yang muncul anda dapat memilih menu &quot;Pilih Video&quot;
+          Pada menu yang muncul anda dapat memilih menu <span className="font-semibold">Pilih Video</span>{" "}
           atau melakukan <i>drag and drop</i> video yang anda akan unggah
         </>,
       ],
@@ -93,6 +93,73 @@ const HelpPage: NextPageWithLayout = () => {
     },
   ];
 
+  const VALIDATE_VIDEO_STEPS = [
+    {
+      title: 'Pilih Menu "Daftar Video"',
+      image: "/help_validate_1.png",
+      description: [
+        <>
+          Pilih menu <span className="font-semibold">Daftar Video</span> yang terdapat pada daftar menu di
+          bagian kiri antarmuka sistem.
+        </>,
+        <>
+          Selain daftar menu, daftar video juga dapat diakses dari menu{" "}
+          <span className="font-semibold">Profil</span> pada pojok kanan atas.
+        </>,
+      ],
+    },
+    {
+      title: "Pilih Salah Satu Hasil Moderasi",
+      image: "/help_validate_2.png",
+      description: [
+        <>
+          Pada daftar video, Anda dapat memilih salah satu video dengan status
+          <span className="font-semibold">Ditemukan Pelanggaran</span>.
+        </>,
+      ],
+    },
+    {
+      title: "Navigasi Menuju Bagian Hasil Moderasi",
+      image: "/help_validate_3.png",
+      description: [
+        <>
+          Pada halaman detail hasil moderasi, anda harus melakukan navigasi ke
+          bawah halaman hingga mencapai bagian hasil moderasi.
+        </>,
+        <>
+          Selanjutnya, anda dapat memilih dugaan pelanggaran untuk mengekspansi
+          dugaan pelanggaran tersebut.
+        </>,
+        <>
+          Pada setiap dugaan pelanggaran, terdapat bagian video dan kategori
+          yang dilanggar.
+        </>,
+        <>
+          Anda dapat melakukan validasi berupa{" "}
+          <span className="font-semibold">Valid</span> atau
+          <span className="font-semibold">Tidak Valid</span> terhadap dugaan
+          pelanggaran tersebut.
+        </>,
+      ],
+    },
+    {
+      title: "Hasil Moderasi Tervalidasi",
+      image: "/help_validate_4.png",
+      description: [
+        <>
+          Apabila semua dugaan pelanggaran sudah tervalidasi, maka status dari
+          hasil moderasi akan menjadi{" "}
+          <span className="font-semibold">Tervalidasi</span>
+        </>,
+
+        <>
+          Anda dapat mengunduh laporan pelanggaran dengan menekan tombol{" "}
+          <span className="font-semibold">Buat Laporan</span> pada pojok kiri
+          bawah antarmuka.
+        </>,
+      ],
+    },
+  ];
   //#endregion ::: Variable Initialisations
 
   return (
@@ -118,7 +185,7 @@ const HelpPage: NextPageWithLayout = () => {
       <div className="overflow-clip rounded-lg bg-white transition-all md:p-4 md:shadow-custom">
         <HelpCollapse
           title="Bagaimana Memvalidasi Hasil Moderasi Video?"
-          steps={UPLOAD_VIDEO_STEPS}
+          steps={VALIDATE_VIDEO_STEPS}
         ></HelpCollapse>
       </div>
     </div>

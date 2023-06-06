@@ -225,7 +225,7 @@ const ManageUser: NextPageWithLayout = () => {
         <FontAwesomeIcon className="h-[16px]" icon={faShield} />
       </span>
       <Popconfirm
-        title="Yakin hapus pengguna ini?"
+        title="Yakin nonaktifkan pengguna ini?"
         onConfirm={() => {
           handleDeleteUser(index);
         }}

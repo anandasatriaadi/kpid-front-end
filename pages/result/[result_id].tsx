@@ -185,7 +185,7 @@ const SingleResult: NextPageWithLayout = () => {
       case "initialized":
         return {
           className: "bg-slate-300",
-          text: "Sedang Diunggah",
+          text: "Mengekstraksi Frame",
         };
       case "uploaded":
         return {
