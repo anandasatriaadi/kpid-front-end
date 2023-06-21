@@ -97,6 +97,7 @@ function HelpCollapse({ title, steps }: HelpCollapseProps) {
             </div>
             <div className="flex justify-end gap-4">
               <Button
+                disabled={currentUploadStep === 0}
                 onClick={() => {
                   setCurrentUploadStep(Math.max(currentUploadStep - 1, 0));
                 }}
@@ -105,6 +106,7 @@ function HelpCollapse({ title, steps }: HelpCollapseProps) {
               </Button>
               <Button
                 type="primary"
+                disabled={currentUploadStep === steps.length - 1}
                 onClick={() => {
                   setCurrentUploadStep(
                     Math.min(currentUploadStep + 1, steps.length - 1)

@@ -45,7 +45,7 @@ const statusFilterOptions: SelectProps["options"] = [
   { value: "uploaded", label: "Belum Diproses" },
   { value: "in_progress", label: "Sedang Diproses" },
   { value: "initialized", label: "Sedang Diunggah" },
-  { value: "approved", label: "Tanpa Pelanggaran" },
+  { value: "accepted", label: "Tanpa Pelanggaran" },
 ];
 
 const sortOptions: any[] = [
@@ -83,6 +83,31 @@ const Result: NextPageWithLayout = () => {
   //
 
   //#region ::: Other Methods
+  const getModerationsData = () => {
+    httpRequest
+      .get(`/moderations/user`, queryParams)
+      .then((response) => {
+        const result = response.data;
+        setIsReloading(false);
+        setModerationData((prevData: any) => {
+          console.log(prevData, result.data);
+          return result.data;
+        });
+        setMetadata(result.metadata);
+      })
+      .catch((err) => {
+        if (err?.response?.data?.data !== undefined) {
+          if (
+            err.response.data.status !== 401 &&
+            err.response.data.status !== 403
+          ) {
+            debounceErrorMessage(err.response.data.data);
+          }
+        }
+        console.error(err);
+      });
+  };
+
   const RenderFilterBody = (): React.ReactElement => {
     const disabledDate: RangePickerProps["disabledDate"] = (current) => {
       return current && current > moment().endOf("day");
@@ -186,27 +211,17 @@ const Result: NextPageWithLayout = () => {
 
   //#region ::: UseEffect
   React.useEffect(() => {
-    httpRequest
-      .get(`/moderations/user`, queryParams)
-      .then((response) => {
-        const result = response.data;
-        setIsReloading(false);
-        setModerationData(result.data);
-        setMetadata(result.metadata);
-      })
-      .catch((err) => {
-        if (err?.response?.data?.data !== undefined) {
-          if (
-            err.response.data.status !== 401 &&
-            err.response.data.status !== 403
-          ) {
-            debounceErrorMessage(err.response.data.data);
-          }
-        }
-        console.error(err);
-        Router.push("/");
-      });
+    getModerationsData();
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageFilter]);
+
+  React.useEffect(() => {
+    let interval = setInterval(getModerationsData, 5000);
+
+    return () => {
+      clearInterval(interval);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageFilter]);
   //#endregion ::: UseEffect
@@ -260,8 +275,8 @@ const Result: NextPageWithLayout = () => {
           <>
             <Spin spinning={isReloading}>
               <section className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3 ">
-                {moderationData.map((value: any, _: number) => {
-                  return <ResultCard key={value._id} data={value} />;
+                {moderationData.map((value: any, index: number) => {
+                  return <ResultCard key={index} data={value} />;
                 })}
               </section>
             </Spin>

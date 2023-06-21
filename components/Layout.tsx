@@ -263,7 +263,7 @@ const Layout = ({ children }: LayoutProps) => {
         //   MOBILE LAYOUT
         // ========================================================================
         <>
-          <AntLayout className="custom-layout site-layout relative max-h-screen min-h-screen overflow-y-scroll bg-white scrollbar-thin scrollbar-track-slate-300 scrollbar-thumb-slate-400 scrollbar-track-rounded-full scrollbar-thumb-rounded-full">
+          <AntLayout className="custom-layout site-layout relative min-h-screen">
             <AntLayout.Header className="sticky top-0 left-0 right-0 z-50 flex bg-white p-4 shadow-custom">
               <div
                 className="trigger flex flex-col justify-center"

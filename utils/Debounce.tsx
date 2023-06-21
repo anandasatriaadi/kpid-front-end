@@ -10,18 +10,42 @@ export default function debounce(callback: Function, wait: number) {
   };
 }
 
-export const debounceSuccessMessage = debounce((msg: string) => {
-  message.success(msg);
+export const debounceSuccessMessage = debounce((msg: string, key?: string) => {
+  let config: any = {
+    content: msg,
+  };
+  if (key !== undefined) config["key"] = key;
+  console.log(config)
+
+  message.success(config);
 }, 150);
 
-export const debounceErrorMessage = debounce((msg: string) => {
-  message.error(msg);
+export const debounceErrorMessage = debounce((msg: string, key?: string) => {
+  let config: any = {
+    content: msg,
+  };
+  if (key !== undefined) config["key"] = key;
+  console.log(config)
+
+  message.error(config);
 }, 150);
 
-export const debounceLoadingMessage = debounce((msg: string) => {
-  message.loading(msg);
+export const debounceLoadingMessage = debounce((msg: string, key?: string) => {
+  let config: any = {
+    content: msg,
+  };
+  if (key !== undefined) config["key"] = key;
+  console.log(config)
+
+  message.loading(config);
 }, 150);
 
-export const debounceWarningMessage = debounce((msg: string) => {
-  message.warning(msg);
+export const debounceWarningMessage = debounce((msg: string, key?: string) => {
+  let config: any = {
+    content: msg,
+  };
+  if (key !== undefined) config["key"] = key;
+  console.log(config)
+
+  message.warning(config);
 }, 150);

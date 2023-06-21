@@ -17,7 +17,7 @@ type Props = {
 
 function ResultCard(props: Props) {
   //#region ::: Variable Initialisations
-  const [moderationData, _] = React.useState<ModerationResponse>(props.data);
+  const [moderationData, setModerationData] = React.useState<ModerationResponse>();
   //#endregion ::: Variable Initialisations
 
   //
@@ -45,7 +45,7 @@ function ResultCard(props: Props) {
           className: "bg-blue-600 text-white",
           text: "Sedang Diproses",
         };
-      case "approved":
+      case "accepted":
         return {
           className: "bg-green-500",
           text: "Tanpa Pelanggaran",
@@ -94,6 +94,11 @@ function ResultCard(props: Props) {
   //
 
   //#region ::: UseEffect
+  React.useEffect(() => {
+    setModerationData({...props.data})
+    console.log("categories", props.data.status);
+  }, [props.data])
+  
   //#endregion ::: UseEffect
 
   //#region ::: After Method Initialisations
@@ -103,6 +108,8 @@ function ResultCard(props: Props) {
   const categories = summarizeCategories();
   //#endregion ::: After Method Initialisations
 
+  if (moderationData == undefined){
+  return <></>}
   return (
     <Link href={"/result/" + moderationData._id}>
       <div className="group flex cursor-pointer flex-col rounded-lg bg-white shadow-custom transition-shadow hover:shadow-custom-lg">

@@ -42,8 +42,12 @@ const SingleResult: NextPageWithLayout = () => {
 
   // Refs
   const router = useRouter();
-  const pathname = router.asPath;
-  const moderationID = pathname.split("/").slice(-1)[0];
+  const moderationID: string =
+    router.query.result_id !== undefined
+      ? Array.isArray(router.query.result_id)
+        ? router.query.result_id[0]
+        : router.query.result_id
+      : "";
   const fetchURL = `/moderations/${moderationID}`;
 
   // Constants
@@ -197,7 +201,7 @@ const SingleResult: NextPageWithLayout = () => {
           className: "bg-blue-600 text-white",
           text: "Sedang Diproses",
         };
-      case "approved":
+      case "accepted":
         return {
           className: "bg-lime-500",
           text: "Tidak Ditemukan Pelanggaran",

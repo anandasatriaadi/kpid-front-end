@@ -76,7 +76,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const login = async (values: { [key: string]: any }) => {
-    debounceLoadingMessage("Logging In");
+    message.loading({
+      content: "Logging In",
+      duration: 0,
+      key: "loading_login",
+    });
     const form = new FormData();
     for (const key in values) {
       form.append(key, values[key]);
@@ -93,6 +97,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }
         });
       const { status, data } = response.data;
+      message.destroy("loading_login");
 
       if (status === 200) {
         localStorage.setItem("token", data.token);
@@ -112,12 +117,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     } catch (error) {
       console.error(error);
+      message.destroy("loading_login");
       debounceErrorMessage("Terjadi Kesalahan dalam Login");
     }
   };
 
   const register = async (values: { [key: string]: any }) => {
-    debounceLoadingMessage("Registrasi Pengguna");
+    message.loading({
+      content: "Registrasi Pengguna",
+      duration: 0,
+      key: "loading_register",
+    });
     const form = new FormData();
     for (const key in values) {
       form.append(key, values[key]);
@@ -134,6 +144,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }
         });
       const { status, data } = response.data;
+      message.destroy("loading_register");
 
       if (status === 201) {
         localStorage.setItem("token", data.token);
@@ -147,12 +158,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     } catch (error) {
       console.error(error);
+      message.destroy("loading_register");
       debounceErrorMessage("Terjadi Kesalahan dalam Mendaftarkan Akun");
     }
   };
 
   const logout = () => {
-    debounceLoadingMessage("Logging Out");
+    message.loading({ content: "Logging Out", duration: 1, key: "logout" });
 
     localStorage.removeItem("token");
     localStorage.removeItem("user");

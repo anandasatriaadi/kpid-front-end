@@ -2,10 +2,11 @@ import ModerationDecision from "@/types/ModerationDecision";
 import ModerationResponse from "@/types/ModerationResponse";
 import ModerationResult from "@/types/ModerationResult";
 import PasalResponse from "@/types/PasalResponse";
-import { Button, Collapse, Tabs } from "antd";
+import { Collapse, Tabs } from "antd";
 import DOMPurify from "dompurify";
 import parse from "html-react-parser";
 import { Tab } from "rc-tabs/lib/interface";
+import ValidationButtons from "./ValidationButtons";
 
 type ViolationDescProps = {
   moderationData: ModerationResponse;
@@ -127,29 +128,11 @@ function ViolationDesc({
                     ></video>
                   </div>
                 </div>
-                {item.decision.toUpperCase() === "PENDING" && (
-                  <div className="mt-4 flex justify-end gap-4">
-                    <Button
-                      type="default"
-                      onClick={(e) => {
-                        pasalValidationHandler(
-                          index,
-                          ModerationDecision.INVALID
-                        );
-                      }}
-                    >
-                      Tidak Valid
-                    </Button>
-                    <Button
-                      type="primary"
-                      onClick={(e) => {
-                        pasalValidationHandler(index, ModerationDecision.VALID);
-                      }}
-                    >
-                      Valid
-                    </Button>
-                  </div>
-                )}
+                <ValidationButtons
+                  index={index}
+                  moderationResult={item}
+                  pasalValidationHandler={pasalValidationHandler}
+                />
               </div>
               <div className="mt-4 lg:ml-4 lg:mt-0 lg:mb-0 lg:flex-[3]">
                 <div className="mb-4 flex gap-4">

@@ -383,7 +383,7 @@ function UploadModal({ modalOpen, setModalOpen }: UploadModalProps) {
               </Form.Item>
             </div>
 
-            {currentStep === 2 && (
+            {currentStep === 2 && uploadProgressPercent > 0 && (
               <div className="text-base text-slate-500">
                 <h4>Upload Progress</h4>
                 <Progress percent={uploadProgressPercent} />
